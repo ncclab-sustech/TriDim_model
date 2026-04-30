@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # eeg_basis_mixer_v2_nobasis (release)
 
 Single-model release of the **nobasis** TriAxis mixer baseline used in our
@@ -127,3 +128,7 @@ metric jsons land under `./results/`.
   set (yaml does this for you).
 * `--v_layer` is accepted for yaml compatibility but unused by the nobasis
   model.
+=======
+# TriDim_model
+EEG general model architecture development
+>>>>>>> fdbe9f2556b41a0d36e14a62fd68137bd6779ef1
