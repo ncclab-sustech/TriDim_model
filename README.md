@@ -308,7 +308,8 @@ logs/<JOBID>.train.log
 在服务器上运行：
 
 ```bash
-cd ~
+mkdir ~/<yourname>
+cd ~/<yourname>
 git clone https://github.com/ncclab-sustech/TriDim_model.git TriDim_small
 cd TriDim_small
 ```
