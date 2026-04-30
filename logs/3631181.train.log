@@ -1,0 +1,21 @@
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+Traceback (most recent call last):
+  File "/work/bme-shenxk/TeCh_nobasis_release/run.py", line 454, in <module>
+    exp = Exp(args)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_classification.py", line 25, in __init__
+    super().__init__(args)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_basic.py", line 15, in __init__
+    self.model = self._build_model().to(self.device)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_classification.py", line 54, in _build_model
+    test_data, test_loader = self._get_data(flag="TEST")
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_classification.py", line 70, in _get_data
+    data_set, data_loader = data_provider(self.args, flag)
+  File "/work/bme-shenxk/TeCh_nobasis_release/data_provider/data_factory.py", line 56, in data_provider
+    data_set = Data(
+  File "/work/bme-shenxk/TeCh_nobasis_release/data_provider/data_loader.py", line 290, in __init__
+    self._load_zarr_arrays()
+  File "/work/bme-shenxk/TeCh_nobasis_release/data_provider/data_loader.py", line 426, in _load_zarr_arrays
+    raise ImportError(
+ImportError: zarr package is required for .zarr datasets. Install with: python -m pip install zarr

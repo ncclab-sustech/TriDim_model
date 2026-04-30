@@ -1,0 +1,15 @@
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+Traceback (most recent call last):
+  File "/work/bme-shenxk/TeCh_nobasis_release/run.py", line 454, in <module>
+    exp = Exp(args)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_classification.py", line 25, in __init__
+    super().__init__(args)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_basic.py", line 15, in __init__
+    self.model = self._build_model().to(self.device)
+  File "/work/bme-shenxk/TeCh_nobasis_release/exp/exp_classification.py", line 61, in _build_model
+    self.model_dict[self.args.model].Model(self.args).float()
+  File "/work/bme-shenxk/TeCh_nobasis_release/models/eeg_basis_mixer_v2_nobasis_onlyT.py", line 326, in __init__
+    self.channel_basis_dim = int(_get_config(configs, "channel_basis_dim", min(self.canonical_channels, 64)))
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'

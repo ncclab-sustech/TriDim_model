@@ -1,0 +1,45 @@
+dataset: AD65
+root_path: /mnt/dataset0/DATASETS/downstream_preprocess/AD65
+params:
+  seq_len: 2000
+  model: eeg_basis_mixer_v2
+  itr: 5
+  seed_start: 42
+  split_mode: segment_stratified_random
+  train_ratio: 0.4
+  val_ratio: 0.3
+  select_metric: Accuracy
+  use_gpu: true
+  gpu_idx:
+  - 1
+  gpu: 1
+  num_workers: 8
+  train_epochs: 40
+  patience: 10
+  batch_size: 128
+  learning_rate: 0.0003
+  lradj: cosine
+  d_model: 192
+  t_layer: 4
+  v_layer: 0
+  dropout: 0.1
+  patch_len: 64
+  patch_stride: 16
+  augmentations: none
+  channel_basis_dim: 16
+  k_basis_dim: 16
+  t_basis_dim: 20
+  patch_embed_dim: 192
+  channel_graph_sigma: 0.08
+  channel_base_decay: 0.2
+  use_channel_adapter: false
+  canonical_channels: 19
+  no_channel_prior: false
+  channel_adapter_sigma: 0.08
+  channel_adapter_hidden: 32
+  channel_adapter_residual_scale: 0.05
+  input_channel_coord_path: ./configs/electrodes/AD65.csv
+  canonical_channel_coord_path: ./configs/electrodes/AD65.csv
+electrode_csv: ./configs/electrodes/AD65.csv
+electrode_channel_count: 19
+electrode_montage_used: standard_1020

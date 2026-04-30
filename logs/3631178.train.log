@@ -1,0 +1,6 @@
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Traceback (most recent call last):
+  File "/work/bme-shenxk/TeCh_nobasis_release/run.py", line 431, in <module>
+    setting = setting + f"_run{run_id}"
+NameError: name 'setting' is not defined
