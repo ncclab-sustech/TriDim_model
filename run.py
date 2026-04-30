@@ -331,11 +331,28 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.use_channel_prior = not args.no_channel_prior
     # Ensure device visibility is pinned before any CUDA query/initialization.
+    # if args.use_multi_gpu:
+    #     args.devices = args.devices.replace(" ", "")
+    #     os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+    # else:
+    #     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+        
+    # GPU
     if args.use_multi_gpu:
         args.devices = args.devices.replace(" ", "")
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+        if not os.environ.get("CUDA_VISIBLE_DEVICES"):
+            os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+        else:
+            print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+        args.gpu = 0
     else:
-        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+        if not os.environ.get("CUDA_VISIBLE_DEVICES"):
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+            print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+        else:
+            print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+        args.gpu = 0
+    
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
     cli_overrides = _get_cli_overrides(sys.argv[1:])
@@ -463,7 +480,7 @@ if __name__ == "__main__":
 
         git_hash = get_git_hash()
         run_id = time.strftime("%Y%m%d_%H%M%S")
-        setting = setting + f"_git{git_hash}_{run_time}"
+        setting = setting + f"_git{git_hash}_{run_id}"
         exp = Exp(args)
         print(">>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>".format(setting))
         exp.train(setting)
