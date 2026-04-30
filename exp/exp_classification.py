@@ -314,6 +314,9 @@ class Exp_Classification(Exp_Basic):
             f"AUROC: {test_metrics_dict['AUROC']:.5f}, "
             f"AUPRC: {test_metrics_dict['AUPRC']:.5f}\n"
         )
+        
+        self.last_val_metrics = val_metrics_dict
+        self.last_test_metrics = test_metrics_dict
         return test_metrics_dict
     
     def del_weight(self, path):

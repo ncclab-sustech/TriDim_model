@@ -1,0 +1,35 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+[dataset_cfg] applied 38 params for Physionet_MI
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Model] eeg_basis_mixer_v2_nobasis_onlyT
+[Model Params] Total: 37,417 (0.037 M)
+[Model Params] Trainable: 37,417 (0.037 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 0.14 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 0.14 MB
+================================================================================
+>>>>>>>start training : eeg_basis_mixer_v2_nobasis_onlyT_Physionet_MI_seed_42_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitnogit_20260430_234509>>>>>>>>>>>>>>>>>>>>>>>>>>
+(3934, 800, 64)
+(3934,)
+(2951, 800, 64)
+(2951,)
+(2952, 800, 64)
+(2952,)
+Epoch: 1 cost time: 4.115641355514526
+Epoch: 1, Steps: 62, | Train Loss: 1.36257
+Validation results --- Loss: 1.26865, Accuracy: 0.41105, Precision: 0.41582, Recall: 0.41075, F1: 0.39944, AUROC: 0.68947, AUPRC: 0.43959
+Test results --- Loss: 1.26806, Accuracy: 0.41904, Precision: 0.42748, Recall: 0.41873 F1: 0.40974, AUROC: 0.69590, AUPRC: 0.45414
+Metric score decreased (inf --> -0.399437).  Saving model ...
+
+Updating learning rate to 0.00029953760005996916
+Epoch: 2 cost time: 3.637629747390747
+Epoch: 2, Steps: 62, | Train Loss: 1.16534
+Validation results --- Loss: 1.09727, Accuracy: 0.53948, Precision: 0.53172, Recall: 0.53933, F1: 0.53275, AUROC: 0.78185, AUPRC: 0.57301
+Test results --- Loss: 1.10761, Accuracy: 0.51795, Precision: 0.51146, Recall: 0.51792 F1: 0.51277, AUROC: 0.77663, AUPRC: 0.57619
+Metric score decreased (-0.399437 --> -0.532745).  Saving model ...
+
+Updating learning rate to 0.00029815325108927063

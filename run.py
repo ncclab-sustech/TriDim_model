@@ -15,6 +15,7 @@ Typical usage (full 5-seed cross-subject sweep on FACED_new):
         --split_mode label_order --train_ratio 0.4 --val_ratio 0.3 \
         --augmentations none --select_metric F1
 """
+from utils.experiment_record import collect_experiment_record
 import time
 import argparse
 import math
@@ -327,6 +328,9 @@ if __name__ == "__main__":
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--use_multi_gpu", action="store_true", default=False)
     parser.add_argument("--devices", type=str, default="0,1,2,3")
+    
+    parser.add_argument("--bsub_script", type=str, default="")
+    parser.add_argument("--exp_notes", type=str, default="")
 
     args = parser.parse_args()
     args.use_channel_prior = not args.no_channel_prior
@@ -487,6 +491,24 @@ if __name__ == "__main__":
 
         print(">>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(setting))
         avg_metrics.append(exp.test(setting))
+        
+        test_metrics = exp.test(setting)
+        avg_metrics.append(test_metrics)
+
+        val_metrics = getattr(exp, "last_val_metrics", {})
+
+        record, record_path = collect_experiment_record(
+            args=args,
+            setting=setting,
+            test_metrics=test_metrics,
+            val_metrics=val_metrics,
+            result_dir="results/runs",
+            bsub_script=getattr(args, "bsub_script", ""),
+            notes=getattr(args, "exp_notes", ""),
+        )
+
+        print(f"[result] Saved experiment record to: {record_path}")
+        
         torch.cuda.empty_cache()
 
     keys = ("Accuracy", "Precision", "Recall", "F1", "AUROC", "AUPRC")

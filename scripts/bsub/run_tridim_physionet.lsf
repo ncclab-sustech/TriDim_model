@@ -19,7 +19,7 @@ echo "Working directory:"
 pwd
 
 # 进入你的项目目录；这里请改成你真实的 TriDim 项目路径
-cd ~/TeCh_nobasis_release
+cd ~/xinke/TriDim_small
 
 mkdir -p logs
 
@@ -41,6 +41,8 @@ python run.py \
   --dataset_paths_yaml ./configs/datasets/Physionet_MI.yaml \
   --gpu 0 \
   --gpu_idx 0 \
+  --bsub_script scripts/bsub/run_physionet_onlyT.lsf \
+  --exp_notes "onlyT ablation" \
   > logs/${LSB_JOBID}.train.log 2>&1
 
 echo "Job finished at:"
