@@ -1,8 +1,6 @@
 import os
 import torch
-from models import eeg_basis_mixer_v2_nobasis, eeg_basis_mixer_v2_nobasis_onlyT
-
-
+from models import eeg_basis_mixer_v2_nobasis, eeg_basis_mixer_v2_nobasis_onlyT, eeg_basis_mixer_v2_nobasis_noT, eeg_basis_mixer_v2_nobasis_layernorm, eeg_basis_mixer_v2_nobasis_mlla, eeg_mixer_v3_tconv
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
@@ -10,6 +8,10 @@ class Exp_Basic(object):
         self.model_dict = {
             "eeg_basis_mixer_v2_nobasis": eeg_basis_mixer_v2_nobasis,
             "eeg_basis_mixer_v2_nobasis_onlyT": eeg_basis_mixer_v2_nobasis_onlyT,
+            "eeg_basis_mixer_v2_nobasis_noT": eeg_basis_mixer_v2_nobasis_noT,
+            "eeg_basis_mixer_v2_nobasis_layernorm": eeg_basis_mixer_v2_nobasis_layernorm,
+            "eeg_basis_mixer_v2_nobasis_mlla": eeg_basis_mixer_v2_nobasis_mlla,
+            "eeg_mixer_v3_tconv": eeg_mixer_v3_tconv
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)

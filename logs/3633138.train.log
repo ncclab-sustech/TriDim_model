@@ -1,0 +1,12 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+[dataset_cfg] applied 39 params for Physionet_MI
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Traceback (most recent call last):
+  File "/work/bme-shenxk/xinke/TriDim_small/run.py", line 488, in <module>
+    exp = Exp(args)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 25, in __init__
+    super().__init__(args)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_basic.py", line 14, in __init__
+    "eeg_mixer_v3_tconv": eeg_mixer_v3_tconv
+NameError: name 'eeg_mixer_v3_tconv' is not defined

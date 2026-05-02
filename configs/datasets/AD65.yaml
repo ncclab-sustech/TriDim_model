@@ -1,5 +1,5 @@
 dataset: AD65
-root_path: /mnt/dataset0/DATASETS/downstream_preprocess/AD65
+root_path: /work/bme-shenxk/data/AD65
 params:
   seq_len: 2000
   model: eeg_basis_mixer_v2

@@ -1,5 +1,5 @@
 dataset: FACED_new
-root_path: /path/to/datasets/FACED_new
+root_path: /work/bme-shenxk/data/FACED_new
 params:
   input_channel_coord_path: ./configs/electrodes/FACED_new.csv
   model: eeg_basis_mixer_v2_nobasis

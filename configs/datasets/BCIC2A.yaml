@@ -1,5 +1,5 @@
 dataset: BCIC2A
-root_path: /path/to/datasets/BCIC2A
+root_path: /work/bme-shenxk/data/BCIC2A
 params:
   input_channel_coord_path: ./configs/electrodes/BCIC2A.csv
   model: eeg_basis_mixer_v2_nobasis

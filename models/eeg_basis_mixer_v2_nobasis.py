@@ -297,32 +297,6 @@ class TriAxisMixerBlock(nn.Module):
         t_branch = 0.5 * (self.attn_c_for_t(t_branch, attend_dim=1, embed_axis=3) + self.attn_k_for_t(t_branch, attend_dim=2, embed_axis=3))
         weights = torch.softmax(self.fusion_logits, dim=0)
         return x + weights[0] * channel_branch + weights[1] * k_branch + weights[2] * t_branch
-    
-class TriAxisMixerBlock_noT(nn.Module):
-    def __init__(self, channel_dim: int, k_dim: int, t_dim: int, n_heads: int = 4, dropout: float = 0.0):
-        super().__init__()
-        self.norm = nn.GroupNorm(1, channel_dim)
-        self.channel_mlp = AxisMLP(channel_dim, dropout)
-        self.k_mlp = AxisMLP(k_dim, dropout)
-        self.t_mlp = AxisMLP(t_dim, dropout)
-        self.attn_k_for_c = AxisAttention(channel_dim, n_heads, dropout)
-        self.attn_t_for_c = AxisAttention(channel_dim, n_heads, dropout)
-        self.attn_c_for_k = AxisAttention(k_dim, n_heads, dropout)
-        self.attn_t_for_k = AxisAttention(k_dim, n_heads, dropout)
-        self.attn_c_for_t = AxisAttention(t_dim, n_heads, dropout)
-        self.attn_k_for_t = AxisAttention(t_dim, n_heads, dropout)
-        self.fusion_logits = nn.Parameter(torch.zeros(3))
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x_norm = self.norm(x)
-        channel_branch = self.channel_mlp(x_norm, dim=1)
-        channel_branch = 0.5 * (self.attn_k_for_c(channel_branch, attend_dim=2, embed_axis=1) + self.attn_t_for_c(channel_branch, attend_dim=3, embed_axis=1))
-        k_branch = self.k_mlp(x_norm, dim=2)
-        k_branch = 0.5 * (self.attn_c_for_k(k_branch, attend_dim=1, embed_axis=2) + self.attn_t_for_k(k_branch, attend_dim=3, embed_axis=2))
-        t_branch = self.t_mlp(x_norm, dim=3)
-        t_branch = 0.5 * (self.attn_c_for_t(t_branch, attend_dim=1, embed_axis=3) + self.attn_k_for_t(t_branch, attend_dim=2, embed_axis=3))
-        weights = torch.softmax(self.fusion_logits, dim=0)
-        return x + weights[0] * channel_branch + weights[1] * k_branch + weights[2] * t_branch
 
 
 class TriAxisEncoder(nn.Module):

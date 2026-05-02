@@ -29,6 +29,7 @@ params:
   channel_basis_dim: 32
   k_basis_dim: 16
   t_basis_dim: 20
+  t_conv_kernel: 5
   patch_embed_dim: 192
   channel_graph_sigma: 0.1
   channel_base_decay: 0.3

@@ -36,7 +36,7 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 python run.py \
-  --model eeg_basis_mixer_v2_nobasis_onlyT \
+  --model eeg_basis_mixer_v2_nobasis \
   --data Physionet_MI \
   --dataset_paths_yaml ./configs/datasets/Physionet_MI.yaml \
   --gpu 0 \

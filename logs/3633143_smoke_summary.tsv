@@ -1,0 +1,5 @@
+dataset	model	status	log_file
+AD65_wsn	eeg_basis_mixer_v2_nobasis	YAML_NOT_FOUND	NA
+AD65_wsn	eeg_mixer_v3_tconv	YAML_NOT_FOUND	NA
+BCIC2A_wsn	eeg_basis_mixer_v2_nobasis	YAML_NOT_FOUND	NA
+BCIC2A_wsn	eeg_mixer_v3_tconv	YAML_NOT_FOUND	NA
