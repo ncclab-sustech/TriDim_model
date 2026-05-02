@@ -1,0 +1,33 @@
+job_id: 3633139
+owner: bme-shenxk
+date: 2026-05-02
+time: "22:59:47"
+branch: unknown
+commit: unknown
+git_dirty: true
+model: eeg_mixer_v3_tconv
+dataset: Physionet_MI
+setting: eeg_mixer_v3_tconv_Physionet_MI_seed_46_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitnogit_20260502_225158
+seed: 46
+seed_start: 42
+itr: 5
+queue: gpu-bme-liuqy
+node: b07u22g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/Physionet_MI.yaml
+bsub_script: 
+train_log: logs/3633139.train.log
+val_accuracy: 0.584209
+val_precision: 0.592135
+val_recall: 0.584107
+val_f1: 0.586795
+val_auroc: 0.815734
+val_auprc: 0.644494
+test_accuracy: 0.575542
+test_precision: 0.582908
+test_recall: 0.575577
+test_f1: 0.578206
+test_auroc: 0.810998
+test_auprc: 0.632969
+notes: 

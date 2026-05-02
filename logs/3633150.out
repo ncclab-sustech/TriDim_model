@@ -1,0 +1,39 @@
+Job started at:
+Sat May  2 23:03:03 CST 2026
+Job ID: 3633150
+Running on host:
+b07u22g
+Working directory:
+/work/bme-shenxk/xinke/TriDim_small/scripts/bsub
+Python:
+/work/bme-shenxk/conda_envs/eeg3dim/bin/python
+Python 3.10.20
+CUDA_VISIBLE_DEVICES=
+Sat May  2 23:03:04 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.54.15              Driver Version: 550.54.15      CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-SXM3-32GB           On  |   00000000:02:00.0 Off |                    0 |
+| N/A   31C    P0             52W /  350W |       0MiB /  32768MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+============================================================
+[RUN] dataset=AD65
+[RUN] model=eeg_basis_mixer_v2_nobasis
+[RUN] yaml=./configs/datasets/AD65.yaml
+[RUN] log=logs/3633150_AD65_eeg_basis_mixer_v2_nobasis.train.log
+[RUN] start time:
+Sat May  2 23:03:04 CST 2026
+============================================================

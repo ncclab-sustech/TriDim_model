@@ -1,0 +1,137 @@
+Job started at:
+Sat May  2 22:57:49 CST 2026
+Job ID: 3633149
+Running on host:
+b07u22g
+Working directory:
+/work/bme-shenxk/xinke/TriDim_small/scripts/bsub
+Python:
+/work/bme-shenxk/conda_envs/eeg3dim/bin/python
+Python 3.10.20
+CUDA_VISIBLE_DEVICES=
+Sat May  2 22:57:50 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.54.15              Driver Version: 550.54.15      CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:82:00.0 Off |                    0 |
+| N/A   28C    P0             24W /  250W |       0MiB /  32768MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[SKIP] YAML not found: ./configs/datasets/AD65_wsn.yaml
+[SKIP] YAML not found: ./configs/datasets/BCIC2A_wsn.yaml
+============================================================
+Batch run finished
+Summary file: logs/3633149_batch_summary.tsv
+dataset	model	status	exit_code	log_file
+AD65_wsn	eeg_basis_mixer_v2_nobasis	YAML_NOT_FOUND	NA	NA
+AD65_wsn	eeg_mixer_v3_tconv	YAML_NOT_FOUND	NA	NA
+BCIC2A_wsn	eeg_basis_mixer_v2_nobasis	YAML_NOT_FOUND	NA	NA
+BCIC2A_wsn	eeg_mixer_v3_tconv	YAML_NOT_FOUND	NA	NA
+Sat May  2 22:57:50 CST 2026
+============================================================
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@b07u22g>
+Subject: Job 3633149: <tridim_batch_3data_2model> in cluster <qmhpc> Done
+
+Job <tridim_batch_3data_2model> was submitted from host <b04u17l> by user <bme-shenxk> in cluster <qmhpc> at Sat May  2 22:57:43 2026
+Job was executed on host(s) <4*b07u22g>, in queue <gpu-bme-liuqy>, as user <bme-shenxk> in cluster <qmhpc> at Sat May  2 22:57:44 2026
+</work/bme-shenxk> was used as the home directory.
+</work/bme-shenxk/xinke/TriDim_small/scripts/bsub> was used as the working directory.
+Started at Sat May  2 22:57:44 2026
+Terminated at Sat May  2 22:57:54 2026
+Results reported at Sat May  2 22:57:54 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J tridim_batch_3data_2model
+#BSUB -q gpu-bme-liuqy
+#BSUB -m b07u22g
+#BSUB -n 4
+#BSUB -gpu "num=1"
+#BSUB -R "span[ptile=4]"
+#BSUB -e /work/bme-shenxk/xinke/TriDim_small/logs/%J.err
+#BSUB -o /work/bme-shenxk/xinke/TriDim_small/logs/%J.out
+
+set -e
+
+echo "Job started at:"
+date
+echo "Job ID: ${LSB_JOBID}"
+echo "Running on host:"
+hostname
+echo "Working directory:"
+pwd
+
+cd ~/xinke/TriDim_small
+
+mkdir -p logs
+
+module load python/anaconda3/2022.10
+source activate
+conda activate ~/conda_envs/eeg3dim
+
+echo "Python:"
+which python
+python -V
+
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+nvidia-smi || true
+
+DATASETS=(
+  "AD65_wsn"
+  "BCIC2A_wsn"
+)
+
+MODELS=(
+  "eeg_basis_mixer_v2_nobasis"
+  "eeg_mixer_v3_tconv"
+)
+
+SUMMARY_FILE="logs/${LSB_JOBID}_batch_summary.tsv"
+
+echo -e "dataset\tmodel\tstatus\texit_code\tlog_file" > ${SUMMARY_FILE}
+
+for dataset in "${DATASETS[@]}"
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.04 sec.
+    Max Memory :                                 29 MB
+    Average Memory :                             24.00 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   1 MB
+    Max Processes :                              5
+    Max Threads :                                6
+    Run time :                                   6 sec.
+    Turnaround time :                            11 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </work/bme-shenxk/xinke/TriDim_small/logs/3633149.err> for stderr output of this job.
+
