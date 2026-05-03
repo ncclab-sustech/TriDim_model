@@ -1,0 +1,33 @@
+job_id: 3633150
+owner: bme-shenxk
+date: 2026-05-02
+time: "23:57:13"
+branch: unknown
+commit: unknown
+git_dirty: true
+model: eeg_basis_mixer_v2_nobasis
+dataset: BCIC2A
+setting: eeg_basis_mixer_v2_nobasis_BCIC2A_seed_45_dm_128_dp_0.1_tl_3_bs_16_lr0.0002_aug_none_pl_80_cb22_kb16_tb24_pe128_ps20_ca1_cp1_gitnogit_20260502_235126
+seed: 45
+seed_start: 42
+itr: 5
+queue: gpu-bme-liuqy
+node: b07u22g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/BCIC2A.yaml
+bsub_script: 
+train_log: logs/3633150.train.log
+val_accuracy: 0.359375
+val_precision: 0.362740
+val_recall: 0.359375
+val_f1: 0.359656
+val_auroc: 0.619871
+val_auprc: 0.353792
+test_accuracy: 0.364005
+test_precision: 0.346427
+test_recall: 0.364005
+test_f1: 0.321918
+test_auroc: 0.624944
+test_auprc: 0.355879
+notes: 

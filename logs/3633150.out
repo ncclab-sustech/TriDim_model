@@ -37,3 +37,147 @@ Sat May  2 23:03:04 2026
 [RUN] start time:
 Sat May  2 23:03:04 CST 2026
 ============================================================
+[OK] AD65 eeg_basis_mixer_v2_nobasis
+[DONE] dataset=AD65, model=eeg_basis_mixer_v2_nobasis
+[DONE] end time:
+Sat May  2 23:12:05 CST 2026
+============================================================
+[RUN] dataset=AD65
+[RUN] model=eeg_mixer_v3_tconv
+[RUN] yaml=./configs/datasets/AD65.yaml
+[RUN] log=logs/3633150_AD65_eeg_mixer_v3_tconv.train.log
+[RUN] start time:
+Sat May  2 23:12:05 CST 2026
+============================================================
+[OK] AD65 eeg_mixer_v3_tconv
+[DONE] dataset=AD65, model=eeg_mixer_v3_tconv
+[DONE] end time:
+Sat May  2 23:31:10 CST 2026
+============================================================
+[RUN] dataset=BCIC2A
+[RUN] model=eeg_basis_mixer_v2_nobasis
+[RUN] yaml=./configs/datasets/BCIC2A.yaml
+[RUN] log=logs/3633150_BCIC2A_eeg_basis_mixer_v2_nobasis.train.log
+[RUN] start time:
+Sat May  2 23:31:10 CST 2026
+============================================================
+[OK] BCIC2A eeg_basis_mixer_v2_nobasis
+[DONE] dataset=BCIC2A, model=eeg_basis_mixer_v2_nobasis
+[DONE] end time:
+Sun May  3 00:02:45 CST 2026
+============================================================
+[RUN] dataset=BCIC2A
+[RUN] model=eeg_mixer_v3_tconv
+[RUN] yaml=./configs/datasets/BCIC2A.yaml
+[RUN] log=logs/3633150_BCIC2A_eeg_mixer_v3_tconv.train.log
+[RUN] start time:
+Sun May  3 00:02:45 CST 2026
+============================================================
+[OK] BCIC2A eeg_mixer_v3_tconv
+[DONE] dataset=BCIC2A, model=eeg_mixer_v3_tconv
+[DONE] end time:
+Sun May  3 00:38:03 CST 2026
+============================================================
+Batch run finished
+Summary file: logs/3633150_batch_summary.tsv
+dataset	model	status	exit_code	log_file
+AD65	eeg_basis_mixer_v2_nobasis	OK	0	logs/3633150_AD65_eeg_basis_mixer_v2_nobasis.train.log
+AD65	eeg_mixer_v3_tconv	OK	0	logs/3633150_AD65_eeg_mixer_v3_tconv.train.log
+BCIC2A	eeg_basis_mixer_v2_nobasis	OK	0	logs/3633150_BCIC2A_eeg_basis_mixer_v2_nobasis.train.log
+BCIC2A	eeg_mixer_v3_tconv	OK	0	logs/3633150_BCIC2A_eeg_mixer_v3_tconv.train.log
+Sun May  3 00:38:04 CST 2026
+============================================================
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@b07u22g>
+Subject: Job 3633150: <tridim_batch_3data_2model> in cluster <qmhpc> Done
+
+Job <tridim_batch_3data_2model> was submitted from host <b04u17l> by user <bme-shenxk> in cluster <qmhpc> at Sat May  2 23:02:58 2026
+Job was executed on host(s) <4*b07u22g>, in queue <gpu-bme-liuqy>, as user <bme-shenxk> in cluster <qmhpc> at Sat May  2 23:02:58 2026
+</work/bme-shenxk> was used as the home directory.
+</work/bme-shenxk/xinke/TriDim_small/scripts/bsub> was used as the working directory.
+Started at Sat May  2 23:02:58 2026
+Terminated at Sun May  3 00:38:07 2026
+Results reported at Sun May  3 00:38:07 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J tridim_batch_3data_2model
+#BSUB -q gpu-bme-liuqy
+#BSUB -m b07u22g
+#BSUB -n 4
+#BSUB -gpu "num=1"
+#BSUB -R "span[ptile=4]"
+#BSUB -e /work/bme-shenxk/xinke/TriDim_small/logs/%J.err
+#BSUB -o /work/bme-shenxk/xinke/TriDim_small/logs/%J.out
+
+set -e
+
+echo "Job started at:"
+date
+echo "Job ID: ${LSB_JOBID}"
+echo "Running on host:"
+hostname
+echo "Working directory:"
+pwd
+
+cd ~/xinke/TriDim_small
+
+mkdir -p logs
+
+module load python/anaconda3/2022.10
+source activate
+conda activate ~/conda_envs/eeg3dim
+
+echo "Python:"
+which python
+python -V
+
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+nvidia-smi || true
+
+DATASETS=(
+  "AD65"
+  "BCIC2A"
+)
+
+MODELS=(
+  "eeg_basis_mixer_v2_nobasis"
+  "eeg_mixer_v3_tconv"
+)
+
+SUMMARY_FILE="logs/${LSB_JOBID}_batch_summary.tsv"
+
+echo -e "dataset\tmodel\tstatus\texit_code\tlog_file" > ${SUMMARY_FILE}
+
+for dataset in "${DATASETS[@]}"
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   7498.00 sec.
+    Max Memory :                                 5107 MB
+    Average Memory :                             2805.03 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   2 MB
+    Max Processes :                              12
+    Max Threads :                                93
+    Run time :                                   5706 sec.
+    Turnaround time :                            5709 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </work/bme-shenxk/xinke/TriDim_small/logs/3633150.err> for stderr output of this job.
+

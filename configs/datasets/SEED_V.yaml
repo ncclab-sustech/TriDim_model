@@ -1,10 +1,12 @@
 dataset: SEED_V
-root_path: /path/to/datasets/SEED_V
+root_path: /work/bme-shenxk/data/SEED_V_10s
 params:
-  model: eeg_basis_mixer_v2_nobasis
+  model: eeg_mixer_v3_tconv
   itr: 5
   seed_start: 42
   split_mode: label_order
+  train_ratio: 0.4
+  val_ratio: 0.3
   select_metric: F1
   use_gpu: true
   gpu_idx:
@@ -17,6 +19,7 @@ params:
   learning_rate: 0.0002
   lradj: cosine
   d_model: 192
+  n_heads: 4
   t_layer: 4
   v_layer: 0
   dropout: 0.1

@@ -1,0 +1,43 @@
+dataset: ADFTD
+root_path: /work/bme-shenxk/data/ADFTD/ADFD
+params:
+  seq_len: 256
+  model: eeg_mixer_v3_tconv
+  itr: 5
+  seed_start: 42
+  split_mode: label_order
+  train_ratio: 0.4
+  val_ratio: 0.3
+  select_metric: F1
+  use_gpu: true
+  gpu_idx:
+  - 0
+  gpu: 0
+  num_workers: 0
+  train_epochs: 30
+  patience: 5
+  batch_size: 256
+  learning_rate: 0.0002
+  lradj: cosine
+  d_model: 128
+  t_layer: 3
+  v_layer: 0
+  dropout: 0.3
+  patch_len: 32
+  patch_stride: 8
+  augmentations: none
+  channel_basis_dim: 19
+  k_basis_dim: 16
+  t_basis_dim: 16
+  patch_embed_dim: 128
+  use_channel_adapter: false
+  canonical_channels: 19
+  no_channel_prior: false
+  weight_decay: 0.0001
+electrode_channel_count: 19
+electrode_montage_used: standard_1020
+classes:
+  0: control
+  1: frontotemporal_dementia
+  2: Alzheimer
+dataset_note: 88 subjects, 69752 1-second segments, shape (segments, 256, 19)

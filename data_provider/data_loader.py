@@ -361,10 +361,14 @@ class ADHDLoader(Dataset):
         if m is not None:
             return 500000 + int(m.group(1))
         # BCIC2A style: A01T.h5 (training) / A01E.h5 (evaluation). Treat T/E as distinct subjects.
+        # m = re.match(r"A(\d+)([ET])\.h5$", name)
+        # if m is not None:
+        #     num = int(m.group(1))
+        #     return (600000 if m.group(2) == "T" else 700000) + num
         m = re.match(r"A(\d+)([ET])\.h5$", name)
         if m is not None:
             num = int(m.group(1))
-            return (600000 if m.group(2) == "T" else 700000) + num
+            return 600000 + num
         # MDD style: "H S1 EC.h5" (healthy) / "MDD S1 EC.h5" (patient) / "6921143_H S15 EO.h5".
         # Group prefix disambiguates healthy vs patient; condition (EC/EO/TASK) merges into same subject.
         m = re.search(r"(?:^|[_\s])([A-Za-z]+)\s+S(\d+)\b", name)

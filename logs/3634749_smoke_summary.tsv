@@ -1,0 +1,2 @@
+dataset	model	status	log_file
+AD65	eeg_mixer_v4_outAttentionPoolingFusion	OK	logs/3634749_AD65_eeg_mixer_v4_outAttentionPoolingFusion_smoke.train.log

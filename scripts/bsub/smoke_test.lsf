@@ -1,7 +1,6 @@
 #!/bin/bash
 #BSUB -J tridim_smoke_3data_2model
-#BSUB -q gpu-bme-liuqy
-#BSUB -m b07u22g
+#BSUB -q 4v100-16-e5
 #BSUB -n 4
 #BSUB -gpu "num=1"
 #BSUB -R "span[ptile=4]"
@@ -35,13 +34,18 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 DATASETS=(
-  "AD65_wsn"
-  "BCIC2A_wsn"
+  "AD65"
+  "ADFTD"
+  "APAVA"
+  "BCIC2A"
+  "SEED"
+  "SEED_V"
+  "SHU"
+  "SleepEDF_full"
 )
 
 MODELS=(
-  "eeg_basis_mixer_v2_nobasis"
-  "eeg_mixer_v3_tconv"
+  "eeg_mixer_v4_outAttentionPoolingFusion"
 )
 
 SUMMARY_FILE="logs/${LSB_JOBID}_smoke_summary.tsv"

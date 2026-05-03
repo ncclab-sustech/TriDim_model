@@ -1,0 +1,134 @@
+Job started at:
+Sun May  3 10:39:42 CST 2026
+Job ID: 3633781
+Running on host:
+b07u10g
+Working directory:
+/work/bme-shenxk/xinke/TriDim_small/scripts/bsub
+Python:
+/work/bme-shenxk/conda_envs/eeg3dim/bin/python
+Python 3.10.20
+CUDA_VISIBLE_DEVICES=
+Sun May  3 10:39:43 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 560.28.03              Driver Version: 560.28.03      CUDA Version: 12.6     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-16GB           On  |   00000000:03:00.0 Off |                    0 |
+| N/A   26C    P0             25W /  250W |       1MiB /  16384MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+============================================================
+[RUN] dataset=FACED_new
+[RUN] model=eeg_mixer_v3_tconv
+[RUN] yaml=./configs/datasets/FACED_new.yaml
+[RUN] log=logs/3633781_FACED_new_eeg_mixer_v3_tconv.train.log
+[RUN] start time:
+Sun May  3 10:39:43 CST 2026
+============================================================
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@b07u10g>
+Subject: Job 3633781: <tridim_batch_3data_2model> in cluster <qmhpc> Exited
+
+Job <tridim_batch_3data_2model> was submitted from host <b04u17l> by user <bme-shenxk> in cluster <qmhpc> at Sun May  3 10:39:38 2026
+Job was executed on host(s) <4*b07u10g>, in queue <4v100-16-e5>, as user <bme-shenxk> in cluster <qmhpc> at Sun May  3 10:39:38 2026
+</work/bme-shenxk> was used as the home directory.
+</work/bme-shenxk/xinke/TriDim_small/scripts/bsub> was used as the working directory.
+Started at Sun May  3 10:39:38 2026
+Terminated at Sun May  3 10:56:29 2026
+Results reported at Sun May  3 10:56:29 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J tridim_batch_3data_2model
+#BSUB -q 4v100-16-e5
+#BSUB -n 4
+#BSUB -gpu "num=1"
+#BSUB -R "span[ptile=4]"
+#BSUB -e /work/bme-shenxk/xinke/TriDim_small/logs/%J.err
+#BSUB -o /work/bme-shenxk/xinke/TriDim_small/logs/%J.out
+
+set -e
+
+echo "Job started at:"
+date
+echo "Job ID: ${LSB_JOBID}"
+echo "Running on host:"
+hostname
+echo "Working directory:"
+pwd
+
+cd ~/xinke/TriDim_small
+
+mkdir -p logs
+
+module load python/anaconda3/2022.10
+source activate
+conda activate ~/conda_envs/eeg3dim
+
+echo "Python:"
+which python
+python -V
+
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+nvidia-smi || true
+
+DATASETS=(
+  "FACED_new"
+)
+
+MODELS=(
+  "eeg_mixer_v3_tconv"
+)
+
+SUMMARY_FILE="logs/${LSB_JOBID}_batch_summary.tsv"
+
+echo -e "dataset\tmodel\tstatus\texit_code\tlog_file" > ${SUMMARY_FILE}
+
+for dataset in "${DATASETS[@]}"
+do
+  yaml_path="./configs/datasets/${dataset}.yaml"
+
+
+(... more ...)
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 130.
+
+Resource usage summary:
+
+    CPU time :                                   1471.02 sec.
+    Max Memory :                                 11299 MB
+    Average Memory :                             10188.46 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              12
+    Max Threads :                                56
+    Run time :                                   1008 sec.
+    Turnaround time :                            1011 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </work/bme-shenxk/xinke/TriDim_small/logs/3633781.err> for stderr output of this job.
+

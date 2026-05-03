@@ -346,8 +346,8 @@ class BasisMixer(nn.Module):
         if self.use_channel_adapter:
             self.channel_adapter = ChannelAdapter(canonical_channels=self.canonical_channels, use_prior=self.use_channel_prior, sigma=float(_get_config(configs, "channel_adapter_sigma", 0.35)), residual_hidden_dim=int(_get_config(configs, "channel_adapter_hidden", 32)), residual_scale_init=float(_get_config(configs, "channel_adapter_residual_scale", 0.10)), canonical_coords=canonical_coords, canonical_channel_names=canonical_names)
             active_channels = self.canonical_channels
-        if self.channel_basis_dim > active_channels:
-            raise ValueError("channel_basis_dim cannot exceed active channel count")
+        # if self.channel_basis_dim > active_channels:
+        #     raise ValueError("channel_basis_dim cannot exceed active channel count")
         self.channel_basis = LinearChannelProjection(active_channels, self.channel_basis_dim)
         self.k_basis = LinearKProjection(self.patch_len, self.k_basis_dim)
         # self.t_basis = PoolTProjection(self.t_basis_dim)

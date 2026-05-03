@@ -1,0 +1,33 @@
+job_id: 3633781
+owner: bme-shenxk
+date: 2026-05-03
+time: "10:51:22"
+branch: main
+commit: 555de6c
+git_dirty: true
+model: eeg_mixer_v3_tconv
+dataset: FACED_new
+setting: eeg_mixer_v3_tconv_FACED_new_seed_42_dm_256_dp_0.1_tl_6_bs_128_lr0.0007_aug_none_pl_16_cb32_kb16_tb24_pe256_ps8_ca0_cp1_git555de6c_20260503_104017
+seed: 42
+seed_start: 42
+itr: 5
+queue: 4v100-16-e5
+node: b07u10g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/FACED_new.yaml
+bsub_script: 
+train_log: logs/3633781.train.log
+val_accuracy: 0.405727
+val_precision: 0.409417
+val_recall: 0.407908
+val_f1: 0.408218
+val_auroc: 0.788286
+val_auprc: 0.403165
+test_accuracy: 0.344916
+test_precision: 0.344175
+test_recall: 0.344344
+test_f1: 0.342807
+test_auroc: 0.738302
+test_auprc: 0.320887
+notes: 

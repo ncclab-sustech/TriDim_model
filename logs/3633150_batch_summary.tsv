@@ -1,1 +1,5 @@
 dataset	model	status	exit_code	log_file
+AD65	eeg_basis_mixer_v2_nobasis	OK	0	logs/3633150_AD65_eeg_basis_mixer_v2_nobasis.train.log
+AD65	eeg_mixer_v3_tconv	OK	0	logs/3633150_AD65_eeg_mixer_v3_tconv.train.log
+BCIC2A	eeg_basis_mixer_v2_nobasis	OK	0	logs/3633150_BCIC2A_eeg_basis_mixer_v2_nobasis.train.log
+BCIC2A	eeg_mixer_v3_tconv	OK	0	logs/3633150_BCIC2A_eeg_mixer_v3_tconv.train.log

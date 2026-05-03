@@ -1,0 +1,33 @@
+job_id: 3633150
+owner: bme-shenxk
+date: 2026-05-02
+time: "23:27:22"
+branch: unknown
+commit: unknown
+git_dirty: true
+model: eeg_mixer_v3_tconv
+dataset: AD65
+setting: eeg_mixer_v3_tconv_AD65_seed_45_dm_192_dp_0.1_tl_4_bs_128_lr0.0003_aug_none_pl_64_cb16_kb16_tb20_pe192_ps16_ca0_cp1_gitnogit_20260502_232334
+seed: 45
+seed_start: 42
+itr: 5
+queue: gpu-bme-liuqy
+node: b07u22g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/AD65.yaml
+bsub_script: 
+train_log: logs/3633150.train.log
+val_accuracy: 0.571840
+val_precision: 0.580375
+val_recall: 0.517108
+val_f1: 0.495272
+val_auroc: 0.730684
+val_auprc: 0.581650
+test_accuracy: 0.570125
+test_precision: 0.580201
+test_recall: 0.517032
+test_f1: 0.497926
+test_auroc: 0.729706
+test_auprc: 0.579920
+notes: 

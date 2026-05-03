@@ -1,24 +1,26 @@
 dataset: SEED
-root_path: /path/to/datasets/SEED
+root_path: /work/bme-shenxk/data/SEED
 params:
-  input_channel_coord_path: ./configs/electrodes/SEED.csv
-  model: eeg_basis_mixer_v2_nobasis
+  model: eeg_mixer_v3_tconv
   itr: 5
   seed_start: 42
   split_mode: label_order
+  train_ratio: 0.4
+  val_ratio: 0.3
   select_metric: F1
   use_gpu: true
   gpu_idx:
   - 0
   gpu: 0
-  num_workers: 0
+  num_workers: 4
   train_epochs: 30
   patience: 8
-  batch_size: 16
+  batch_size: 64
   learning_rate: 0.0002
   lradj: cosine
-  d_model: 128
-  t_layer: 3
+  d_model: 192
+  n_heads: 4
+  t_layer: 4
   v_layer: 0
   dropout: 0.1
   patch_len: 80
@@ -27,11 +29,12 @@ params:
   channel_basis_dim: 62
   k_basis_dim: 16
   t_basis_dim: 24
-  patch_embed_dim: 128
-  use_channel_adapter: true
+  patch_embed_dim: 192
+  use_channel_adapter: false
   canonical_channels: 62
   no_channel_prior: false
-  canonical_channel_coord_path: ./configs/electrodes/SEED.csv
-electrode_csv: ./configs/electrodes/SEED.csv
-electrode_montage_used: standard_1005
+  input_channel_coord_path: ./configs/electrodes/SEED_V.csv
+  canonical_channel_coord_path: ./configs/electrodes/SEED_V.csv
+electrode_csv: ./configs/electrodes/SEED_V.csv
+electrode_montage_used: standard_1020
 electrode_channel_count: 62

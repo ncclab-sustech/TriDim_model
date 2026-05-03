@@ -1,8 +1,8 @@
 dataset: Physionet_MI
-root_path: ~/data/Physionet_MI_wsn
+root_path: /work/bme-shenxk/data/Physionet_MI_wsn
 params:
   seq_len: 800
-  model: eeg_basis_mixer_v2
+  model: eeg_mixer_v3_tconv
   itr: 5
   seed_start: 42
   split_mode: segment_stratified_random

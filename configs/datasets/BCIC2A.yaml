@@ -2,7 +2,7 @@ dataset: BCIC2A
 root_path: /work/bme-shenxk/data/BCIC2A_wsn
 params:
   input_channel_coord_path: ./configs/electrodes/BCIC2A.csv
-  model: eeg_basis_mixer_v2_nobasis
+  model: eeg_mixer_v3_tconv
   itr: 5
   seed_start: 42
   split_mode: label_order

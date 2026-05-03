@@ -1,7 +1,6 @@
 #!/bin/bash
 #BSUB -J tridim_batch_3data_2model
-#BSUB -q gpu-bme-liuqy
-#BSUB -m b07u22g
+#BSUB -q 4v100-16-e5
 #BSUB -n 4
 #BSUB -gpu "num=1"
 #BSUB -R "span[ptile=4]"
@@ -34,13 +33,11 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 DATASETS=(
-  "AD65"
-  "BCIC2A"
+  "FACED_new"
 )
 
 MODELS=(
-  "eeg_basis_mixer_v2_nobasis"
-  "eeg_mixer_v3_tconv"
+  "eeg_mixer_v4_outAttentionPoolingFusion"
 )
 
 SUMMARY_FILE="logs/${LSB_JOBID}_batch_summary.tsv"
