@@ -37,3 +37,15 @@ Sun May  3 16:18:18 2026
 [RUN] start time:
 Sun May  3 16:18:18 CST 2026
 ============================================================
+[OK] SEED eeg_mixer_v4_outAttentionPoolingFusion
+[DONE] dataset=SEED, model=eeg_mixer_v4_outAttentionPoolingFusion
+[DONE] end time:
+Sun May  3 17:25:12 CST 2026
+============================================================
+[RUN] dataset=SEED_V
+[RUN] model=eeg_mixer_v4_outAttentionPoolingFusion
+[RUN] yaml=./configs/datasets/SEED_V.yaml
+[RUN] log=logs/3635087_SEED_V_eeg_mixer_v4_outAttentionPoolingFusion.train.log
+[RUN] start time:
+Sun May  3 17:25:12 CST 2026
+============================================================

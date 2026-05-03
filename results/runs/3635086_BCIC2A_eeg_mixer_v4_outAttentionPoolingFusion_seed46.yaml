@@ -1,0 +1,33 @@
+job_id: 3635086
+owner: bme-shenxk
+date: 2026-05-03
+time: "17:18:42"
+branch: main
+commit: 1f056a2
+git_dirty: true
+model: eeg_mixer_v4_outAttentionPoolingFusion
+dataset: BCIC2A
+setting: eeg_mixer_v4_outAttentionPoolingFusion_BCIC2A_seed_46_dm_128_dp_0.1_tl_4_bs_128_lr0.002_aug_none_pl_80_cb32_kb16_tb16_pe128_ps20_ca1_cp1_git1f056a2_20260503_171425
+seed: 46
+seed_start: 42
+itr: 5
+queue: 4v100-16-e5
+node: b07u10g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/BCIC2A.yaml
+bsub_script: 
+train_log: logs/3635086.train.log
+val_accuracy: 0.453993
+val_precision: 0.461379
+val_recall: 0.453993
+val_f1: 0.450785
+val_auroc: 0.698288
+val_auprc: 0.446754
+test_accuracy: 0.508102
+test_precision: 0.519137
+test_recall: 0.508102
+test_f1: 0.506825
+test_auroc: 0.760784
+test_auprc: 0.520344
+notes: 

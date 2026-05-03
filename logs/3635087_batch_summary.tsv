@@ -1,1 +1,2 @@
 dataset	model	status	exit_code	log_file
+SEED	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3635087_SEED_eeg_mixer_v4_outAttentionPoolingFusion.train.log

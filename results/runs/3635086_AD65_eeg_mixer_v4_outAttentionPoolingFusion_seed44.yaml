@@ -1,0 +1,33 @@
+job_id: 3635086
+owner: bme-shenxk
+date: 2026-05-03
+time: "16:41:07"
+branch: main
+commit: 1f056a2
+git_dirty: true
+model: eeg_mixer_v4_outAttentionPoolingFusion
+dataset: AD65
+setting: eeg_mixer_v4_outAttentionPoolingFusion_AD65_seed_44_dm_128_dp_0.1_tl_4_bs_128_lr0.002_aug_none_pl_80_cb32_kb16_tb16_pe128_ps20_ca0_cp1_git1f056a2_20260503_163707
+seed: 44
+seed_start: 42
+itr: 5
+queue: 4v100-16-e5
+node: b07u10g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/AD65.yaml
+bsub_script: 
+train_log: logs/3635086.train.log
+val_accuracy: 0.563910
+val_precision: 0.377238
+val_recall: 0.506470
+val_f1: 0.431910
+val_auroc: 0.683083
+val_auprc: 0.466042
+test_accuracy: 0.538644
+test_precision: 0.368233
+test_recall: 0.449792
+test_f1: 0.388803
+test_auroc: 0.639428
+test_auprc: 0.475054
+notes: 

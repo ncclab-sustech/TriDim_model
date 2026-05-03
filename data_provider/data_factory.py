@@ -1,4 +1,4 @@
-from data_provider.data_loader import ADHDLoader
+from data_provider.data_loader import ADHDLoader, APAVALoader, ADFTDLoader
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
 import torch
@@ -25,6 +25,8 @@ def _seed_worker(worker_id):
 data_dict = {
     "ADHD": ADHDLoader,
     "AD65": ADHDLoader,
+    "ADFTD": ADFTDLoader,
+    "APAVA": APAVALoader,
     "BCIC2A": ADHDLoader,
     "Broderick": ADHDLoader,
     "ChineseEEG1": ADHDLoader,
@@ -41,7 +43,7 @@ data_dict = {
     "SEED_V": ADHDLoader,
     "SEED_VIG": ADHDLoader,
     "SHU": ADHDLoader,
-    "sleep-cassette-200hz": ADHDLoader,
+    "SleepEDF_full": ADHDLoader,
 }
 
 

@@ -1,15 +1,15 @@
 Job started at:
-Sun May  3 16:18:16 CST 2026
-Job ID: 3635086
+Sun May  3 17:22:52 CST 2026
+Job ID: 3635104
 Running on host:
-b07u10g
+a04u35g
 Working directory:
 /work/bme-shenxk/xinke/TriDim_small/scripts/bsub
 Python:
 /work/bme-shenxk/conda_envs/eeg3dim/bin/python
 Python 3.10.20
 CUDA_VISIBLE_DEVICES=
-Sun May  3 16:18:18 2026       
+Sun May  3 17:22:55 2026       
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 560.28.03              Driver Version: 560.28.03      CUDA Version: 12.6     |
 |-----------------------------------------+------------------------+----------------------+
@@ -18,7 +18,7 @@ Sun May  3 16:18:18 2026
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
 |   0  Tesla V100-PCIE-16GB           On  |   00000000:03:00.0 Off |                    0 |
-| N/A   26C    P0             25W /  250W |       1MiB /  16384MiB |      0%   E. Process |
+| N/A   22C    P0             23W /  250W |       1MiB /  16384MiB |      0%   E. Process |
 |                                         |                        |                  N/A |
 +-----------------------------------------+------------------------+----------------------+
                                                                                          
@@ -30,34 +30,10 @@ Sun May  3 16:18:18 2026
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
 ============================================================
-[RUN] dataset=AD65
+[RUN] dataset=ADFTD
 [RUN] model=eeg_mixer_v4_outAttentionPoolingFusion
-[RUN] yaml=./configs/datasets/AD65.yaml
-[RUN] log=logs/3635086_AD65_eeg_mixer_v4_outAttentionPoolingFusion.train.log
+[RUN] yaml=./configs/datasets/ADFTD.yaml
+[RUN] log=logs/3635104_ADFTD_eeg_mixer_v4_outAttentionPoolingFusion.train.log
 [RUN] start time:
-Sun May  3 16:18:18 CST 2026
-============================================================
-[OK] AD65 eeg_mixer_v4_outAttentionPoolingFusion
-[DONE] dataset=AD65, model=eeg_mixer_v4_outAttentionPoolingFusion
-[DONE] end time:
-Sun May  3 16:55:43 CST 2026
-============================================================
-[RUN] dataset=BCIC2A
-[RUN] model=eeg_mixer_v4_outAttentionPoolingFusion
-[RUN] yaml=./configs/datasets/BCIC2A.yaml
-[RUN] log=logs/3635086_BCIC2A_eeg_mixer_v4_outAttentionPoolingFusion.train.log
-[RUN] start time:
-Sun May  3 16:55:43 CST 2026
-============================================================
-[OK] BCIC2A eeg_mixer_v4_outAttentionPoolingFusion
-[DONE] dataset=BCIC2A, model=eeg_mixer_v4_outAttentionPoolingFusion
-[DONE] end time:
-Sun May  3 17:18:42 CST 2026
-============================================================
-[RUN] dataset=Physionet_MI
-[RUN] model=eeg_mixer_v4_outAttentionPoolingFusion
-[RUN] yaml=./configs/datasets/Physionet_MI.yaml
-[RUN] log=logs/3635086_Physionet_MI_eeg_mixer_v4_outAttentionPoolingFusion.train.log
-[RUN] start time:
-Sun May  3 17:18:42 CST 2026
+Sun May  3 17:22:55 CST 2026
 ============================================================
