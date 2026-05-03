@@ -28,8 +28,8 @@ class APAVALoader(Dataset):
         self.label_path = os.path.join(root_path, "Label/label.npy")
         self.split_mode = str(getattr(args, "split_mode", "label_order"))
         self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
-        self.train_ratio = float(getattr(args, "train_ratio", 0.6))
-        self.val_ratio = float(getattr(args, "val_ratio", 0.2))
+        self.train_ratio = float(getattr(args, "train_ratio", 0.4))
+        self.val_ratio = float(getattr(args, "val_ratio", 0.3))
         if (
             self.train_ratio <= 0
             or self.val_ratio <= 0
@@ -44,7 +44,7 @@ class APAVALoader(Dataset):
             )
         else:
             self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-                self.label_path, a=0.6, b=0.8
+                self.label_path, a=0.4, b=0.7
             )
             self.X, self.y = self.load_apava(self.data_path, self.label_path, flag=flag)
 
@@ -54,9 +54,9 @@ class APAVALoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.6, b=0.8):
+    def load_train_val_test_list(self, label_path, a=0.4, b=0.7):
         """
-        Build subject-level 6:2:2 split for APAVA.
+        Build subject-level 4:3:3 split for APAVA.
         The split is stratified by class and keeps metadata order per class.
         """
         data_list = np.load(label_path)
@@ -122,7 +122,7 @@ class APAVALoader(Dataset):
     def load_apava_segment_split(self, data_path, label_path, flag=None):
         """
         Non-cross-subject split for APAVA:
-        collect all segments, then stratified 6:2:2 (or CLI ratios) by segment label.
+        collect all segments, then stratified 4:3:3 (or CLI ratios) by segment label.
         """
         feature_list = []
         label_list = []
@@ -814,8 +814,15 @@ class ADFTDLoader(Dataset):
         self.root_path = root_path
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
-
-        a, b = 0.4, 0.7
+        
+        if (
+            self.train_ratio <= 0
+            or self.val_ratio <= 0
+            or self.train_ratio + self.val_ratio >= 1.0
+        ):
+            a, b = 0.4, 0.7
+        else:
+            a, b = self.train_ratio, self.train_ratio + self.val_ratio
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
             self.label_path, a, b
         )
@@ -827,7 +834,7 @@ class ADFTDLoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.6, b=0.8):
+    def load_train_val_test_list(self, label_path, a=0.4, b=0.7):
         """
         Loads IDs for training, validation, and test sets
         Args:
