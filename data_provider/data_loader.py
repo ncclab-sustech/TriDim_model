@@ -35,7 +35,7 @@ class APAVALoader(Dataset):
             or self.val_ratio <= 0
             or self.train_ratio + self.val_ratio >= 1.0
         ):
-            self.train_ratio, self.val_ratio = 0.6, 0.2
+            self.train_ratio, self.val_ratio = 0.4, 0.3
 
         # Keep legacy subject-level APAVA split by default.
         if self.split_mode == "segment_stratified_random":
@@ -815,7 +815,7 @@ class ADFTDLoader(Dataset):
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
 
-        a, b = 0.6, 0.8
+        a, b = 0.4, 0.7
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
             self.label_path, a, b
         )

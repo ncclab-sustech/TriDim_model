@@ -1,0 +1,33 @@
+job_id: 3635104
+owner: bme-shenxk
+date: 2026-05-03
+time: "19:03:17"
+branch: unknown
+commit: unknown
+git_dirty: true
+model: eeg_mixer_v4_outAttentionPoolingFusion
+dataset: ADFTD
+setting: eeg_mixer_v4_outAttentionPoolingFusion_ADFTD_seed_43_dm_128_dp_0.1_tl_4_bs_128_lr0.002_aug_none_pl_80_cb32_kb16_tb16_pe128_ps20_ca0_cp1_gitnogit_20260503_180652
+seed: 43
+seed_start: 42
+itr: 5
+queue: 4v100-16-e5
+node: a04u35g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/ADFTD.yaml
+bsub_script: 
+train_log: logs/3635104.train.log
+val_accuracy: 0.615705
+val_precision: 0.613042
+val_recall: 0.608503
+val_f1: 0.605824
+val_auroc: 0.755279
+val_auprc: 0.664820
+test_accuracy: 0.517750
+test_precision: 0.502749
+test_recall: 0.502240
+test_f1: 0.501252
+test_auroc: 0.710877
+test_auprc: 0.520700
+notes: 

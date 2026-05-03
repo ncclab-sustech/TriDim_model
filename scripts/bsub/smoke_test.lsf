@@ -34,10 +34,7 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 DATASETS=(
-  "BCIC2A"
-  "SEED"
-  "SEED_V"
-  "SHU"
+  "APAVA"
   "SleepEDF_full"
 )
 
