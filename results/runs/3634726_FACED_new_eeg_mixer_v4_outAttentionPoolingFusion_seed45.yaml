@@ -1,0 +1,33 @@
+job_id: 3634726
+owner: bme-shenxk
+date: 2026-05-03
+time: "14:31:10"
+branch: main
+commit: d550e0d
+git_dirty: true
+model: eeg_mixer_v4_outAttentionPoolingFusion
+dataset: FACED_new
+setting: eeg_mixer_v4_outAttentionPoolingFusion_FACED_new_seed_45_dm_128_dp_0.1_tl_4_bs_128_lr0.002_aug_none_pl_80_cb32_kb16_tb16_pe128_ps20_ca0_cp1_git555de6c_20260503_142511
+seed: 45
+seed_start: 42
+itr: 5
+queue: 4v100-16-e5
+node: b07u10g
+cuda_visible_devices: 0
+gpu_request: 
+config: ./configs/datasets/FACED_new.yaml
+bsub_script: 
+train_log: logs/3634726.train.log
+val_accuracy: 0.392535
+val_precision: 0.401446
+val_recall: 0.393977
+val_f1: 0.395917
+val_auroc: 0.782402
+val_auprc: 0.380438
+test_accuracy: 0.336229
+test_precision: 0.341647
+test_recall: 0.336086
+test_f1: 0.336733
+test_auroc: 0.738818
+test_auprc: 0.318264
+notes: 

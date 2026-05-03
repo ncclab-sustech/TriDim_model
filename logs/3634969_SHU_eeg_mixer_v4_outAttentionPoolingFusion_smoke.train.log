@@ -1,0 +1,214 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] SHU root_path -> /work/bme-shenxk/data/SHU_MI
+[dataset_cfg] applied 34 params for SHU
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2248
+[Split Summary] label distribution: {0: 1111, 1: 1137}
+[Split Summary] X shape: (2248, 800, 32)
+================================================================================
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 541,370 (0.541 M)
+[Model Params] Trainable: 541,370 (0.541 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 2.07 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 2.07 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_SHU_seed_42_dm_192_dp_0.1_tl_4_bs_64_lr0.0002_aug_none_pl_80_cb32_kb16_tb24_pe192_ps20_ca0_cp1_gitnogit_20260503_151100>>>>>>>>>>>>>>>>>>>>>>>>>>
+================================================================================
+[Split Summary] flag: TRAIN
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3272
+[Split Summary] label distribution: {0: 1639, 1: 1633}
+[Split Summary] X shape: (3272, 800, 32)
+================================================================================
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2051
+[Split Summary] label distribution: {0: 1024, 1: 1027}
+[Split Summary] X shape: (2051, 800, 32)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2248
+[Split Summary] label distribution: {0: 1111, 1: 1137}
+[Split Summary] X shape: (2248, 800, 32)
+================================================================================
+(3272, 800, 32)
+(3272,)
+(2051, 800, 32)
+(2051,)
+(2248, 800, 32)
+(2248,)
+Epoch: 1 cost time: 15.166390419006348
+Epoch: 1, Steps: 52, | Train Loss: 0.73542
+Validation results --- Loss: 0.68995, Accuracy: 0.50561, Precision: 0.52122, Recall: 0.50497, F1: 0.38803, AUROC: 0.55446, AUPRC: 0.55424
+Test results --- Loss: 0.69225, Accuracy: 0.50845, Precision: 0.53044, Recall: 0.50296 F1: 0.36060, AUROC: 0.54009, AUPRC: 0.55256
+Metric score decreased (inf --> -0.388031).  Saving model ...
+
+Updating learning rate to 0.0
+>>>>>>>testing : eeg_mixer_v4_outAttentionPoolingFusion_SHU_seed_42_dm_192_dp_0.1_tl_4_bs_64_lr0.0002_aug_none_pl_80_cb32_kb16_tb24_pe192_ps20_ca0_cp1_gitnogit_20260503_151100<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2051
+[Split Summary] label distribution: {0: 1024, 1: 1027}
+[Split Summary] X shape: (2051, 800, 32)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2248
+[Split Summary] label distribution: {0: 1111, 1: 1137}
+[Split Summary] X shape: (2248, 800, 32)
+================================================================================
+Validation results --- Loss: 0.68995, Accuracy: 0.50561, Precision: 0.52122, Recall: 0.50497, F1: 0.38803, AUROC: 0.55446, AUPRC: 0.55424
+Test results --- Loss: 0.69225, Accuracy: 0.50845, Precision: 0.53044, Recall: 0.50296, F1: 0.36060, AUROC: 0.54009, AUPRC: 0.55256
+
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2051
+[Split Summary] label distribution: {0: 1024, 1: 1027}
+[Split Summary] X shape: (2051, 800, 32)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SHU_MI
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 10
+[Split Summary] val subjects: 8
+[Split Summary] test subjects: 7
+[Split Summary] train ids: ['sub-001', 'sub-002', 'sub-003', 'sub-004', 'sub-005', 'sub-006', 'sub-007', 'sub-008', 'sub-009', 'sub-010']
+[Split Summary] val ids: ['sub-011', 'sub-012', 'sub-013', 'sub-014', 'sub-015', 'sub-016', 'sub-017', 'sub-018']
+[Split Summary] test ids: ['sub-019', 'sub-020', 'sub-021', 'sub-022', 'sub-023', 'sub-024', 'sub-025']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 2248
+[Split Summary] label distribution: {0: 1111, 1: 1137}
+[Split Summary] X shape: (2248, 800, 32)
+================================================================================
+Validation results --- Loss: 0.68995, Accuracy: 0.50561, Precision: 0.52122, Recall: 0.50497, F1: 0.38803, AUROC: 0.55446, AUPRC: 0.55424
+Test results --- Loss: 0.69225, Accuracy: 0.50845, Precision: 0.53044, Recall: 0.50296, F1: 0.36060, AUROC: 0.54009, AUPRC: 0.55256
+
+[result] Saved experiment record to: results/runs/3634969_SHU_eeg_mixer_v4_outAttentionPoolingFusion_seed42.yaml
+Mean accuracy: 0.5085, precision: 0.5304,recall: 0.5030, f1: 0.3606, AUROC: 0.5401, AUPRC: 0.5526
+Std accuracy: 0.0000, precision: 0.0000,recall: 0.0000, f1: 0.0000, AUROC: 0.0000, AUPRC: 0.0000

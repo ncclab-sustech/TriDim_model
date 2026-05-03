@@ -31,6 +31,7 @@ params:
   canonical_channels: 19
   no_channel_prior: false
   input_channel_coord_path: ./configs/electrodes/ADHD.csv
+  use_subject_label_for_split: true
 electrode_csv: ./configs/electrodes/ADHD.csv
 electrode_montage_used: standard_1020
 electrode_channel_count: 19

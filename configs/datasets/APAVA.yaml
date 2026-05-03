@@ -12,24 +12,24 @@ params:
   gpu_idx:
   - 0
   gpu: 0
-  num_workers: 4
-  train_epochs: 40
+  num_workers: 8
+  train_epochs: 100
   patience: 20
-  batch_size: 64
-  learning_rate: 0.0002
+  batch_size: 128
+  learning_rate: 0.002
   lradj: cosine
-  d_model: 192
-  n_heads: 8
-  t_layer: 6
+  n_heads: 4
+  t_layer: 4
   v_layer: 0
   dropout: 0.1
-  patch_len: 8
-  patch_stride: 4
+  patch_len: 80
+  patch_stride: 20
   augmentations: none
-  channel_basis_dim: 16
-  k_basis_dim: 8
-  t_basis_dim: 32
-  patch_embed_dim: 192
+  channel_basis_dim: 32
+  k_basis_dim: 16
+  t_basis_dim: 16
+  patch_embed_dim: 128
   use_channel_adapter: false
   canonical_channels: 16
   no_channel_prior: false
+  use_subject_label_for_split: true

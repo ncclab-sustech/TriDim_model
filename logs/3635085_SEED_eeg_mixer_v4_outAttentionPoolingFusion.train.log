@@ -1,0 +1,69 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] SEED root_path -> /work/bme-shenxk/data/SEED
+[dataset_cfg] applied 34 params for SEED
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 914,643 (0.915 M)
+[Model Params] Trainable: 914,643 (0.915 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 3.49 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 3.49 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_SEED_seed_42_dm_192_dp_0.1_tl_4_bs_64_lr0.0002_aug_none_pl_80_cb62_kb16_tb24_pe192_ps20_ca0_cp1_gitd550e0d_20260503_160848>>>>>>>>>>>>>>>>>>>>>>>>>>
+(5958, 2000, 62)
+(5958,)
+(3972, 2000, 62)
+(3972,)
+(4965, 2000, 62)
+(4965,)
+Epoch: 1 cost time: 12.838974475860596
+Epoch: 1, Steps: 94, | Train Loss: 1.11996
+Validation results --- Loss: 1.11482, Accuracy: 0.36833, Precision: 0.45026, Recall: 0.37047, F1: 0.27542, AUROC: 0.59569, AUPRC: 0.41807
+Test results --- Loss: 1.09771, Accuracy: 0.36415, Precision: 0.50406, Recall: 0.36651 F1: 0.26875, AUROC: 0.63580, AUPRC: 0.45530
+Metric score decreased (inf --> -0.275420).  Saving model ...
+
+Updating learning rate to 0.00019945218953682734
+Epoch: 2 cost time: 12.588672161102295
+Epoch: 2, Steps: 94, | Train Loss: 1.05672
+Validation results --- Loss: 1.09629, Accuracy: 0.42497, Precision: 0.51775, Recall: 0.42575, F1: 0.37556, AUROC: 0.65394, AUPRC: 0.48835
+Test results --- Loss: 1.08415, Accuracy: 0.42377, Precision: 0.52931, Recall: 0.42436 F1: 0.37150, AUROC: 0.67352, AUPRC: 0.50230
+Metric score decreased (-0.275420 --> -0.375563).  Saving model ...
+
+Updating learning rate to 0.00019781476007338058
+Epoch: 3 cost time: 12.61296796798706
+Epoch: 3, Steps: 94, | Train Loss: 0.95428
+Validation results --- Loss: 1.04391, Accuracy: 0.49572, Precision: 0.56833, Recall: 0.49401, F1: 0.46307, AUROC: 0.72097, AUPRC: 0.56279
+Test results --- Loss: 1.03305, Accuracy: 0.50876, Precision: 0.56038, Recall: 0.50634 F1: 0.47745, AUROC: 0.72847, AUPRC: 0.57023
+Metric score decreased (-0.375563 --> -0.463070).  Saving model ...
+
+Updating learning rate to 0.00019510565162951537
+Epoch: 4 cost time: 12.551973819732666
+Traceback (most recent call last):
+  File "/work/bme-shenxk/xinke/TriDim_small/run.py", line 490, in <module>
+    exp.train(setting)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 239, in train
+    test_loss, test_metrics_dict = self.vali(test_data, test_loader, criterion)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 113, in vali
+    outputs = self._forward_model(batch_x, padding_mask=padding_mask)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 90, in _forward_model
+    return self.model(batch_x, seq_mask=seq_mask)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 756, in forward
+    x = self.encoder(x)        # [B, C', K', T']
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 489, in forward
+    x = layer(x)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+KeyboardInterrupt

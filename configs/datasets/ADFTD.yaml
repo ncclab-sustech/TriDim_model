@@ -14,19 +14,18 @@ params:
   - 0
   gpu: 0
   num_workers: 0
-  train_epochs: 30
-  patience: 5
-  batch_size: 256
-  learning_rate: 0.0002
+  train_epochs: 100
+  patience: 20
+  batch_size: 128
+  learning_rate: 0.002
   lradj: cosine
-  d_model: 128
-  t_layer: 3
+  t_layer: 4
   v_layer: 0
-  dropout: 0.3
-  patch_len: 32
-  patch_stride: 8
+  dropout: 0.1
+  patch_len: 80
+  patch_stride: 20
   augmentations: none
-  channel_basis_dim: 19
+  channel_basis_dim: 32
   k_basis_dim: 16
   t_basis_dim: 16
   patch_embed_dim: 128
@@ -34,6 +33,7 @@ params:
   canonical_channels: 19
   no_channel_prior: false
   weight_decay: 0.0001
+  use_subject_label_for_split: true
 electrode_channel_count: 19
 electrode_montage_used: standard_1020
 classes:

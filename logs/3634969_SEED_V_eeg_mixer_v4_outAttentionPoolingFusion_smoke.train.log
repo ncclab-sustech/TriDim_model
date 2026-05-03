@@ -1,0 +1,214 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] SEED_V root_path -> /work/bme-shenxk/data/SEED_V_10s
+[dataset_cfg] applied 34 params for SEED_V
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 915,029 (0.915 M)
+[Model Params] Trainable: 915,029 (0.915 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 3.49 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 3.49 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_SEED_V_seed_42_dm_192_dp_0.1_tl_4_bs_64_lr0.0002_aug_none_pl_80_cb62_kb16_tb24_pe192_ps20_ca0_cp1_gitnogit_20260503_150824>>>>>>>>>>>>>>>>>>>>>>>>>>
+================================================================================
+[Split Summary] flag: TRAIN
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 4284
+[Split Summary] label distribution: {0: 720, 1: 870, 2: 1128, 3: 864, 4: 702}
+[Split Summary] X shape: (4284, 2000, 62)
+================================================================================
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+(4284, 2000, 62)
+(4284,)
+(3570, 2000, 62)
+(3570,)
+(3570, 2000, 62)
+(3570,)
+Epoch: 1 cost time: 20.06873917579651
+Epoch: 1, Steps: 67, | Train Loss: 1.63771
+Validation results --- Loss: 1.60109, Accuracy: 0.24846, Precision: 0.09458, Recall: 0.19835, F1: 0.11945, AUROC: 0.54243, AUPRC: 0.23371
+Test results --- Loss: 1.61373, Accuracy: 0.25546, Precision: 0.09362, Recall: 0.20366 F1: 0.12154, AUROC: 0.49985, AUPRC: 0.20109
+Metric score decreased (inf --> -0.119446).  Saving model ...
+
+Updating learning rate to 0.0
+>>>>>>>testing : eeg_mixer_v4_outAttentionPoolingFusion_SEED_V_seed_42_dm_192_dp_0.1_tl_4_bs_64_lr0.0002_aug_none_pl_80_cb62_kb16_tb24_pe192_ps20_ca0_cp1_gitnogit_20260503_150824<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+Validation results --- Loss: 1.60109, Accuracy: 0.24846, Precision: 0.09458, Recall: 0.19835, F1: 0.11945, AUROC: 0.54243, AUPRC: 0.23371
+Test results --- Loss: 1.61373, Accuracy: 0.25546, Precision: 0.09362, Recall: 0.20366, F1: 0.12154, AUROC: 0.49985, AUPRC: 0.20109
+
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/SEED_V_10s
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: label_order
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary] train subjects: 6
+[Split Summary] val subjects: 5
+[Split Summary] test subjects: 5
+[Split Summary] train ids: ['1', '10', '11', '12', '13', '14']
+[Split Summary] val ids: ['15', '16', '2', '3', '4']
+[Split Summary] test ids: ['5', '6', '7', '8', '9']
+[Split Summary] train-val overlap: []
+[Split Summary] train-test overlap: []
+[Split Summary] val-test overlap: []
+[Split Summary] loaded samples: 3570
+[Split Summary] label distribution: {0: 600, 1: 725, 2: 940, 3: 720, 4: 585}
+[Split Summary] X shape: (3570, 2000, 62)
+================================================================================
+Validation results --- Loss: 1.60109, Accuracy: 0.24846, Precision: 0.09458, Recall: 0.19835, F1: 0.11945, AUROC: 0.54243, AUPRC: 0.23371
+Test results --- Loss: 1.61373, Accuracy: 0.25546, Precision: 0.09362, Recall: 0.20366, F1: 0.12154, AUROC: 0.49985, AUPRC: 0.20109
+
+[result] Saved experiment record to: results/runs/3634969_SEED_V_eeg_mixer_v4_outAttentionPoolingFusion_seed42.yaml
+Mean accuracy: 0.2555, precision: 0.0936,recall: 0.2037, f1: 0.1215, AUROC: 0.4999, AUPRC: 0.2011
+Std accuracy: 0.0000, precision: 0.0000,recall: 0.0000, f1: 0.0000, AUROC: 0.0000, AUPRC: 0.0000

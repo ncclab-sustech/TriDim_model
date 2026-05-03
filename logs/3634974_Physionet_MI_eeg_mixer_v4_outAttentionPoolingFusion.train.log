@@ -1,0 +1,736 @@
+[device] set CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] Physionet_MI root_path -> /work/bme-shenxk/data/Physionet_MI_wsn
+[dataset_cfg] applied 40 params for Physionet_MI
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 517,755 (0.518 M)
+[Model Params] Trainable: 517,755 (0.518 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 1.98 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 1.98 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_Physionet_MI_seed_42_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitd550e0d_20260503_150636>>>>>>>>>>>>>>>>>>>>>>>>>>
+================================================================================
+[Split Summary] flag: TRAIN
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 3934
+[Split Summary] label distribution: {0: 991, 1: 975, 2: 986, 3: 982}
+[Split Summary] X shape: (3934, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+(3934, 800, 64)
+(3934,)
+(2951, 800, 64)
+(2951,)
+(2952, 800, 64)
+(2952,)
+Epoch: 1 cost time: 10.433024644851685
+Epoch: 1, Steps: 62, | Train Loss: 1.42581
+Validation results --- Loss: 1.38567, Accuracy: 0.28092, Precision: 0.26460, Recall: 0.28227, F1: 0.19348, AUROC: 0.59090, AUPRC: 0.32439
+Test results --- Loss: 1.38663, Accuracy: 0.27947, Precision: 0.25398, Recall: 0.28079 F1: 0.19177, AUROC: 0.60161, AUPRC: 0.33617
+Metric score decreased (inf --> -0.193476).  Saving model ...
+
+Updating learning rate to 0.00029953760005996916
+Epoch: 2 cost time: 10.25623631477356
+Epoch: 2, Steps: 62, | Train Loss: 1.30325
+Validation results --- Loss: 1.19677, Accuracy: 0.45849, Precision: 0.51259, Recall: 0.45863, F1: 0.39155, AUROC: 0.75094, AUPRC: 0.52175
+Test results --- Loss: 1.21591, Accuracy: 0.44682, Precision: 0.45920, Recall: 0.44718 F1: 0.38153, AUROC: 0.75213, AUPRC: 0.53727
+Metric score decreased (-0.193476 --> -0.391554).  Saving model ...
+
+Updating learning rate to 0.00029815325108927063
+Epoch: 3 cost time: 10.255402088165283
+Epoch: 3, Steps: 62, | Train Loss: 1.14143
+Validation results --- Loss: 1.09122, Accuracy: 0.53168, Precision: 0.52456, Recall: 0.53166, F1: 0.52212, AUROC: 0.78182, AUPRC: 0.57857
+Test results --- Loss: 1.09645, Accuracy: 0.53523, Precision: 0.53123, Recall: 0.53530 F1: 0.52846, AUROC: 0.78606, AUPRC: 0.59595
+Metric score decreased (-0.391554 --> -0.522120).  Saving model ...
+
+Updating learning rate to 0.0002958554880596515
+Epoch: 4 cost time: 10.175629138946533
+Epoch: 4, Steps: 62, | Train Loss: 1.05306
+Validation results --- Loss: 1.12257, Accuracy: 0.53507, Precision: 0.53021, Recall: 0.53505, F1: 0.51897, AUROC: 0.78973, AUPRC: 0.59118
+Test results --- Loss: 1.12761, Accuracy: 0.53692, Precision: 0.53599, Recall: 0.53705 F1: 0.52495, AUROC: 0.79183, AUPRC: 0.60083
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.00029265847744427303
+Epoch: 5 cost time: 10.201040506362915
+Epoch: 5, Steps: 62, | Train Loss: 1.02572
+Validation results --- Loss: 1.07648, Accuracy: 0.56015, Precision: 0.57784, Recall: 0.55983, F1: 0.56311, AUROC: 0.79490, AUPRC: 0.60548
+Test results --- Loss: 1.07456, Accuracy: 0.56978, Precision: 0.58521, Recall: 0.56946 F1: 0.57201, AUROC: 0.79991, AUPRC: 0.61569
+Metric score decreased (-0.522120 --> -0.563113).  Saving model ...
+
+Updating learning rate to 0.000288581929876693
+Epoch: 6 cost time: 10.327066659927368
+Epoch: 6, Steps: 62, | Train Loss: 0.98771
+Validation results --- Loss: 1.04657, Accuracy: 0.56727, Precision: 0.56486, Recall: 0.56727, F1: 0.56506, AUROC: 0.80112, AUPRC: 0.61337
+Test results --- Loss: 1.05377, Accuracy: 0.56470, Precision: 0.56569, Recall: 0.56468 F1: 0.56341, AUROC: 0.80346, AUPRC: 0.62362
+Metric score decreased (-0.563113 --> -0.565057).  Saving model ...
+
+Updating learning rate to 0.00028365097862825513
+Epoch: 7 cost time: 10.379207134246826
+Epoch: 7, Steps: 62, | Train Loss: 0.96396
+Validation results --- Loss: 1.05648, Accuracy: 0.56286, Precision: 0.56481, Recall: 0.56275, F1: 0.55837, AUROC: 0.80234, AUPRC: 0.61601
+Test results --- Loss: 1.05943, Accuracy: 0.56775, Precision: 0.56873, Recall: 0.56764 F1: 0.56585, AUROC: 0.80379, AUPRC: 0.62570
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.0002778960246531138
+Epoch: 8 cost time: 10.307576417922974
+Epoch: 8, Steps: 62, | Train Loss: 0.94090
+Validation results --- Loss: 1.10362, Accuracy: 0.54863, Precision: 0.57961, Recall: 0.54810, F1: 0.54950, AUROC: 0.80055, AUPRC: 0.61327
+Test results --- Loss: 1.09691, Accuracy: 0.57317, Precision: 0.60224, Recall: 0.57263 F1: 0.57418, AUROC: 0.80623, AUPRC: 0.62934
+EarlyStopping counter: 2 out of 10
+Updating learning rate to 0.0002713525491562421
+Epoch: 9 cost time: 10.332576751708984
+Epoch: 9, Steps: 62, | Train Loss: 0.92148
+Validation results --- Loss: 1.06780, Accuracy: 0.55642, Precision: 0.56753, Recall: 0.55632, F1: 0.55354, AUROC: 0.80266, AUPRC: 0.61779
+Test results --- Loss: 1.07135, Accuracy: 0.55962, Precision: 0.57512, Recall: 0.55949 F1: 0.55680, AUROC: 0.80741, AUPRC: 0.63309
+EarlyStopping counter: 3 out of 10
+Updating learning rate to 0.00026406089484000466
+Epoch: 10 cost time: 10.108164072036743
+Epoch: 10, Steps: 62, | Train Loss: 0.89439
+Validation results --- Loss: 1.06535, Accuracy: 0.55879, Precision: 0.55780, Recall: 0.55859, F1: 0.55117, AUROC: 0.80448, AUPRC: 0.62088
+Test results --- Loss: 1.07652, Accuracy: 0.55962, Precision: 0.56322, Recall: 0.55943 F1: 0.55423, AUROC: 0.80635, AUPRC: 0.63164
+EarlyStopping counter: 4 out of 10
+Updating learning rate to 0.00025606601717798207
+Epoch: 11 cost time: 10.142863035202026
+Epoch: 11, Steps: 62, | Train Loss: 0.86626
+Validation results --- Loss: 1.07164, Accuracy: 0.56388, Precision: 0.56319, Recall: 0.56388, F1: 0.56332, AUROC: 0.80467, AUPRC: 0.61858
+Test results --- Loss: 1.07832, Accuracy: 0.57486, Precision: 0.57658, Recall: 0.57487 F1: 0.57513, AUROC: 0.80677, AUPRC: 0.63212
+EarlyStopping counter: 5 out of 10
+Updating learning rate to 0.0002474172072495275
+Epoch: 12 cost time: 10.086338996887207
+Epoch: 12, Steps: 62, | Train Loss: 0.84059
+Validation results --- Loss: 1.06979, Accuracy: 0.56489, Precision: 0.56325, Recall: 0.56479, F1: 0.56368, AUROC: 0.80485, AUPRC: 0.62004
+Test results --- Loss: 1.08328, Accuracy: 0.56402, Precision: 0.56313, Recall: 0.56393 F1: 0.56336, AUROC: 0.80275, AUPRC: 0.62834
+EarlyStopping counter: 6 out of 10
+Updating learning rate to 0.00023816778784387094
+Epoch: 13 cost time: 10.286789178848267
+Epoch: 13, Steps: 62, | Train Loss: 0.81861
+Validation results --- Loss: 1.12117, Accuracy: 0.56727, Precision: 0.58726, Recall: 0.56722, F1: 0.57066, AUROC: 0.80519, AUPRC: 0.62104
+Test results --- Loss: 1.13604, Accuracy: 0.56369, Precision: 0.58205, Recall: 0.56360 F1: 0.56545, AUROC: 0.80663, AUPRC: 0.63510
+Metric score decreased (-0.565057 --> -0.570661).  Saving model ...
+
+Updating learning rate to 0.0002283747847073923
+Epoch: 14 cost time: 10.183281898498535
+Epoch: 14, Steps: 62, | Train Loss: 0.79013
+Validation results --- Loss: 1.12601, Accuracy: 0.56489, Precision: 0.57872, Recall: 0.56467, F1: 0.56706, AUROC: 0.80463, AUPRC: 0.62214
+Test results --- Loss: 1.11874, Accuracy: 0.57893, Precision: 0.59275, Recall: 0.57874 F1: 0.58186, AUROC: 0.80680, AUPRC: 0.63665
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.00021809857496093199
+Epoch: 15 cost time: 10.125319957733154
+Epoch: 15, Steps: 62, | Train Loss: 0.76936
+Validation results --- Loss: 1.15026, Accuracy: 0.56320, Precision: 0.57324, Recall: 0.56316, F1: 0.56620, AUROC: 0.80232, AUPRC: 0.61863
+Test results --- Loss: 1.15546, Accuracy: 0.57012, Precision: 0.57986, Recall: 0.57005 F1: 0.57307, AUROC: 0.80110, AUPRC: 0.62735
+EarlyStopping counter: 2 out of 10
+Updating learning rate to 0.00020740251485476345
+Epoch: 16 cost time: 10.121315002441406
+Epoch: 16, Steps: 62, | Train Loss: 0.73809
+Validation results --- Loss: 1.16412, Accuracy: 0.56557, Precision: 0.56875, Recall: 0.56559, F1: 0.56667, AUROC: 0.80208, AUPRC: 0.61781
+Test results --- Loss: 1.15860, Accuracy: 0.57554, Precision: 0.57817, Recall: 0.57563 F1: 0.57607, AUROC: 0.80451, AUPRC: 0.63315
+EarlyStopping counter: 3 out of 10
+Updating learning rate to 0.0001963525491562421
+Epoch: 17 cost time: 10.178208112716675
+Epoch: 17, Steps: 62, | Train Loss: 0.72158
+Validation results --- Loss: 1.17930, Accuracy: 0.56184, Precision: 0.57167, Recall: 0.56161, F1: 0.56413, AUROC: 0.79810, AUPRC: 0.61474
+Test results --- Loss: 1.17650, Accuracy: 0.56775, Precision: 0.57619, Recall: 0.56749 F1: 0.56955, AUROC: 0.79827, AUPRC: 0.62368
+EarlyStopping counter: 4 out of 10
+Updating learning rate to 0.0001850168045783858
+Epoch: 18 cost time: 10.20618200302124
+Epoch: 18, Steps: 62, | Train Loss: 0.69380
+Validation results --- Loss: 1.20170, Accuracy: 0.55778, Precision: 0.55326, Recall: 0.55760, F1: 0.55401, AUROC: 0.80051, AUPRC: 0.61451
+Test results --- Loss: 1.20165, Accuracy: 0.56335, Precision: 0.55941, Recall: 0.56321 F1: 0.55951, AUROC: 0.79902, AUPRC: 0.62022
+EarlyStopping counter: 5 out of 10
+Updating learning rate to 0.00017346516975603462
+Epoch: 19 cost time: 10.165911436080933
+Epoch: 19, Steps: 62, | Train Loss: 0.66591
+Validation results --- Loss: 1.19140, Accuracy: 0.56422, Precision: 0.56853, Recall: 0.56403, F1: 0.56538, AUROC: 0.80219, AUPRC: 0.61679
+Test results --- Loss: 1.20625, Accuracy: 0.57283, Precision: 0.57704, Recall: 0.57265 F1: 0.57357, AUROC: 0.79954, AUPRC: 0.62429
+EarlyStopping counter: 6 out of 10
+Updating learning rate to 0.00016176886435917675
+Epoch: 20 cost time: 10.140762329101562
+Epoch: 20, Steps: 62, | Train Loss: 0.64564
+Validation results --- Loss: 1.23645, Accuracy: 0.55574, Precision: 0.55471, Recall: 0.55553, F1: 0.55431, AUROC: 0.79748, AUPRC: 0.60955
+Test results --- Loss: 1.23141, Accuracy: 0.56131, Precision: 0.56061, Recall: 0.56110 F1: 0.55961, AUROC: 0.79691, AUPRC: 0.61695
+EarlyStopping counter: 7 out of 10
+Updating learning rate to 0.00015
+Epoch: 21 cost time: 10.145273447036743
+Epoch: 21, Steps: 62, | Train Loss: 0.62912
+Validation results --- Loss: 1.23967, Accuracy: 0.55947, Precision: 0.56344, Recall: 0.55934, F1: 0.56096, AUROC: 0.79772, AUPRC: 0.61051
+Test results --- Loss: 1.25035, Accuracy: 0.56131, Precision: 0.56414, Recall: 0.56120 F1: 0.56229, AUROC: 0.79477, AUPRC: 0.61459
+EarlyStopping counter: 8 out of 10
+Updating learning rate to 0.00013823113564082325
+Epoch: 22 cost time: 10.189329147338867
+Epoch: 22, Steps: 62, | Train Loss: 0.59079
+Validation results --- Loss: 1.28424, Accuracy: 0.54931, Precision: 0.55748, Recall: 0.54915, F1: 0.55171, AUROC: 0.79283, AUPRC: 0.60300
+Test results --- Loss: 1.28973, Accuracy: 0.55996, Precision: 0.56762, Recall: 0.55984 F1: 0.56151, AUROC: 0.79274, AUPRC: 0.61104
+EarlyStopping counter: 9 out of 10
+Updating learning rate to 0.00012653483024396533
+Epoch: 23 cost time: 10.289870023727417
+Epoch: 23, Steps: 62, | Train Loss: 0.57254
+Validation results --- Loss: 1.30017, Accuracy: 0.55405, Precision: 0.55653, Recall: 0.55398, F1: 0.55452, AUROC: 0.79448, AUPRC: 0.60674
+Test results --- Loss: 1.30951, Accuracy: 0.55759, Precision: 0.56034, Recall: 0.55751 F1: 0.55835, AUROC: 0.79099, AUPRC: 0.61197
+EarlyStopping counter: 10 out of 10
+Early stopping
+>>>>>>>testing : eeg_mixer_v4_outAttentionPoolingFusion_Physionet_MI_seed_42_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitd550e0d_20260503_150636<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+Validation results --- Loss: 1.12117, Accuracy: 0.56727, Precision: 0.58726, Recall: 0.56722, F1: 0.57066, AUROC: 0.80519, AUPRC: 0.62104
+Test results --- Loss: 1.13604, Accuracy: 0.56369, Precision: 0.58205, Recall: 0.56360, F1: 0.56545, AUROC: 0.80663, AUPRC: 0.63510
+
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 42
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+Validation results --- Loss: 1.12117, Accuracy: 0.56727, Precision: 0.58726, Recall: 0.56722, F1: 0.57066, AUROC: 0.80519, AUPRC: 0.62104
+Test results --- Loss: 1.13604, Accuracy: 0.56369, Precision: 0.58205, Recall: 0.56360, F1: 0.56545, AUROC: 0.80663, AUPRC: 0.63510
+
+[result] Saved experiment record to: results/runs/3634974_Physionet_MI_eeg_mixer_v4_outAttentionPoolingFusion_seed42.yaml
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 517,755 (0.518 M)
+[Model Params] Trainable: 517,755 (0.518 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 1.98 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 1.98 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_Physionet_MI_seed_43_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitd550e0d_20260503_151355>>>>>>>>>>>>>>>>>>>>>>>>>>
+================================================================================
+[Split Summary] flag: TRAIN
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 3934
+[Split Summary] label distribution: {0: 991, 1: 975, 2: 986, 3: 982}
+[Split Summary] X shape: (3934, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+(3934, 800, 64)
+(3934,)
+(2951, 800, 64)
+(2951,)
+(2952, 800, 64)
+(2952,)
+Epoch: 1 cost time: 10.291603565216064
+Epoch: 1, Steps: 62, | Train Loss: 1.44167
+Validation results --- Loss: 1.38103, Accuracy: 0.29482, Precision: 0.16739, Recall: 0.29462, F1: 0.18852, AUROC: 0.62836, AUPRC: 0.36095
+Test results --- Loss: 1.38101, Accuracy: 0.29743, Precision: 0.16421, Recall: 0.29693 F1: 0.18969, AUROC: 0.63471, AUPRC: 0.36726
+Metric score decreased (inf --> -0.188515).  Saving model ...
+
+Updating learning rate to 0.00029953760005996916
+Epoch: 2 cost time: 10.264915466308594
+Epoch: 2, Steps: 62, | Train Loss: 1.26691
+Validation results --- Loss: 1.13921, Accuracy: 0.48187, Precision: 0.49196, Recall: 0.48160, F1: 0.44960, AUROC: 0.76372, AUPRC: 0.54735
+Test results --- Loss: 1.15202, Accuracy: 0.48238, Precision: 0.49835, Recall: 0.48227 F1: 0.44877, AUROC: 0.76061, AUPRC: 0.54644
+Metric score decreased (-0.188515 --> -0.449604).  Saving model ...
+
+Updating learning rate to 0.00029815325108927063
+Epoch: 3 cost time: 10.399825096130371
+Epoch: 3, Steps: 62, | Train Loss: 1.09236
+Validation results --- Loss: 1.08350, Accuracy: 0.54456, Precision: 0.55339, Recall: 0.54442, F1: 0.54585, AUROC: 0.78425, AUPRC: 0.57757
+Test results --- Loss: 1.10021, Accuracy: 0.53625, Precision: 0.54749, Recall: 0.53615 F1: 0.53850, AUROC: 0.78014, AUPRC: 0.57406
+Metric score decreased (-0.449604 --> -0.545848).  Saving model ...
+
+Updating learning rate to 0.0002958554880596515
+Epoch: 4 cost time: 10.190785884857178
+Epoch: 4, Steps: 62, | Train Loss: 1.04683
+Validation results --- Loss: 1.06494, Accuracy: 0.54456, Precision: 0.55990, Recall: 0.54425, F1: 0.53785, AUROC: 0.79289, AUPRC: 0.59718
+Test results --- Loss: 1.08735, Accuracy: 0.52846, Precision: 0.54193, Recall: 0.52818 F1: 0.51994, AUROC: 0.78836, AUPRC: 0.59015
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.00029265847744427303
+Epoch: 5 cost time: 10.205495357513428
+Epoch: 5, Steps: 62, | Train Loss: 0.99559
+Validation results --- Loss: 1.03082, Accuracy: 0.56727, Precision: 0.57483, Recall: 0.56721, F1: 0.56911, AUROC: 0.80182, AUPRC: 0.61302
+Test results --- Loss: 1.05376, Accuracy: 0.55793, Precision: 0.56982, Recall: 0.55791 F1: 0.56135, AUROC: 0.79614, AUPRC: 0.60447
+Metric score decreased (-0.545848 --> -0.569107).  Saving model ...
+
+Updating learning rate to 0.000288581929876693
+Epoch: 6 cost time: 10.322175741195679
+Epoch: 6, Steps: 62, | Train Loss: 0.96112
+Validation results --- Loss: 1.08376, Accuracy: 0.53880, Precision: 0.53229, Recall: 0.53861, F1: 0.52801, AUROC: 0.79157, AUPRC: 0.59485
+Test results --- Loss: 1.10085, Accuracy: 0.53320, Precision: 0.52778, Recall: 0.53313 F1: 0.52353, AUROC: 0.78902, AUPRC: 0.59298
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.00028365097862825513
+Epoch: 7 cost time: 10.24273943901062
+Epoch: 7, Steps: 62, | Train Loss: 0.92911
+Validation results --- Loss: 1.05419, Accuracy: 0.55710, Precision: 0.57989, Recall: 0.55711, F1: 0.56128, AUROC: 0.80193, AUPRC: 0.61510
+Test results --- Loss: 1.08909, Accuracy: 0.55149, Precision: 0.58117, Recall: 0.55153 F1: 0.55604, AUROC: 0.79621, AUPRC: 0.60781
+EarlyStopping counter: 2 out of 10
+Updating learning rate to 0.0002778960246531138
+Epoch: 8 cost time: 10.332709312438965
+Epoch: 8, Steps: 62, | Train Loss: 0.89633
+Validation results --- Loss: 1.05162, Accuracy: 0.56557, Precision: 0.57672, Recall: 0.56544, F1: 0.56826, AUROC: 0.79991, AUPRC: 0.61465
+Test results --- Loss: 1.08401, Accuracy: 0.53896, Precision: 0.56039, Recall: 0.53880 F1: 0.54432, AUROC: 0.79134, AUPRC: 0.60284
+EarlyStopping counter: 3 out of 10
+Updating learning rate to 0.0002713525491562421
+Epoch: 9 cost time: 10.237685680389404
+Epoch: 9, Steps: 62, | Train Loss: 0.86825
+Validation results --- Loss: 1.08447, Accuracy: 0.55574, Precision: 0.55943, Recall: 0.55562, F1: 0.55613, AUROC: 0.79905, AUPRC: 0.61310
+Test results --- Loss: 1.12045, Accuracy: 0.55115, Precision: 0.56068, Recall: 0.55105 F1: 0.55249, AUROC: 0.79405, AUPRC: 0.60503
+EarlyStopping counter: 4 out of 10
+Updating learning rate to 0.00026406089484000466
+Epoch: 10 cost time: 10.243216037750244
+Epoch: 10, Steps: 62, | Train Loss: 0.82858
+Validation results --- Loss: 1.08286, Accuracy: 0.56150, Precision: 0.56200, Recall: 0.56132, F1: 0.56085, AUROC: 0.79912, AUPRC: 0.61464
+Test results --- Loss: 1.11943, Accuracy: 0.54675, Precision: 0.55000, Recall: 0.54658 F1: 0.54729, AUROC: 0.79266, AUPRC: 0.60330
+EarlyStopping counter: 5 out of 10
+Updating learning rate to 0.00025606601717798207
+Epoch: 11 cost time: 10.19109845161438
+Epoch: 11, Steps: 62, | Train Loss: 0.79812
+Validation results --- Loss: 1.10071, Accuracy: 0.55337, Precision: 0.56305, Recall: 0.55329, F1: 0.55655, AUROC: 0.79431, AUPRC: 0.61055
+Test results --- Loss: 1.14138, Accuracy: 0.54505, Precision: 0.55863, Recall: 0.54493 F1: 0.54866, AUROC: 0.78980, AUPRC: 0.60155
+EarlyStopping counter: 6 out of 10
+Updating learning rate to 0.0002474172072495275
+Epoch: 12 cost time: 10.18135952949524
+Epoch: 12, Steps: 62, | Train Loss: 0.76242
+Validation results --- Loss: 1.13289, Accuracy: 0.55574, Precision: 0.56077, Recall: 0.55576, F1: 0.55691, AUROC: 0.79302, AUPRC: 0.60919
+Test results --- Loss: 1.17343, Accuracy: 0.54539, Precision: 0.55239, Recall: 0.54542 F1: 0.54779, AUROC: 0.78853, AUPRC: 0.59843
+EarlyStopping counter: 7 out of 10
+Updating learning rate to 0.00023816778784387094
+Epoch: 13 cost time: 10.257511854171753
+Epoch: 13, Steps: 62, | Train Loss: 0.72433
+Validation results --- Loss: 1.15550, Accuracy: 0.54321, Precision: 0.54162, Recall: 0.54332, F1: 0.53920, AUROC: 0.79284, AUPRC: 0.60654
+Test results --- Loss: 1.19263, Accuracy: 0.53625, Precision: 0.53716, Recall: 0.53652 F1: 0.53415, AUROC: 0.78823, AUPRC: 0.59884
+EarlyStopping counter: 8 out of 10
+Updating learning rate to 0.0002283747847073923
+Epoch: 14 cost time: 10.167307376861572
+Epoch: 14, Steps: 62, | Train Loss: 0.69913
+Validation results --- Loss: 1.15021, Accuracy: 0.54964, Precision: 0.55440, Recall: 0.54968, F1: 0.55003, AUROC: 0.79305, AUPRC: 0.61125
+Test results --- Loss: 1.19439, Accuracy: 0.54912, Precision: 0.55622, Recall: 0.54911 F1: 0.55100, AUROC: 0.78826, AUPRC: 0.60211
+EarlyStopping counter: 9 out of 10
+Updating learning rate to 0.00021809857496093199
+Epoch: 15 cost time: 10.221845865249634
+Epoch: 15, Steps: 62, | Train Loss: 0.66892
+Validation results --- Loss: 1.19060, Accuracy: 0.55337, Precision: 0.55195, Recall: 0.55318, F1: 0.54853, AUROC: 0.79305, AUPRC: 0.61202
+Test results --- Loss: 1.24233, Accuracy: 0.53794, Precision: 0.53541, Recall: 0.53781 F1: 0.53357, AUROC: 0.78647, AUPRC: 0.59660
+EarlyStopping counter: 10 out of 10
+Early stopping
+>>>>>>>testing : eeg_mixer_v4_outAttentionPoolingFusion_Physionet_MI_seed_43_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitd550e0d_20260503_151355<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+Validation results --- Loss: 1.03082, Accuracy: 0.56727, Precision: 0.57483, Recall: 0.56721, F1: 0.56911, AUROC: 0.80182, AUPRC: 0.61302
+Test results --- Loss: 1.05376, Accuracy: 0.55793, Precision: 0.56982, Recall: 0.55791, F1: 0.56135, AUROC: 0.79614, AUPRC: 0.60447
+
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 43
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+Validation results --- Loss: 1.03082, Accuracy: 0.56727, Precision: 0.57483, Recall: 0.56721, F1: 0.56911, AUROC: 0.80182, AUPRC: 0.61302
+Test results --- Loss: 1.05376, Accuracy: 0.55793, Precision: 0.56982, Recall: 0.55791, F1: 0.56135, AUROC: 0.79614, AUPRC: 0.60447
+
+[result] Saved experiment record to: results/runs/3634974_Physionet_MI_eeg_mixer_v4_outAttentionPoolingFusion_seed43.yaml
+Use GPU (single): visible=0 -> cuda:0
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 44
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+================================================================================
+[Model] eeg_mixer_v4_outAttentionPoolingFusion
+[Model Params] Total: 517,755 (0.518 M)
+[Model Params] Trainable: 517,755 (0.518 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 1.98 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 1.98 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v4_outAttentionPoolingFusion_Physionet_MI_seed_44_dm_192_dp_0.15_tl_5_bs_64_lr0.0003_aug_none_pl_32_cb32_kb16_tb20_pe192_ps8_ca0_cp1_gitd550e0d_20260503_151854>>>>>>>>>>>>>>>>>>>>>>>>>>
+================================================================================
+[Split Summary] flag: TRAIN
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 44
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 3934
+[Split Summary] label distribution: {0: 991, 1: 975, 2: 986, 3: 982}
+[Split Summary] X shape: (3934, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: VAL
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 44
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2951
+[Split Summary] label distribution: {0: 744, 1: 732, 2: 739, 3: 736}
+[Split Summary] X shape: (2951, 800, 64)
+================================================================================
+================================================================================
+[Split Summary] flag: TEST
+[Split Summary] root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+[Split Summary] dataset_name: 
+[Split Summary] split_mode: segment_stratified_random
+[Split Summary] split_seed: 44
+[Split Summary] use_subject_label_for_split: False
+[Split Summary] train_ratio: 0.4
+[Split Summary] val_ratio: 0.3
+[Split Summary][WARNING] segment-level split; not cross-subject.
+[Split Summary] loaded samples: 2952
+[Split Summary] label distribution: {0: 744, 1: 731, 2: 740, 3: 737}
+[Split Summary] X shape: (2952, 800, 64)
+================================================================================
+(3934, 800, 64)
+(3934,)
+(2951, 800, 64)
+(2951,)
+(2952, 800, 64)
+(2952,)
+Epoch: 1 cost time: 10.357635021209717
+Epoch: 1, Steps: 62, | Train Loss: 1.44037
+Validation results --- Loss: 1.38314, Accuracy: 0.27855, Precision: 0.28091, Recall: 0.27913, F1: 0.21127, AUROC: 0.55826, AUPRC: 0.29015
+Test results --- Loss: 1.38187, Accuracy: 0.29505, Precision: 0.30879, Recall: 0.29601 F1: 0.22587, AUROC: 0.56964, AUPRC: 0.30102
+Metric score decreased (inf --> -0.211275).  Saving model ...
+
+Updating learning rate to 0.00029953760005996916
+Epoch: 2 cost time: 10.195641994476318
+Epoch: 2, Steps: 62, | Train Loss: 1.39438
+Validation results --- Loss: 1.35358, Accuracy: 0.36089, Precision: 0.37538, Recall: 0.36083, F1: 0.30293, AUROC: 0.64568, AUPRC: 0.39132
+Test results --- Loss: 1.34791, Accuracy: 0.36145, Precision: 0.34907, Recall: 0.36176 F1: 0.30018, AUROC: 0.65691, AUPRC: 0.39436
+Metric score decreased (-0.211275 --> -0.302931).  Saving model ...
+
+Updating learning rate to 0.00029815325108927063
+Epoch: 3 cost time: 10.303473234176636
+Epoch: 3, Steps: 62, | Train Loss: 1.24787
+Validation results --- Loss: 1.13050, Accuracy: 0.51948, Precision: 0.53987, Recall: 0.51930, F1: 0.52269, AUROC: 0.76464, AUPRC: 0.56534
+Test results --- Loss: 1.11527, Accuracy: 0.53218, Precision: 0.55173, Recall: 0.53197 F1: 0.53448, AUROC: 0.77010, AUPRC: 0.57347
+Metric score decreased (-0.302931 --> -0.522691).  Saving model ...
+
+Updating learning rate to 0.0002958554880596515
+Epoch: 4 cost time: 10.21028447151184
+Epoch: 4, Steps: 62, | Train Loss: 1.09552
+Validation results --- Loss: 1.08410, Accuracy: 0.54524, Precision: 0.55626, Recall: 0.54502, F1: 0.54669, AUROC: 0.78709, AUPRC: 0.59890
+Test results --- Loss: 1.06687, Accuracy: 0.54946, Precision: 0.55937, Recall: 0.54924 F1: 0.54985, AUROC: 0.79271, AUPRC: 0.60371
+Metric score decreased (-0.522691 --> -0.546695).  Saving model ...
+
+Updating learning rate to 0.00029265847744427303
+Epoch: 5 cost time: 10.185983419418335
+Epoch: 5, Steps: 62, | Train Loss: 1.03773
+Validation results --- Loss: 1.09627, Accuracy: 0.54354, Precision: 0.59782, Recall: 0.54328, F1: 0.55000, AUROC: 0.79181, AUPRC: 0.60807
+Test results --- Loss: 1.07736, Accuracy: 0.54844, Precision: 0.59474, Recall: 0.54804 F1: 0.55317, AUROC: 0.79943, AUPRC: 0.61683
+Metric score decreased (-0.546695 --> -0.550004).  Saving model ...
+
+Updating learning rate to 0.000288581929876693
+Epoch: 6 cost time: 10.24963092803955
+Epoch: 6, Steps: 62, | Train Loss: 0.99876
+Validation results --- Loss: 1.07534, Accuracy: 0.55337, Precision: 0.56688, Recall: 0.55316, F1: 0.55417, AUROC: 0.79540, AUPRC: 0.61828
+Test results --- Loss: 1.05820, Accuracy: 0.55657, Precision: 0.56951, Recall: 0.55630 F1: 0.55600, AUROC: 0.80195, AUPRC: 0.61996
+Metric score decreased (-0.550004 --> -0.554170).  Saving model ...
+
+Updating learning rate to 0.00028365097862825513
+Epoch: 7 cost time: 10.288412809371948
+Epoch: 7, Steps: 62, | Train Loss: 0.95811
+Validation results --- Loss: 1.11672, Accuracy: 0.53168, Precision: 0.55402, Recall: 0.53111, F1: 0.51793, AUROC: 0.79304, AUPRC: 0.61503
+Test results --- Loss: 1.11034, Accuracy: 0.53625, Precision: 0.56610, Recall: 0.53575 F1: 0.52284, AUROC: 0.79647, AUPRC: 0.61756
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.0002778960246531138
+Epoch: 8 cost time: 10.270889043807983
+Epoch: 8, Steps: 62, | Train Loss: 0.92473
+Validation results --- Loss: 1.09888, Accuracy: 0.55236, Precision: 0.57034, Recall: 0.55202, F1: 0.55514, AUROC: 0.79772, AUPRC: 0.62457
+Test results --- Loss: 1.10216, Accuracy: 0.55318, Precision: 0.56912, Recall: 0.55276 F1: 0.55404, AUROC: 0.79854, AUPRC: 0.62167
+Metric score decreased (-0.554170 --> -0.555144).  Saving model ...
+
+Updating learning rate to 0.0002713525491562421
+Epoch: 9 cost time: 10.254825353622437
+Epoch: 9, Steps: 62, | Train Loss: 0.88898
+Validation results --- Loss: 1.10386, Accuracy: 0.54795, Precision: 0.55134, Recall: 0.54814, F1: 0.54463, AUROC: 0.79253, AUPRC: 0.61649
+Test results --- Loss: 1.09041, Accuracy: 0.54539, Precision: 0.54382, Recall: 0.54552 F1: 0.54139, AUROC: 0.79861, AUPRC: 0.61965
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 0.00026406089484000466
+Epoch: 10 cost time: 10.294447660446167
+Epoch: 10, Steps: 62, | Train Loss: 0.85477
+Validation results --- Loss: 1.11033, Accuracy: 0.53778, Precision: 0.54357, Recall: 0.53791, F1: 0.53812, AUROC: 0.78772, AUPRC: 0.60933
+Test results --- Loss: 1.10192, Accuracy: 0.54302, Precision: 0.54330, Recall: 0.54316 F1: 0.54199, AUROC: 0.79244, AUPRC: 0.61046
+EarlyStopping counter: 2 out of 10
+Updating learning rate to 0.00025606601717798207
+Epoch: 11 cost time: 10.375084638595581
+Epoch: 11, Steps: 62, | Train Loss: 0.82895
+Validation results --- Loss: 1.13162, Accuracy: 0.53575, Precision: 0.56737, Recall: 0.53582, F1: 0.54213, AUROC: 0.78992, AUPRC: 0.61310
+Test results --- Loss: 1.13204, Accuracy: 0.54912, Precision: 0.57596, Recall: 0.54908 F1: 0.55500, AUROC: 0.79218, AUPRC: 0.61151
+EarlyStopping counter: 3 out of 10
+Updating learning rate to 0.0002474172072495275
+Epoch: 12 cost time: 10.225884675979614
+Epoch: 12, Steps: 62, | Train Loss: 0.77828
+Validation results --- Loss: 1.13384, Accuracy: 0.54693, Precision: 0.54778, Recall: 0.54685, F1: 0.54668, AUROC: 0.79010, AUPRC: 0.60996
+Test results --- Loss: 1.13976, Accuracy: 0.54776, Precision: 0.54656, Recall: 0.54769 F1: 0.54604, AUROC: 0.79259, AUPRC: 0.61099
+EarlyStopping counter: 4 out of 10
+Updating learning rate to 0.00023816778784387094
+Epoch: 13 cost time: 10.283417463302612
+Epoch: 13, Steps: 62, | Train Loss: 0.73496
+Validation results --- Loss: 1.17663, Accuracy: 0.54422, Precision: 0.54091, Recall: 0.54425, F1: 0.54158, AUROC: 0.79064, AUPRC: 0.60907
+Test results --- Loss: 1.16989, Accuracy: 0.55285, Precision: 0.54825, Recall: 0.55286 F1: 0.54943, AUROC: 0.79340, AUPRC: 0.61009
+EarlyStopping counter: 5 out of 10
+Updating learning rate to 0.0002283747847073923
+Epoch: 14 cost time: 10.219759464263916
+Epoch: 14, Steps: 62, | Train Loss: 0.70577
+Validation results --- Loss: 1.22970, Accuracy: 0.54321, Precision: 0.54799, Recall: 0.54300, F1: 0.54303, AUROC: 0.78860, AUPRC: 0.60550
+Test results --- Loss: 1.24545, Accuracy: 0.55081, Precision: 0.55745, Recall: 0.55057 F1: 0.55008, AUROC: 0.78857, AUPRC: 0.60385
+EarlyStopping counter: 6 out of 10
+Updating learning rate to 0.00021809857496093199
+Epoch: 15 cost time: 10.256828784942627
+Epoch: 15, Steps: 62, | Train Loss: 0.65235
+Validation results --- Loss: 1.25725, Accuracy: 0.52965, Precision: 0.53273, Recall: 0.52966, F1: 0.53086, AUROC: 0.78160, AUPRC: 0.59621
+Test results --- Loss: 1.25943, Accuracy: 0.53896, Precision: 0.54189, Recall: 0.53897 F1: 0.54022, AUROC: 0.78270, AUPRC: 0.59084
+EarlyStopping counter: 7 out of 10
+Updating learning rate to 0.00020740251485476345
+Epoch: 16 cost time: 10.20212721824646
+Traceback (most recent call last):
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 90, in _forward_model
+    return self.model(batch_x, seq_mask=seq_mask)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 756, in forward
+    x = self.encoder(x)        # [B, C', K', T']
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 489, in forward
+    x = layer(x)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 477, in forward
+    t_branch = 0.5 * (self.attn_c_for_t(t_branch, attend_dim=1, embed_axis=3) + self.attn_k_for_t(t_branch, attend_dim=2, embed_axis=3))
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 448, in forward
+    return self._attention(x.permute(0, 2, 1, 3).reshape(batch * k_dim, c_dim, t_dim)).reshape(batch, k_dim, c_dim, t_dim).permute(0, 2, 1, 3)
+  File "/work/bme-shenxk/xinke/TriDim_small/models/eeg_mixer_v4_outAttentionPoolingFusion.py", line 431, in _attention
+    qkv = self.qkv_proj(x).reshape(batch, seq_len, 3, self.n_heads, self.head_dim).permute(2, 0, 3, 1, 4)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/work/bme-shenxk/conda_envs/eeg3dim/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/work/bme-shenxk/xinke/TriDim_small/run.py", line 490, in <module>
+    exp.train(setting)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 239, in train
+    test_loss, test_metrics_dict = self.vali(test_data, test_loader, criterion)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 113, in vali
+    outputs = self._forward_model(batch_x, padding_mask=padding_mask)
+  File "/work/bme-shenxk/xinke/TriDim_small/exp/exp_classification.py", line 90, in _forward_model
+    return self.model(batch_x, seq_mask=seq_mask)
+KeyboardInterrupt

@@ -37,3 +37,108 @@ Sun May  3 13:53:44 2026
 [RUN] start time:
 Sun May  3 13:53:44 CST 2026
 ============================================================
+[OK] FACED_new eeg_mixer_v4_outAttentionPoolingFusion
+[DONE] dataset=FACED_new, model=eeg_mixer_v4_outAttentionPoolingFusion
+[DONE] end time:
+Sun May  3 14:36:41 CST 2026
+============================================================
+Batch run finished
+Summary file: logs/3634726_batch_summary.tsv
+dataset	model	status	exit_code	log_file
+FACED_new	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3634726_FACED_new_eeg_mixer_v4_outAttentionPoolingFusion.train.log
+Sun May  3 14:36:41 CST 2026
+============================================================
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@b07u10g>
+Subject: Job 3634726: <tridim_batch_3data_2model> in cluster <qmhpc> Done
+
+Job <tridim_batch_3data_2model> was submitted from host <b04u17l> by user <bme-shenxk> in cluster <qmhpc> at Sun May  3 13:53:39 2026
+Job was executed on host(s) <4*b07u10g>, in queue <4v100-16-e5>, as user <bme-shenxk> in cluster <qmhpc> at Sun May  3 13:53:39 2026
+</work/bme-shenxk> was used as the home directory.
+</work/bme-shenxk/xinke/TriDim_small/scripts/bsub> was used as the working directory.
+Started at Sun May  3 13:53:39 2026
+Terminated at Sun May  3 14:36:45 2026
+Results reported at Sun May  3 14:36:45 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J tridim_batch_3data_2model
+#BSUB -q 4v100-16-e5
+#BSUB -n 4
+#BSUB -gpu "num=1"
+#BSUB -R "span[ptile=4]"
+#BSUB -e /work/bme-shenxk/xinke/TriDim_small/logs/%J.err
+#BSUB -o /work/bme-shenxk/xinke/TriDim_small/logs/%J.out
+
+set -e
+
+echo "Job started at:"
+date
+echo "Job ID: ${LSB_JOBID}"
+echo "Running on host:"
+hostname
+echo "Working directory:"
+pwd
+
+cd ~/xinke/TriDim_small
+
+mkdir -p logs
+
+module load python/anaconda3/2022.10
+source activate
+conda activate ~/conda_envs/eeg3dim
+
+echo "Python:"
+which python
+python -V
+
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+nvidia-smi || true
+
+DATASETS=(
+  "FACED_new"
+)
+
+MODELS=(
+  "eeg_mixer_v4_outAttentionPoolingFusion"
+)
+
+SUMMARY_FILE="logs/${LSB_JOBID}_batch_summary.tsv"
+
+echo -e "dataset\tmodel\tstatus\texit_code\tlog_file" > ${SUMMARY_FILE}
+
+for dataset in "${DATASETS[@]}"
+do
+  yaml_path="./configs/datasets/${dataset}.yaml"
+
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   4349.00 sec.
+    Max Memory :                                 11931 MB
+    Average Memory :                             10619.41 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   2 MB
+    Max Processes :                              12
+    Max Threads :                                74
+    Run time :                                   2582 sec.
+    Turnaround time :                            2586 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </work/bme-shenxk/xinke/TriDim_small/logs/3634726.err> for stderr output of this job.
+

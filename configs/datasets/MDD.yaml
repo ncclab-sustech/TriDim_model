@@ -32,6 +32,7 @@ params:
   canonical_channels: 20
   no_channel_prior: false
   canonical_channel_coord_path: ./configs/electrodes/MDD.csv
+  use_subject_label_for_split: true
 electrode_csv: ./configs/electrodes/MDD.csv
 electrode_montage_used: standard_1020
 electrode_channel_count: 20

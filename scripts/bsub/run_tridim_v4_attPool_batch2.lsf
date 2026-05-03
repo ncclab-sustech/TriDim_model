@@ -33,7 +33,9 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 DATASETS=(
-  "FACED_new"
+  "SEED"
+  "SEED_V"
+  "SHU"
 )
 
 MODELS=(

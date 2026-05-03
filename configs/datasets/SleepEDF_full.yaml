@@ -12,29 +12,29 @@ params:
   gpu_idx:
   - 0
   gpu: 0
-  num_workers: 4
-  train_epochs: 30
-  patience: 8
-  batch_size: 16
-  learning_rate: 0.0002
+  num_workers: 8
+  train_epochs: 100
+  patience: 20
+  batch_size: 128
+  learning_rate: 0.002
   lradj: cosine
-  d_model: 128
   n_heads: 4
-  t_layer: 3
+  t_layer: 4
   v_layer: 0
   dropout: 0.1
   patch_len: 80
   patch_stride: 20
   augmentations: none
-  channel_basis_dim: 2
+  channel_basis_dim: 32
   k_basis_dim: 16
-  t_basis_dim: 24
+  t_basis_dim: 16
   patch_embed_dim: 128
   use_channel_adapter: false
   canonical_channels: 2
   no_channel_prior: false
   input_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
   canonical_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
+  use_subject_label_for_split: false
 electrode_csv: ./configs/electrodes/sleep-cassette-200hz.csv
 electrode_montage_used: standard_1020
 electrode_channel_count: 2

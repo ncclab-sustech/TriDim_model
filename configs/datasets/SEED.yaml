@@ -12,13 +12,12 @@ params:
   gpu_idx:
   - 0
   gpu: 0
-  num_workers: 4
-  train_epochs: 30
-  patience: 8
-  batch_size: 64
-  learning_rate: 0.0002
+  num_workers: 8
+  train_epochs: 100
+  patience: 20
+  batch_size: 128
+  learning_rate: 0.002
   lradj: cosine
-  d_model: 192
   n_heads: 4
   t_layer: 4
   v_layer: 0
@@ -26,15 +25,16 @@ params:
   patch_len: 80
   patch_stride: 20
   augmentations: none
-  channel_basis_dim: 62
+  channel_basis_dim: 32
   k_basis_dim: 16
-  t_basis_dim: 24
-  patch_embed_dim: 192
+  t_basis_dim: 16
+  patch_embed_dim: 128
   use_channel_adapter: false
   canonical_channels: 62
   no_channel_prior: false
   input_channel_coord_path: ./configs/electrodes/SEED_V.csv
   canonical_channel_coord_path: ./configs/electrodes/SEED_V.csv
+  use_subject_label_for_split: false
 electrode_csv: ./configs/electrodes/SEED_V.csv
 electrode_montage_used: standard_1020
 electrode_channel_count: 62

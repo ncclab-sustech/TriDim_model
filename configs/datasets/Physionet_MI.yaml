@@ -14,23 +14,22 @@ params:
   - 1
   gpu: 1
   num_workers: 8
-  train_epochs: 40
-  patience: 10
-  batch_size: 64
-  learning_rate: 0.0003
+  train_epochs: 100
+  patience: 20
+  batch_size: 128
+  learning_rate: 0.002
   lradj: cosine
-  d_model: 192
-  t_layer: 5
+  t_layer: 4
   v_layer: 0
-  dropout: 0.15
-  patch_len: 32
-  patch_stride: 8
+  dropout: 0.1
+  patch_len: 80
+  patch_stride: 20
   augmentations: none
   channel_basis_dim: 32
   k_basis_dim: 16
-  t_basis_dim: 20
+  t_basis_dim: 16
   t_conv_kernel: 5
-  patch_embed_dim: 192
+  patch_embed_dim: 128
   channel_graph_sigma: 0.1
   channel_base_decay: 0.3
   use_channel_adapter: false
@@ -41,6 +40,7 @@ params:
   channel_adapter_residual_scale: 0.05
   input_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
   canonical_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
+  use_subject_label_for_split: false
 electrode_csv: ./configs/electrodes/Physionet_MI.csv
 electrode_montage_used: standard_1005
 electrode_channel_count: 64
