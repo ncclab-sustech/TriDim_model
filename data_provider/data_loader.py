@@ -816,13 +816,13 @@ class ADFTDLoader(Dataset):
         self.label_path = os.path.join(root_path, "Label/label.npy")
         
         if (
-            self.train_ratio <= 0
-            or self.val_ratio <= 0
-            or self.train_ratio + self.val_ratio >= 1.0
+            args.train_ratio <= 0
+            or args.val_ratio <= 0
+            or args.train_ratio + args.val_ratio >= 1.0
         ):
             a, b = 0.4, 0.7
         else:
-            a, b = self.train_ratio, self.train_ratio + self.val_ratio
+            a, b = args.train_ratio, args.train_ratio + args.val_ratio
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
             self.label_path, a, b
         )

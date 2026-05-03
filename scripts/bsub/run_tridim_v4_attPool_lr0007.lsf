@@ -33,8 +33,15 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 nvidia-smi || true
 
 DATASETS=(
-  "ADFTD"
+  "AD65"
   "APAVA"
+  "BCIC2A"
+  "FACED_new"
+  "Physionet_MI"
+  "SEED_V"
+  "SEED"
+  "SHU"
+  "ADFTD"
   "SleepEDF_full"
 )
 
@@ -83,6 +90,7 @@ do
       --seed_start 42 \
       --gpu 0 \
       --gpu_idx 0 \
+      --learning_rate 0.0007
       > ${log_file} 2>&1
 
     exit_code=$?
