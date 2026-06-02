@@ -44,6 +44,7 @@ data_dict = {
     "SEED_VIG": ADHDLoader,
     "SHU": ADHDLoader,
     "SleepEDF_full": ADHDLoader,
+    "sleep-cassette-200hz": ADHDLoader,
 }
 
 
