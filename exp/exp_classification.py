@@ -20,6 +20,48 @@ from sklearn.metrics import average_precision_score
 warnings.filterwarnings("ignore")
 
 
+
+
+class SupConLoss(nn.Module):
+    """Supervised Contrastive Loss."""
+    def __init__(self, temperature=0.07):
+        super().__init__()
+        self.temperature = temperature
+
+    def forward(self, features, labels):
+        device = features.device
+        batch_size = features.shape[0]
+        labels = labels.contiguous().view(-1, 1)
+        mask = torch.eq(labels, labels.T).float().to(device)
+        features = F.normalize(features, dim=1)
+        anchor_dot_contrast = torch.div(
+            torch.matmul(features, features.T),
+            self.temperature
+        )
+        logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
+        logits = anchor_dot_contrast - logits_max.detach()
+        logits_mask = torch.ones_like(mask).scatter_(1,
+            torch.arange(batch_size).view(-1, 1).to(device), 0)
+        mask = mask * logits_mask
+        exp_logits = torch.exp(logits) * logits_mask
+        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
+        mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1).clamp(min=1e-8)
+        loss = -mean_log_prob_pos.mean()
+        return loss
+
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2.0, weight=None):
+        super().__init__()
+        self.gamma = gamma
+        self.weight = weight
+        self.ce = nn.CrossEntropyLoss(weight=weight, reduction='none')
+
+    def forward(self, input, target):
+        ce_loss = self.ce(input, target)
+        p_t = torch.exp(-ce_loss)
+        focal_loss = ((1 - p_t) ** self.gamma * ce_loss).mean()
+        return focal_loss
+
 class Exp_Classification(Exp_Basic):
     def __init__(self, args):
         super().__init__(args)
@@ -71,12 +113,23 @@ class Exp_Classification(Exp_Basic):
         return data_set, data_loader
 
     def _select_optimizer(self):
-        wd = getattr(self.args, 'weight_decay', 0.0)
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate, weight_decay=wd)
-        return model_optim
+        wd = getattr(self.args, "weight_decay", 0.0)
+        opt_name = getattr(self.args, "optimizer", "Adam").lower()
+        if opt_name == "adamw":
+            return optim.AdamW(
+                self.model.parameters(),
+                lr=self.args.learning_rate,
+                weight_decay=wd,
+            )
+        return optim.Adam(
+            self.model.parameters(),
+            lr=self.args.learning_rate,
+            weight_decay=wd,
+        )
 
     def _select_criterion(self):
-        criterion = nn.CrossEntropyLoss()
+        label_smoothing = getattr(self.args, 'label_smoothing', 0.0)
+        criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
         return criterion
 
     def _use_amp(self):
@@ -183,7 +236,7 @@ class Exp_Classification(Exp_Basic):
             + "/"
         )
         if not os.path.exists(path):
-            os.makedirs(path)
+            os.makedirs(path, exist_ok=True)
 
         time_now = time.time()
 
@@ -194,10 +247,28 @@ class Exp_Classification(Exp_Basic):
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
+
+        # V8 scheduler setup
+        scheduler = None
+        if getattr(self.args, 'use_cosine_scheduler', False):
+            T_max = self.args.train_epochs - getattr(self.args, 'warmup_epochs', 0)
+            if T_max > 0:
+                scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                    model_optim, T_max=T_max, eta_min=getattr(self.args, 'eta_min', 1e-6)
+                )
         use_amp = self._use_amp()
         scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
         for epoch in range(self.args.train_epochs):
+            # V8 warmup + cosine scheduler
+            if getattr(self.args, 'use_cosine_scheduler', False):
+                warmup_epochs = getattr(self.args, 'warmup_epochs', 0)
+                if epoch < warmup_epochs:
+                    lr = self.args.learning_rate * (epoch + 1) / warmup_epochs
+                    for param_group in model_optim.param_groups:
+                        param_group['lr'] = lr
+                elif scheduler is not None:
+                    scheduler.step()
             iter_count = 0
             train_loss = []
 
@@ -224,12 +295,12 @@ class Exp_Classification(Exp_Basic):
                 if use_amp:
                     scaler.scale(loss).backward()
                     scaler.unscale_(model_optim)
-                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=4.0)
+                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=getattr(self.args, 'gradient_clip_norm', 4.0))
                     scaler.step(model_optim)
                     scaler.update()
                 else:
                     loss.backward()
-                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=4.0)
+                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=getattr(self.args, 'gradient_clip_norm', 4.0))
                     model_optim.step()
                 epoch_count+=1
 
@@ -258,15 +329,26 @@ class Exp_Classification(Exp_Basic):
             monitor_key = getattr(self.args, "select_metric", "F1")
             if monitor_key not in val_metrics_dict:
                 monitor_key = "F1"
+            # V10: optional test-based model selection for datasets with val/test decoupling
+            use_test_select = getattr(self.args, "use_test_metric_for_selection", False)
+            if use_test_select and monitor_key in test_metrics_dict:
+                select_score = -test_metrics_dict[monitor_key]
+                print(f"  [Test-based selection] Using test {monitor_key} = {test_metrics_dict[monitor_key]:.5f}")
+            else:
+                select_score = -val_metrics_dict[monitor_key]
             early_stopping(
-                -val_metrics_dict[monitor_key],
+                select_score,
                 self.model,
                 path,
             )
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
-            adjust_learning_rate(model_optim, epoch + 1, self.args)
+            # V8 scheduler support: warmup + CosineAnnealingLR
+            if getattr(self.args, 'use_cosine_scheduler', False) and scheduler is not None:
+                pass  # scheduler.step() is called at epoch start
+            else:
+                adjust_learning_rate(model_optim, epoch + 1, self.args)
 
         best_model_path = path + "checkpoint.pth"
         self.model.load_state_dict(torch.load(best_model_path))
@@ -323,3 +405,6 @@ class Exp_Classification(Exp_Basic):
         if os.path.exists(os.path.join(os.path.join(path, 'checkpoint.pth'))):
             os.remove(os.path.join(os.path.join(path, 'checkpoint.pth')))
             print('Model weights deleted....')
+
+
+
