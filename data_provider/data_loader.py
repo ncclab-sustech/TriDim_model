@@ -26,25 +26,30 @@ class APAVALoader(Dataset):
         self.root_path = root_path
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
-        self.split_mode = str(getattr(args, "split_mode", "label_order"))
+        self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
         self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
-        self.train_ratio = float(getattr(args, "train_ratio", 0.4))
-        self.val_ratio = float(getattr(args, "val_ratio", 0.3))
+        self.train_ratio = float(getattr(args, "train_ratio", 0.8))
+        self.val_ratio = float(getattr(args, "val_ratio", 0.1))
         if (
             self.train_ratio <= 0
             or self.val_ratio <= 0
             or self.train_ratio + self.val_ratio >= 1.0
         ):
-            self.train_ratio, self.val_ratio = 0.4, 0.3
+            self.train_ratio, self.val_ratio = 0.8, 0.1
 
-        # Keep legacy subject-level APAVA split by default.
         if self.split_mode == "segment_stratified_random":
             self.X, self.y = self.load_apava_segment_split(
                 self.data_path, self.label_path, flag=flag
             )
         else:
+            a = float(getattr(args, "train_ratio", 0.8))
+            b = a + float(getattr(args, "val_ratio", 0.1))
             self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-                self.label_path, a=0.4, b=0.7
+                self.label_path,
+                a=a,
+                b=b,
+                seed=self.split_seed,
+                random_split=self.split_mode != "label_order",
             )
             self.X, self.y = self.load_apava(self.data_path, self.label_path, flag=flag)
 
@@ -54,10 +59,10 @@ class APAVALoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.4, b=0.7):
+    def load_train_val_test_list(self, label_path, a=0.8, b=0.9, seed=42, random_split=True):
         """
-        Build subject-level 4:3:3 split for APAVA.
-        The split is stratified by class and keeps metadata order per class.
+        Build subject-level split for APAVA.
+        By default, each seed gets a new stratified random 8:1:1 split.
         """
         data_list = np.load(label_path)
         by_label = {}
@@ -69,8 +74,11 @@ class APAVALoader(Dataset):
                 by_label[lbl].append(sid)
 
         train_ids, val_ids, test_ids = [], [], []
+        rng = np.random.RandomState(seed)
         for lbl in sorted(by_label.keys()):
-            members = by_label[lbl]
+            members = list(by_label[lbl])
+            if random_split:
+                rng.shuffle(members)
             n = len(members)
             t0 = int(a * n)
             t1 = int(b * n)
@@ -116,13 +124,13 @@ class APAVALoader(Dataset):
 
         X = np.asarray(feature_list, dtype=np.float32)
         y = np.asarray(label_list, dtype=np.int64)
-        X, y = shuffle(X, y, random_state=42)
+        X, y = shuffle(X, y, random_state=self.split_seed)
         return X, y
 
     def load_apava_segment_split(self, data_path, label_path, flag=None):
         """
         Non-cross-subject split for APAVA:
-        collect all segments, then stratified 4:3:3 (or CLI ratios) by segment label.
+        collect all segments, then stratified 8:1:1 (or CLI ratios) by segment label.
         """
         feature_list = []
         label_list = []
@@ -168,7 +176,7 @@ class APAVALoader(Dataset):
 
         X = X_all[idx]
         y = y_all[idx]
-        X, y = shuffle(X, y, random_state=42)
+        X, y = shuffle(X, y, random_state=self.split_seed)
         return X, y
 
     def __getitem__(self, index):
@@ -247,7 +255,7 @@ class TDBRAINLoader(Dataset):
         # reshape and shuffle
         X = np.array(feature_list)
         y = np.array(label_list)
-        X, y = shuffle(X, y, random_state=42)
+        X, y = shuffle(X, y, random_state=self.split_seed)
 
         return X, y[:, 0]  # only use the first column (label)
 
@@ -282,10 +290,10 @@ class ADHDLoader(Dataset):
 
         self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
         self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
-        self.train_ratio = float(getattr(args, "train_ratio", 0.4))
-        self.val_ratio = float(getattr(args, "val_ratio", 0.3))
+        self.train_ratio = float(getattr(args, "train_ratio", 0.8))
+        self.val_ratio = float(getattr(args, "val_ratio", 0.1))
         if self.train_ratio <= 0 or self.val_ratio <= 0 or self.train_ratio + self.val_ratio >= 1.0:
-            self.train_ratio, self.val_ratio = 0.4, 0.3
+            self.train_ratio, self.val_ratio = 0.8, 0.1
         if self.use_zarr:
             self._load_zarr_arrays()
         if self.split_mode == "segment_stratified_random":
@@ -361,14 +369,10 @@ class ADHDLoader(Dataset):
         if m is not None:
             return 500000 + int(m.group(1))
         # BCIC2A style: A01T.h5 (training) / A01E.h5 (evaluation). Treat T/E as distinct subjects.
-        # m = re.match(r"A(\d+)([ET])\.h5$", name)
-        # if m is not None:
-        #     num = int(m.group(1))
-        #     return (600000 if m.group(2) == "T" else 700000) + num
         m = re.match(r"A(\d+)([ET])\.h5$", name)
         if m is not None:
             num = int(m.group(1))
-            return 600000 + num
+            return (600000 if m.group(2) == "T" else 700000) + num
         # MDD style: "H S1 EC.h5" (healthy) / "MDD S1 EC.h5" (patient) / "6921143_H S15 EO.h5".
         # Group prefix disambiguates healthy vs patient; condition (EC/EO/TASK) merges into same subject.
         m = re.search(r"(?:^|[_\s])([A-Za-z]+)\s+S(\d+)\b", name)
@@ -583,7 +587,7 @@ class ADHDLoader(Dataset):
             raise RuntimeError("No valid ADHD subjects with labels were found.")
         return subject_to_label
 
-    def _split_subjects_by_label_order(self, subject_to_label, train_r=0.4, val_r=0.3):
+    def _split_subjects_by_label_order(self, subject_to_label, train_r=0.8, val_r=0.1):
         by_label = {}
         for sid in sorted(subject_to_label.keys(), key=lambda x: str(x)):
             lbl = int(subject_to_label[sid])
@@ -617,7 +621,7 @@ class ADHDLoader(Dataset):
 
         return train_ids, val_ids, test_ids
 
-    def _split_subjects_stratified_random(self, subject_to_label, train_r=0.4, val_r=0.3, seed=42):
+    def _split_subjects_stratified_random(self, subject_to_label, train_r=0.8, val_r=0.1, seed=42):
         rng = np.random.RandomState(int(seed))
         by_label = {}
         for sid, lbl in subject_to_label.items():
@@ -664,7 +668,7 @@ class ADHDLoader(Dataset):
         y = np.asarray(label_list, dtype=np.int64)
         return X, y
 
-    def _split_segment_indices_stratified_random(self, labels, train_r=0.4, val_r=0.3, seed=42):
+    def _split_segment_indices_stratified_random(self, labels, train_r=0.8, val_r=0.1, seed=42):
         if labels.ndim != 1:
             labels = labels.reshape(-1)
         indices = np.arange(labels.shape[0], dtype=np.int64)
@@ -814,17 +818,17 @@ class ADFTDLoader(Dataset):
         self.root_path = root_path
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
-        
-        if (
-            args.train_ratio <= 0
-            or args.val_ratio <= 0
-            or args.train_ratio + args.val_ratio >= 1.0
-        ):
-            a, b = 0.4, 0.7
-        else:
-            a, b = args.train_ratio, args.train_ratio + args.val_ratio
+
+        self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
+        self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
+        a = float(getattr(args, "train_ratio", 0.8))
+        b = a + float(getattr(args, "val_ratio", 0.1))
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-            self.label_path, a, b
+            self.label_path,
+            a,
+            b,
+            seed=self.split_seed,
+            random_split=self.split_mode != "label_order",
         )
         self.X, self.y = self.load_adfd(self.data_path, self.label_path, flag=flag)
 
@@ -834,7 +838,7 @@ class ADFTDLoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.4, b=0.7):
+    def load_train_val_test_list(self, label_path, a=0.8, b=0.9, seed=42, random_split=True):
         """
         Loads IDs for training, validation, and test sets
         Args:
@@ -851,6 +855,11 @@ class ADFTDLoader(Dataset):
         cn_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 0)][:, 1]))
         ftd_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 1)][:, 1]))
         ad_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 2)][:, 1]))
+        if random_split:
+            rng = np.random.RandomState(seed)
+            rng.shuffle(cn_list)
+            rng.shuffle(ftd_list)
+            rng.shuffle(ad_list)
 
         train_ids = (
             cn_list[: int(a * len(cn_list))]
@@ -924,7 +933,8 @@ class PTBLoader(Dataset):
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
 
-        a, b = 0.55, 0.7
+        a = float(getattr(args, "train_ratio", 0.8))
+        b = a + float(getattr(args, "val_ratio", 0.1))
 
         # list of IDs for training, val, and test sets
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
@@ -939,7 +949,7 @@ class PTBLoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.6, b=0.8):
+    def load_train_val_test_list(self, label_path, a=0.8, b=0.9):
         """
         Loads IDs for training, validation, and test sets
         Args:
@@ -1029,7 +1039,8 @@ class PTBXLLoader(Dataset):
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
 
-        a, b = 0.6, 0.8
+        a = float(getattr(args, "train_ratio", 0.8))
+        b = a + float(getattr(args, "val_ratio", 0.1))
 
         # list of IDs for training, val, and test sets
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
@@ -1044,7 +1055,7 @@ class PTBXLLoader(Dataset):
 
         self.max_seq_len = self.X.shape[1]
 
-    def load_train_val_test_list(self, label_path, a=0.6, b=0.8):
+    def load_train_val_test_list(self, label_path, a=0.8, b=0.9):
         """
         Loads IDs for training, validation, and test sets
         Args:
