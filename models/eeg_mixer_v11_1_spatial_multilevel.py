@@ -80,13 +80,8 @@ except Exception:
             return nn.Identity()
 
 
-def _get_config(configs, name: str, default=None):
-    if isinstance(configs, dict):
-        value = configs.get(name, default)
-    else:
-        value = getattr(configs, name, default)
-    # Treat argparse attributes set to None as unspecified.
-    return default if value is None else value
+def _get_config(configs, name: str, default):
+    return getattr(configs, name, default)
 
 
 # =============================================================================
