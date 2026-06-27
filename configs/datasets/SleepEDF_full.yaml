@@ -1,40 +1,58 @@
 dataset: SleepEDF_full
 root_path: /work/bme-shenxk/data/SleepEDF_full
+electrode_channel_count: 2
+electrode_csv: ./configs/electrodes/sleep-cassette-200hz.csv
+electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v3_tconv
-  itr: 5
-  seed_start: 42
+  model: eeg_mixer_v11_2_no_stem
+  itr: 1
+  seed: 5
+  seed_start: 5
   split_mode: label_order
   train_ratio: 0.4
   val_ratio: 0.3
   select_metric: F1
   use_gpu: true
+  gpu: 0
   gpu_idx:
   - 0
-  gpu: 0
-  num_workers: 8
+  num_workers: 4
   train_epochs: 100
   patience: 20
-  batch_size: 128
-  learning_rate: 0.002
+  batch_size: 32
+  learning_rate: 0.0005
   lradj: cosine
-  n_heads: 4
-  t_layer: 4
-  v_layer: 0
-  dropout: 0.1
+  optimizer: AdamW
+  weight_decay: 0.02
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  augmentations: none
   patch_len: 80
   patch_stride: 20
-  augmentations: none
   channel_basis_dim: 32
   k_basis_dim: 16
   t_basis_dim: 16
   patch_embed_dim: 128
-  use_channel_adapter: false
+  t_layer: 4
+  n_heads: 4
+  dropout: 0.15
+  layer_scale_init: 0.01
+  drop_path_c: 0.25
+  drop_path_k: 0.05
+  drop_path_t: 0.15
+  drop_path_mlp: 0.05
+  drop_path_schedule: linear
+  use_input_norm: true
+  use_channel_adapter: true
   canonical_channels: 2
-  no_channel_prior: false
-  input_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
   canonical_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
+  input_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
+  no_channel_prior: false
   use_subject_label_for_split: false
-electrode_csv: ./configs/electrodes/sleep-cassette-200hz.csv
-electrode_montage_used: standard_1020
-electrode_channel_count: 2
+  use_multi_level_readout: true
+  channel_adapter_hidden: 16
+  channel_adapter_residual_scale: 0.1
+  channel_adapter_sigma: 0.35
