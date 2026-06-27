@@ -1,40 +1,67 @@
 dataset: AD65
 root_path: /work/bme-shenxk/data/AD65_wsn
+electrode_channel_count: 19
+electrode_csv: ./configs/electrodes/AD65.csv
+electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v3_tconv
-  itr: 5
-  seed_start: 42
-  split_mode: label_order
-  train_ratio: 0.4
-  val_ratio: 0.3
-  select_metric: F1
-  use_gpu: true
-  gpu_idx:
-  - 0
-  gpu: 0
-  num_workers: 4
-  train_epochs: 100
-  patience: 20
-  batch_size: 128
-  learning_rate: 0.002
-  lradj: cosine
-  n_heads: 4
-  t_layer: 4
-  v_layer: 0
-  dropout: 0.1
+  model: eeg_mixer_v11_2_no_stem
   patch_len: 80
   patch_stride: 20
-  augmentations: none
-  channel_basis_dim: 32
-  k_basis_dim: 16
-  t_basis_dim: 16
+  channel_basis_dim: 96
+  k_basis_dim: 32
+  t_basis_dim: 32
   patch_embed_dim: 128
-  use_channel_adapter: false
+  n_heads: 4
+  t_layer: 4
+  dropout: 0.2
+  layer_scale_init: 0.01
+  use_input_norm: true
+  stem_kernels:
+  - 51
+  - 99
+  - 199
+  stem_hidden_mult: 4
+  stem_dropout: 0.1
+  drop_path_c: 0.1
+  drop_path_k: 0.02
+  drop_path_t: 0.08
+  drop_path_mlp: 0.02
+  drop_path_schedule: constant
+  use_channel_adapter: true
   canonical_channels: 19
-  no_channel_prior: false
-  input_channel_coord_path: ./configs/electrodes/AD65.csv
+  channel_adapter_sigma: 0.35
+  channel_adapter_hidden: 32
+  channel_adapter_residual_scale: 0.1
   canonical_channel_coord_path: ./configs/electrodes/AD65.csv
-  use_subject_label_for_split: true
-electrode_csv: ./configs/electrodes/AD65.csv
-electrode_channel_count: 19
-electrode_montage_used: standard_1020
+  input_channel_coord_path: ./configs/electrodes/AD65.csv
+  no_channel_prior: false
+  use_multi_level_readout: true
+  augmentations: none
+  batch_size: 32
+  learning_rate: 0.0005
+  lradj: cosine
+  optimizer: AdamW
+  weight_decay: 0.02
+  train_epochs: 100
+  patience: 20
+  num_workers: 4
+  select_metric: F1
+  split_mode: stratified_random
+  train_ratio: 0.8
+  val_ratio: 0.1
+  use_gpu: true
+  gpu: 0
+  gpu_idx:
+  - 0
+  itr: 1
+  seed_start: 5
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0.025
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  num_class: 3
+  seed: 5
+  use_focal_loss: false
+  focal_gamma: 1.0
+  class_weight_mode: none
