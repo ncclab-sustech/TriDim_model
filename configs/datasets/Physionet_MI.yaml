@@ -1,46 +1,69 @@
 dataset: Physionet_MI
 root_path: /work/bme-shenxk/data/Physionet_MI_wsn
-params:
-  seq_len: 800
-  model: eeg_mixer_v3_tconv
-  itr: 5
-  seed_start: 42
-  split_mode: segment_stratified_random
-  train_ratio: 0.4
-  val_ratio: 0.3
-  select_metric: F1
-  use_gpu: true
-  gpu_idx:
-  - 1
-  gpu: 1
-  num_workers: 8
-  train_epochs: 100
-  patience: 20
-  batch_size: 128
-  learning_rate: 0.002
-  lradj: cosine
-  t_layer: 4
-  v_layer: 0
-  dropout: 0.1
-  patch_len: 80
-  patch_stride: 20
-  augmentations: none
-  channel_basis_dim: 32
-  k_basis_dim: 16
-  t_basis_dim: 16
-  t_conv_kernel: 5
-  patch_embed_dim: 128
-  channel_graph_sigma: 0.1
-  channel_base_decay: 0.3
-  use_channel_adapter: false
-  canonical_channels: 59
-  no_channel_prior: false
-  channel_adapter_sigma: 0.1
-  channel_adapter_hidden: 32
-  channel_adapter_residual_scale: 0.05
-  input_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
-  canonical_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
-  use_subject_label_for_split: false
 electrode_csv: ./configs/electrodes/Physionet_MI.csv
 electrode_montage_used: standard_1005
 electrode_channel_count: 64
+params:
+  augmentations: none
+  batch_size: 32
+  canonical_channel_coord_path: null
+  canonical_channels: 64
+  channel_adapter_hidden: 32
+  channel_adapter_residual_scale: 0.1
+  channel_adapter_sigma: 0.35
+  channel_basis_dim: 96
+  dataset: Physionet_MI
+  drop_path_c: 0.25
+  drop_path_k: 0.05
+  drop_path_mlp: 0.05
+  drop_path_schedule: linear
+  drop_path_t: 0.15
+  dropout: 0.3
+  electrode_channel_count: 64
+  electrode_csv: ./configs/electrodes/Physionet_MI.csv
+  electrode_montage_used: standard_1005
+  eta_min: 1.0e-06
+  gpu: 0
+  gpu_idx:
+  - 0
+  gradient_clip_norm: 1.0
+  input_channel_coord_path: null
+  itr: 1
+  k_basis_dim: 32
+  label_smoothing: 0
+  layer_scale_init: 0.01
+  learning_rate: 0.0005
+  lradj: cosine
+  model: eeg_mixer_v11_2_no_stem
+  n_heads: 4
+  no_channel_prior: true
+  num_workers: 4
+  optimizer: AdamW
+  patch_embed_dim: 256
+  patch_len: 64
+  patch_stride: 16
+  patience: 20
+  root_path: /work/bme-shenxk/data/Physionet_MI_wsn
+  seed: 5
+  seed_start: 5
+  select_metric: F1
+  split_mode: stratified_random
+  stem_dropout: 0.1
+  stem_hidden_mult: 4
+  stem_kernels:
+  - 51
+  - 99
+  - 199
+  t_basis_dim: 32
+  t_layer: 6
+  train_epochs: 100
+  train_ratio: 0.8
+  use_channel_adapter: true
+  use_cosine_scheduler: true
+  use_gpu: true
+  use_input_norm: true
+  use_multi_level_readout: true
+  use_subject_label_for_split: false
+  val_ratio: 0.1
+  warmup_epochs: 5
+  weight_decay: 0.02
