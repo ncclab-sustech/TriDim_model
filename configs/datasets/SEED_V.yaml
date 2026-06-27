@@ -1,40 +1,64 @@
 dataset: SEED_V
 root_path: /work/bme-shenxk/data/SEED_V_10s
-params:
-  model: eeg_mixer_v3_tconv
-  itr: 5
-  seed_start: 42
-  split_mode: label_order
-  train_ratio: 0.4
-  val_ratio: 0.3
-  select_metric: F1
-  use_gpu: true
-  gpu_idx:
-  - 0
-  gpu: 0
-  num_workers: 8
-  train_epochs: 100
-  patience: 20
-  batch_size: 128
-  learning_rate: 0.002
-  lradj: cosine
-  n_heads: 4
-  t_layer: 4
-  v_layer: 0
-  dropout: 0.1
-  patch_len: 80
-  patch_stride: 20
-  augmentations: none
-  channel_basis_dim: 32
-  k_basis_dim: 16
-  t_basis_dim: 16
-  patch_embed_dim: 128
-  use_channel_adapter: false
-  canonical_channels: 62
-  no_channel_prior: false
-  input_channel_coord_path: ./configs/electrodes/SEED_V.csv
-  canonical_channel_coord_path: ./configs/electrodes/SEED_V.csv
-  use_subject_label_for_split: false
+electrode_channel_count: 62
 electrode_csv: ./configs/electrodes/SEED_V.csv
 electrode_montage_used: standard_1020
-electrode_channel_count: 62
+params:
+  model: eeg_mixer_v11_2_no_stem
+  itr: 1
+  seed: 5
+  seed_start: 5
+  split_mode: stratified_random
+  train_ratio: 0.8
+  val_ratio: 0.1
+  select_metric: F1
+  use_gpu: true
+  gpu: 0
+  gpu_idx:
+  - 0
+  num_workers: 4
+  train_epochs: 100
+  patience: 20
+  batch_size: 32
+  learning_rate: 0.0005
+  lradj: cosine
+  optimizer: AdamW
+  weight_decay: 0.01
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0.0
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  augmentations: none
+  patch_len: 80
+  patch_stride: 20
+  channel_basis_dim: 96
+  k_basis_dim: 32
+  t_basis_dim: 32
+  patch_embed_dim: 256
+  t_layer: 6
+  n_heads: 4
+  dropout: 0.2
+  stem_dropout: 0.1
+  stem_hidden_mult: 4
+  stem_kernels:
+  - 51
+  - 99
+  - 199
+  layer_scale_init: 0.01
+  drop_path_c: 0.1
+  drop_path_k: 0.02
+  drop_path_t: 0.08
+  drop_path_mlp: 0.02
+  drop_path_schedule: constant
+  use_input_norm: true
+  use_channel_adapter: true
+  canonical_channels: 62
+  canonical_channel_coord_path: null
+  input_channel_coord_path: null
+  no_channel_prior: true
+  use_subject_label_for_split: false
+  use_multi_level_readout: true
+  channel_adapter_sigma: 0.35
+  channel_adapter_hidden: 32
+  channel_adapter_residual_scale: 0.0
