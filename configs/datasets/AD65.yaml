@@ -4,7 +4,7 @@ electrode_channel_count: 19
 electrode_csv: ./configs/electrodes/AD65.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: eeg_mixer_v11_2_no_stem
   patch_len: 80
   patch_stride: 20
   channel_basis_dim: 96
@@ -27,7 +27,7 @@ params:
   drop_path_t: 0.08
   drop_path_mlp: 0.02
   drop_path_schedule: constant
-  use_channel_adapter: true
+  use_channel_adapter: false
   canonical_channels: 19
   channel_adapter_sigma: 0.35
   channel_adapter_hidden: 32
@@ -45,7 +45,7 @@ params:
   train_epochs: 100
   patience: 20
   num_workers: 4
-  select_metric: F1
+  select_metric: ACC
   split_mode: stratified_random
   train_ratio: 0.8
   val_ratio: 0.1
@@ -64,4 +64,4 @@ params:
   seed: 5
   use_focal_loss: false
   focal_gamma: 1.0
-  class_weight_mode: none
+  class_weight_mode: sqrt_inverse
