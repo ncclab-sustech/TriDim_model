@@ -6,8 +6,8 @@ electrode_channel_count: 64
 params:
   augmentations: none
   batch_size: 32
-  canonical_channel_coord_path: null
-  canonical_channels: 64
+  canonical_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
+  canonical_channels: 59
   channel_adapter_hidden: 32
   channel_adapter_residual_scale: 0.1
   channel_adapter_sigma: 0.35
@@ -27,26 +27,26 @@ params:
   gpu_idx:
   - 0
   gradient_clip_norm: 1.0
-  input_channel_coord_path: null
+  input_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
   itr: 1
   k_basis_dim: 32
   label_smoothing: 0
   layer_scale_init: 0.01
   learning_rate: 0.0005
   lradj: cosine
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: eeg_mixer_v11_2_no_stem
   n_heads: 4
-  no_channel_prior: true
+  no_channel_prior: false
   num_workers: 4
   optimizer: AdamW
   patch_embed_dim: 256
-  patch_len: 64
-  patch_stride: 16
+  patch_len: 80
+  patch_stride: 20
   patience: 20
   root_path: /work/bme-shenxk/data/Physionet_MI_wsn
   seed: 5
   seed_start: 5
-  select_metric: F1
+  select_metric: ACC
   split_mode: stratified_random
   stem_dropout: 0.1
   stem_hidden_mult: 4
@@ -58,7 +58,7 @@ params:
   t_layer: 6
   train_epochs: 100
   train_ratio: 0.8
-  use_channel_adapter: true
+  use_channel_adapter: false
   use_cosine_scheduler: true
   use_gpu: true
   use_input_norm: true
