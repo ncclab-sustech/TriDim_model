@@ -5,13 +5,13 @@ electrode_channel_count: 32
 electrode_csv: ./configs/electrodes/FACED_new.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: eeg_mixer_v11_2_no_stem
   seq_len: 2000
   num_class: 9
   n_heads: 4
   layer_scale_init: 0.01
   use_input_norm: true
-  use_channel_adapter: true
+  use_channel_adapter: false
   canonical_channels: 32
   channel_adapter_sigma: 0.35
   channel_adapter_hidden: 32
@@ -23,7 +23,7 @@ params:
   augmentations: none
   patience: 20
   num_workers: 4
-  select_metric: F1
+  select_metric: ACC
   split_mode: stratified_random
   train_ratio: 0.8
   val_ratio: 0.1
@@ -32,7 +32,7 @@ params:
   gpu_idx:
   - 0
   itr: 1
-  seed_start: 5
+  seed_start: 42
   train_epochs: 100
   use_cosine_scheduler: true
   warmup_epochs: 5
@@ -52,10 +52,10 @@ params:
   t_layer: 6
   dropout: 0.15
   learning_rate: 0.0005
-  drop_path_c: 0.0
-  drop_path_k: 0.0
-  drop_path_t: 0.0
-  drop_path_mlp: 0.0
+  drop_path_c: 0.1
+  drop_path_k: 0.02
+  drop_path_t: 0.08
+  drop_path_mlp: 0.02
   drop_path_schedule: constant
   stem_dropout: 0.05
-  seed: 5
+  seed: 42
