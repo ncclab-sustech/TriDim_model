@@ -275,6 +275,20 @@ if __name__ == "__main__":
         help="kept for yaml compatibility; unused by the nobasis model",
     )
     parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--stem_dropout", type=float, default=0.1)
+    parser.add_argument("--use_spatial_mix", action="store_true", default=False)
+    parser.add_argument("--use_multi_level_readout", action="store_true", default=False)
+    parser.add_argument("--weight_decay", type=float, default=0.0, help="L2 weight decay for Adam optimizer")
+    parser.add_argument("--optimizer", type=str, default="Adam", choices=["Adam", "AdamW"], help="Optimizer type")
+    parser.add_argument("--use_cosine_scheduler", action="store_true", help="Use CosineAnnealingLR with warmup")
+    parser.add_argument("--warmup_epochs", type=int, default=0, help="Linear warmup epochs before cosine")
+    parser.add_argument("--eta_min", type=float, default=1e-6, help="Minimum LR for cosine scheduler")
+    parser.add_argument("--label_smoothing", type=float, default=0.0, help="Label smoothing for CrossEntropyLoss")
+    parser.add_argument("--use_focal_loss", action="store_true", help="Use focal loss for imbalanced classification")
+    parser.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss gamma")
+    parser.add_argument('--use_subject_balanced_sampler', action='store_true', help='APAVA TRAIN-only inverse subject-count sampler')
+    parser.add_argument("--class_weight_mode", type=str, default="none", choices=["none", "inverse", "sqrt_inverse"], help="Compute class weights from training labels only")
+    parser.add_argument("--gradient_clip_norm", type=float, default=4.0, help="Gradient clipping max norm")
 
     # augmentation
     parser.add_argument(
@@ -295,7 +309,7 @@ if __name__ == "__main__":
         "--select_metric",
         type=str,
         default="F1",
-        choices=["F1", "Accuracy"],
+        choices=["F1", "Accuracy", "AUROC", "APAVA_SubjectF1", "APAVA_WeightedF1"],
         help="validation metric used for model selection",
     )
 
@@ -304,7 +318,7 @@ if __name__ == "__main__":
         "--split_mode",
         type=str,
         default="label_order",
-        choices=["stratified_random", "label_order", "segment_stratified_random"],
+        choices=["stratified_random", "subject_random", "label_order", "segment_stratified_random"],
         help="label_order = deterministic subject split used in the paper",
     )
     parser.add_argument("--train_ratio", type=float, default=0.4)
@@ -345,14 +359,21 @@ if __name__ == "__main__":
     if args.use_multi_gpu:
         args.devices = args.devices.replace(" ", "")
         if not os.environ.get("CUDA_VISIBLE_DEVICES"):
-            os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+            if not torch.cuda.is_available():
+                os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+                print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+            else:
+                print("[device] CUDA already available (MPS), skip CUDA_VISIBLE_DEVICES override")
         else:
             print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
         args.gpu = 0
     else:
         if not os.environ.get("CUDA_VISIBLE_DEVICES"):
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-            print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+            if not torch.cuda.is_available():
+                os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+                print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
+            else:
+                print("[device] CUDA already available (MPS), skip CUDA_VISIBLE_DEVICES override")
         else:
             print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
         args.gpu = 0
@@ -381,6 +402,7 @@ if __name__ == "__main__":
                 if attr in cli_overrides:
                     continue
                 if not hasattr(args, attr):
+                    setattr(args, attr, value)
                     continue
                 current = getattr(args, attr)
                 try:
@@ -460,7 +482,7 @@ if __name__ == "__main__":
         pe = args.patch_embed_dim if args.patch_embed_dim is not None else "auto"
         setting = (
             "{}_{}_seed_{}_dm_{}_dp_{}_tl_{}_bs_{}_lr{}_aug_{}_pl_{}"
-            "_cb{}_kb{}_tb{}_pe{}_ps{}_ca{}_cp{}".format(
+            "_cb{}_kb{}_tb{}_pe{}_ps{}_ca{}_cp{}_sm{}_ml{}".format(
                 args.model,
                 args.data,
                 args.seed,
@@ -478,6 +500,8 @@ if __name__ == "__main__":
                 stride,
                 int(args.use_channel_adapter),
                 int(args.use_channel_prior),
+                int(getattr(args, 'use_spatial_mix', False)),
+                int(getattr(args, 'use_multi_level_readout', False)),
             )
         )
 
@@ -490,7 +514,7 @@ if __name__ == "__main__":
         exp.train(setting)
 
         print(">>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(setting))
-        avg_metrics.append(exp.test(setting))
+        # avg_metrics.append(exp.test(setting))  # fixed: was double-testing
         
         test_metrics = exp.test(setting)
         avg_metrics.append(test_metrics)
@@ -524,3 +548,4 @@ if __name__ == "__main__":
         f"recall: {stds[2]:.4f}, f1: {stds[3]:.4f},"
         f" AUROC: {stds[4]:.4f}, AUPRC: {stds[5]:.4f}"
     )
+
