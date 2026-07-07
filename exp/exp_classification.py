@@ -113,23 +113,44 @@ class Exp_Classification(Exp_Basic):
         return data_set, data_loader
 
     def _select_optimizer(self):
-        wd = getattr(self.args, "weight_decay", 0.0)
+        wd = getattr(self.args, 'weight_decay', 0.0)
         opt_name = getattr(self.args, "optimizer", "Adam").lower()
         if opt_name == "adamw":
-            return optim.AdamW(
-                self.model.parameters(),
-                lr=self.args.learning_rate,
-                weight_decay=wd,
-            )
-        return optim.Adam(
-            self.model.parameters(),
-            lr=self.args.learning_rate,
-            weight_decay=wd,
-        )
+            model_optim = optim.AdamW(self.model.parameters(), lr=self.args.learning_rate, weight_decay=wd)
+        else:
+            model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+        return model_optim
 
-    def _select_criterion(self):
-        label_smoothing = getattr(self.args, 'label_smoothing', 0.0)
-        criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+    def _select_criterion(self, train_data=None):
+        if train_data is None and hasattr(self, "_cached_criterion"):
+            return self._cached_criterion
+
+        weight = None
+        weight_mode = str(getattr(self.args, "class_weight_mode", "none")).lower()
+        if weight_mode != "none" and train_data is not None:
+            labels = np.asarray(train_data.y, dtype=np.int64).reshape(-1)
+            counts = np.bincount(labels, minlength=int(self.args.num_class)).astype(np.float64)
+            counts = np.maximum(counts, 1.0)
+            if weight_mode == "inverse":
+                values = counts.sum() / (len(counts) * counts)
+            elif weight_mode == "sqrt_inverse":
+                values = np.sqrt(counts.sum() / (len(counts) * counts))
+            else:
+                raise ValueError(f"Unsupported class_weight_mode: {weight_mode}")
+            weight = torch.tensor(values, dtype=torch.float32, device=self.device)
+            print(f"Training class counts: {counts.astype(int).tolist()}, class weights: {values.tolist()}")
+
+        if bool(getattr(self.args, "use_focal_loss", False)):
+            criterion = FocalLoss(
+                gamma=float(getattr(self.args, "focal_gamma", 2.0)),
+                weight=weight,
+            ).to(self.device)
+        else:
+            criterion = nn.CrossEntropyLoss(
+                weight=weight,
+                label_smoothing=float(getattr(self.args, "label_smoothing", 0.0)),
+            ).to(self.device)
+        self._cached_criterion = criterion
         return criterion
 
     def _use_amp(self):
@@ -166,8 +187,8 @@ class Exp_Classification(Exp_Basic):
                     outputs = self._forward_model(batch_x, padding_mask=padding_mask)
                 
                 pred = outputs.detach().cpu()
-                loss = criterion(pred, label.long().cpu())
-                total_loss.append(loss)
+                loss = criterion(outputs, label.long())
+                total_loss.append(loss.detach().cpu())
 
                 preds.append(outputs.detach())
                 trues.append(label)
@@ -214,6 +235,40 @@ class Exp_Classification(Exp_Basic):
         except Exception:
             pass
 
+        if getattr(self.args, "data", "") == "APAVA" and getattr(self.args, "select_metric", "") == "APAVA_SubjectF1":
+            subject_ids = np.asarray(vali_data.subject_ids)
+            if len(subject_ids) != len(predictions):
+                raise RuntimeError(f"APAVA subject metric alignment mismatch: {len(subject_ids)} != {len(predictions)}")
+            subject_true, subject_pred = [], []
+            for sid in np.unique(subject_ids):
+                mask = subject_ids == sid
+                true_counts = np.bincount(trues[mask].astype(np.int64), minlength=self.args.num_class)
+                pred_counts = np.bincount(predictions[mask].astype(np.int64), minlength=self.args.num_class)
+                subject_true.append(int(np.argmax(true_counts)))
+                subject_pred.append(int(np.argmax(pred_counts)))
+            metrics_dict["APAVA_SubjectF1"] = f1_score(
+                subject_true, subject_pred, average="macro", zero_division=0
+            )
+            print(
+                f"APAVA validation SubjectF1: {metrics_dict['APAVA_SubjectF1']:.5f} "
+                f"over {len(subject_true)} subjects"
+            )
+
+        if getattr(self.args, "data", "") == "APAVA" and getattr(self.args, "select_metric", "") == "APAVA_WeightedF1":
+            subject_ids = np.asarray(vali_data.subject_ids)
+            if len(subject_ids) != len(predictions):
+                raise RuntimeError(f"APAVA weighted metric alignment mismatch: {len(subject_ids)} != {len(predictions)}")
+            unique_ids, subject_counts = np.unique(subject_ids, return_counts=True)
+            count_map = dict(zip(unique_ids.tolist(), subject_counts.tolist()))
+            sample_weights = np.asarray([1.0 / count_map[int(sid)] for sid in subject_ids])
+            metrics_dict["APAVA_WeightedF1"] = f1_score(
+                trues, predictions, average="macro", sample_weight=sample_weights, zero_division=0
+            )
+            print(
+                f"APAVA validation WeightedF1: {metrics_dict['APAVA_WeightedF1']:.5f} "
+                f"over {len(unique_ids)} subjects"
+            )
+
         self.model.train()
         return total_loss, metrics_dict
 
@@ -246,7 +301,7 @@ class Exp_Classification(Exp_Basic):
         )
 
         model_optim = self._select_optimizer()
-        criterion = self._select_criterion()
+        criterion = self._select_criterion(train_data)
 
         # V8 scheduler setup
         scheduler = None
@@ -405,6 +460,7 @@ class Exp_Classification(Exp_Basic):
         if os.path.exists(os.path.join(os.path.join(path, 'checkpoint.pth'))):
             os.remove(os.path.join(os.path.join(path, 'checkpoint.pth')))
             print('Model weights deleted....')
+
 
 
 
