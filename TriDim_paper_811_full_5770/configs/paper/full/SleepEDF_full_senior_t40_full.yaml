@@ -1,0 +1,57 @@
+dataset: SleepEDF_full
+root_path: ${TRIDIM_DATA_ROOT}/SleepEDF_full
+electrode_channel_count: 2
+electrode_csv: ./configs/electrodes/sleep-cassette-200hz.csv
+electrode_montage_used: standard_1020
+params:
+  model: eeg_mixer_v11_1_spatial_multilevel
+  itr: 3
+  seeds: [5, 42, 43]
+  seed: 5
+  seed_start: 5
+  # Exact benchmark indices: session-level split, and training-only t40
+  # sampling (at most 40 epochs per session and sleep-stage label).
+  split_mode: external_manifest
+  external_split_manifest: ./configs/splits/SleepEDF_full_senior_seed_{seed}_downsample_t40.json
+  train_ratio: 0.8
+  val_ratio: 0.1
+  select_metric: Accuracy
+  use_gpu: true
+  gpu: 0
+  gpu_idx: [0]
+  num_workers: 4
+  train_epochs: 50
+  patience: 50
+  eval_freq: 5
+  batch_size: 32
+  learning_rate: 0.0005
+  lradj: cosine
+  optimizer: AdamW
+  weight_decay: 0.05
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0.0
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  d_model: 128
+  patch_len: 80
+  patch_stride: 20
+  channel_basis_dim: 32
+  k_basis_dim: 16
+  t_basis_dim: 16
+  patch_embed_dim: 128
+  t_layer: 4
+  n_heads: 4
+  dropout: 0.15
+  layer_scale_init: 0.01
+  drop_path_c: 0.25
+  drop_path_k: 0.05
+  drop_path_t: 0.15
+  drop_path_mlp: 0.05
+  drop_path_schedule: linear
+  use_input_norm: true
+  canonical_channels: 2
+  canonical_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
+  input_channel_coord_path: ./configs/electrodes/sleep-cassette-200hz.csv
+  no_channel_prior: false
+  use_multi_level_readout: true

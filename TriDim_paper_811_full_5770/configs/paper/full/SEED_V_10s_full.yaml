@@ -1,0 +1,56 @@
+dataset: SEED_V
+root_path: ${TRIDIM_DATA_ROOT}/SEED_V_10s
+electrode_channel_count: 62
+electrode_csv: ./configs/electrodes/SEED_V.csv
+electrode_montage_used: standard_1020
+params:
+  model: eeg_mixer_v11_1_spatial_multilevel
+  itr: 3
+  seeds: [5, 42, 43]
+  seed: 5
+  seed_start: 5
+  split_mode: external_manifest
+  external_split_manifest: ./configs/splits/SEED_V_10s_benchmark_seed_{seed}.json
+  train_ratio: 0.8
+  val_ratio: 0.1
+  select_metric: Accuracy
+  use_gpu: true
+  gpu: 0
+  gpu_idx: [0]
+  num_workers: 4
+  # Match the benchmark's generic training protocol. The TriDim-specific
+  # architecture and InstanceTimeNorm remain unchanged.
+  train_epochs: 50
+  patience: 50
+  eval_freq: 5
+  batch_size: 32
+  learning_rate: 0.0005
+  lradj: cosine
+  optimizer: AdamW
+  weight_decay: 0.05
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0.0
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  patch_len: 64
+  patch_stride: 16
+  channel_basis_dim: 96
+  k_basis_dim: 32
+  t_basis_dim: 32
+  patch_embed_dim: 256
+  n_heads: 4
+  t_layer: 6
+  dropout: 0.2
+  layer_scale_init: 0.01
+  use_input_norm: true
+  drop_path_c: 0.1
+  drop_path_k: 0.02
+  drop_path_t: 0.08
+  drop_path_mlp: 0.02
+  drop_path_schedule: constant
+  canonical_channels: 62
+  canonical_channel_coord_path: ./configs/electrodes/SEED_V.csv
+  input_channel_coord_path: ./configs/electrodes/SEED_V.csv
+  no_channel_prior: false
+  use_multi_level_readout: true

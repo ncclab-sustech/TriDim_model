@@ -1,0 +1,60 @@
+dataset: SHU
+root_path: ${TRIDIM_DATA_ROOT}/SHU_MI
+electrode_channel_count: 32
+electrode_csv: ./configs/electrodes/SHU.csv
+electrode_montage_used: standard_1020
+params:
+  model: eeg_mixer_v11_1_spatial_multilevel
+  d_model: 512
+  patch_len: 32
+  patch_stride: 8
+  channel_basis_dim: 48
+  k_basis_dim: 16
+  t_basis_dim: 16
+  patch_embed_dim: 128
+  n_heads: 4
+  t_layer: 3
+  dropout: 0.2
+  layer_scale_init: 0.01
+  use_input_norm: true
+  stem_kernels:
+  - 51
+  - 99
+  - 199
+  stem_hidden_mult: 4
+  stem_dropout: 0.1
+  drop_path_c: 0.1
+  drop_path_k: 0.02
+  drop_path_t: 0.08
+  drop_path_mlp: 0.02
+  drop_path_schedule: constant
+  canonical_channels: 32
+  canonical_channel_coord_path: ./configs/electrodes/SHU.csv
+  input_channel_coord_path: ./configs/electrodes/SHU.csv
+  no_channel_prior: false
+  use_multi_level_readout: true
+  batch_size: 64
+  learning_rate: 0.0001
+  lradj: cosine
+  optimizer: AdamW
+  weight_decay: 0.02
+  train_epochs: 100
+  patience: 15
+  num_workers: 4
+  select_metric: Accuracy
+  split_mode: stratified_random
+  train_ratio: 0.8
+  val_ratio: 0.1
+  use_gpu: true
+  gpu: 0
+  gpu_idx:
+  - 0
+  itr: 3
+  seeds: [5, 42, 43]
+  seed_start: 5
+  use_cosine_scheduler: true
+  warmup_epochs: 5
+  label_smoothing: 0.0
+  gradient_clip_norm: 1.0
+  eta_min: 1.0e-06
+  seed: 42

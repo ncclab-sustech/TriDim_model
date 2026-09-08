@@ -1,0 +1,64 @@
+dataset: Physionet_MI
+root_path: ${TRIDIM_DATA_ROOT}/Physionet_MI_wsn
+electrode_csv: ./configs/electrodes/Physionet_MI.csv
+electrode_montage_used: standard_1005
+electrode_channel_count: 64
+params:
+  batch_size: 32
+  canonical_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
+  canonical_channels: 59
+  channel_basis_dim: 96
+  dataset: Physionet_MI
+  drop_path_c: 0.25
+  drop_path_k: 0.05
+  drop_path_mlp: 0.05
+  drop_path_schedule: linear
+  drop_path_t: 0.15
+  dropout: 0.3
+  electrode_channel_count: 64
+  electrode_csv: ./configs/electrodes/Physionet_MI.csv
+  electrode_montage_used: standard_1005
+  eta_min: 1.0e-06
+  gpu: 0
+  gpu_idx:
+  - 0
+  gradient_clip_norm: 1.0
+  input_channel_coord_path: ./configs/electrodes/Physionet_MI.csv
+  itr: 3
+  seeds: [5, 42, 43]
+  k_basis_dim: 32
+  label_smoothing: 0
+  layer_scale_init: 0.01
+  learning_rate: 0.0005
+  lradj: cosine
+  model: eeg_mixer_v11_1_spatial_multilevel
+  n_heads: 4
+  no_channel_prior: false
+  num_workers: 4
+  optimizer: AdamW
+  patch_embed_dim: 256
+  patch_len: 80
+  patch_stride: 20
+  patience: 20
+  seed: 5
+  seed_start: 5
+  select_metric: Accuracy
+  split_mode: stratified_random
+  stem_dropout: 0.1
+  stem_hidden_mult: 4
+  stem_kernels:
+  - 51
+  - 99
+  - 199
+  t_basis_dim: 32
+  t_layer: 6
+  train_epochs: 100
+  train_ratio: 0.8
+  use_cosine_scheduler: true
+  use_gpu: true
+  use_input_norm: true
+  use_multi_level_readout: true
+  use_subject_label_for_split: false
+  val_ratio: 0.1
+  warmup_epochs: 5
+  weight_decay: 0.02
