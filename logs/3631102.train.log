@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/work/bme-shenxk/TeCh_nobasis_release/run.py", line 26, in <module>
-    import psutil
-ModuleNotFoundError: No module named 'psutil'

@@ -1,0 +1,158 @@
+[launch] gpu=0 dataset=SEED_V seed=43 2026-07-21T22:53:55Z
+[device] keep scheduler CUDA_VISIBLE_DEVICES=0
+[dataset_cfg] SEED_V root_path -> <DATA_ROOT>
+[dataset_cfg] applied 52 params for SEED_V
+A total 12 CPUs are used, making sure that num_worker is small than the number of CPUs
+Use GPU (single): visible=0 -> cuda:0
+[dataset_cfg] fixed external zarr split: ./configs/splits/SEED_V_10s_benchmark_seed_43.json; train/val/test=9282/1428/714
+================================================================================
+[Model] eeg_mixer_v11_1_spatial_multilevel
+[Model Params] Total: 13,018,841 (13.019 M)
+[Model Params] Trainable: 13,018,841 (13.019 M)
+[Model Params] Non-trainable: 0 (0.000 M)
+[Model Size] Parameters: 49.66 MB
+[Model Size] Buffers: 0.00 MB
+[Model Size] Total estimated: 49.66 MB
+================================================================================
+>>>>>>>start training : eeg_mixer_v11_1_spatial_multilevel_SEED_V_seed_43_dm_128_dp_0.2_tl_6_bs_32_lr0.0005_aug_none_pl_64_cb96_kb32_tb32_pe256_ps16_ca0_cp1_sm0_ml1_selACC_gitnogit_20260722_065456>>>>>>>>>>>>>>>>>>>>>>>>>>
+[dataset_cfg] fixed external zarr split: ./configs/splits/SEED_V_10s_benchmark_seed_43.json; train/val/test=9282/1428/714
+[dataset_cfg] fixed external zarr split: ./configs/splits/SEED_V_10s_benchmark_seed_43.json; train/val/test=9282/1428/714
+(9282, 2000, 62)
+(9282,)
+(1428, 2000, 62)
+(1428,)
+Epoch: 1 cost time: 167.6984224319458
+Epoch: 1, Steps: 291, | Train Loss: 1.66010 | validation skipped (eval_freq=5)
+Epoch: 2 cost time: 166.17153906822205
+Epoch: 2, Steps: 291, | Train Loss: 1.61557 | validation skipped (eval_freq=5)
+Epoch: 3 cost time: 167.32285523414612
+Epoch: 3, Steps: 291, | Train Loss: 1.58684 | validation skipped (eval_freq=5)
+Epoch: 4 cost time: 166.26575255393982
+Epoch: 4, Steps: 291, | Train Loss: 1.53361 | validation skipped (eval_freq=5)
+Epoch: 5 cost time: 167.05058932304382
+Epoch: 5, Steps: 291, | Train Loss: 1.43353
+Validation results --- Loss: 1.62019, Accuracy: 0.28081, Precision: 0.30254, Recall: 0.30547, F1: 0.23251, AUROC: 0.64788, AUPRC: 0.31398
+Metric score decreased (inf --> -0.280812).  Saving model ...
+
+Epoch: 6 cost time: 167.59903264045715
+Epoch: 6, Steps: 291, | Train Loss: 1.26429 | validation skipped (eval_freq=5)
+Epoch: 7 cost time: 166.8495261669159
+Epoch: 7, Steps: 291, | Train Loss: 1.01392 | validation skipped (eval_freq=5)
+Epoch: 8 cost time: 166.43186116218567
+Epoch: 8, Steps: 291, | Train Loss: 0.75975 | validation skipped (eval_freq=5)
+Epoch: 9 cost time: 166.75389170646667
+Epoch: 9, Steps: 291, | Train Loss: 0.51558 | validation skipped (eval_freq=5)
+Epoch: 10 cost time: 166.34306287765503
+Epoch: 10, Steps: 291, | Train Loss: 0.34518
+Validation results --- Loss: 3.37551, Accuracy: 0.29552, Precision: 0.29116, Recall: 0.30973, F1: 0.27719, AUROC: 0.61854, AUPRC: 0.28685
+Metric score decreased (-0.280812 --> -0.295518).  Saving model ...
+
+Epoch: 11 cost time: 167.80791354179382
+Epoch: 11, Steps: 291, | Train Loss: 0.24416 | validation skipped (eval_freq=5)
+Epoch: 12 cost time: 167.0706431865692
+Epoch: 12, Steps: 291, | Train Loss: 0.18911 | validation skipped (eval_freq=5)
+Epoch: 13 cost time: 166.17754483222961
+Epoch: 13, Steps: 291, | Train Loss: 0.14103 | validation skipped (eval_freq=5)
+Epoch: 14 cost time: 167.2431128025055
+Epoch: 14, Steps: 291, | Train Loss: 0.11839 | validation skipped (eval_freq=5)
+Epoch: 15 cost time: 166.79822373390198
+Epoch: 15, Steps: 291, | Train Loss: 0.09931
+Validation results --- Loss: 5.17438, Accuracy: 0.30252, Precision: 0.28815, Recall: 0.30868, F1: 0.28059, AUROC: 0.61469, AUPRC: 0.28154
+Metric score decreased (-0.295518 --> -0.302521).  Saving model ...
+
+Epoch: 16 cost time: 166.99007511138916
+Epoch: 16, Steps: 291, | Train Loss: 0.08753 | validation skipped (eval_freq=5)
+Epoch: 17 cost time: 166.57514357566833
+Epoch: 17, Steps: 291, | Train Loss: 0.07137 | validation skipped (eval_freq=5)
+Epoch: 18 cost time: 166.50723552703857
+Epoch: 18, Steps: 291, | Train Loss: 0.06824 | validation skipped (eval_freq=5)
+Epoch: 19 cost time: 167.1580832004547
+Epoch: 19, Steps: 291, | Train Loss: 0.04682 | validation skipped (eval_freq=5)
+Epoch: 20 cost time: 166.7415668964386
+Epoch: 20, Steps: 291, | Train Loss: 0.04691
+Validation results --- Loss: 6.34770, Accuracy: 0.28852, Precision: 0.28768, Recall: 0.29396, F1: 0.28406, AUROC: 0.60027, AUPRC: 0.26778
+EarlyStopping counter: 1 out of 50
+Epoch: 21 cost time: 166.99543023109436
+Epoch: 21, Steps: 291, | Train Loss: 0.03847 | validation skipped (eval_freq=5)
+Epoch: 22 cost time: 166.47952437400818
+Epoch: 22, Steps: 291, | Train Loss: 0.02540 | validation skipped (eval_freq=5)
+Epoch: 23 cost time: 166.39007234573364
+Epoch: 23, Steps: 291, | Train Loss: 0.02452 | validation skipped (eval_freq=5)
+Epoch: 24 cost time: 166.93505239486694
+Epoch: 24, Steps: 291, | Train Loss: 0.01795 | validation skipped (eval_freq=5)
+Epoch: 25 cost time: 167.70117783546448
+Epoch: 25, Steps: 291, | Train Loss: 0.01341
+Validation results --- Loss: 7.87614, Accuracy: 0.28641, Precision: 0.28857, Recall: 0.30181, F1: 0.26984, AUROC: 0.60973, AUPRC: 0.28022
+EarlyStopping counter: 2 out of 50
+Epoch: 26 cost time: 167.0925600528717
+Epoch: 26, Steps: 291, | Train Loss: 0.01291 | validation skipped (eval_freq=5)
+Epoch: 27 cost time: 166.27005243301392
+Epoch: 27, Steps: 291, | Train Loss: 0.01032 | validation skipped (eval_freq=5)
+Epoch: 28 cost time: 166.51633596420288
+Epoch: 28, Steps: 291, | Train Loss: 0.00863 | validation skipped (eval_freq=5)
+Epoch: 29 cost time: 166.90509605407715
+Epoch: 29, Steps: 291, | Train Loss: 0.00770 | validation skipped (eval_freq=5)
+Epoch: 30 cost time: 167.32471442222595
+Epoch: 30, Steps: 291, | Train Loss: 0.00518
+Validation results --- Loss: 8.59669, Accuracy: 0.28501, Precision: 0.29523, Recall: 0.29878, F1: 0.27364, AUROC: 0.61220, AUPRC: 0.28142
+EarlyStopping counter: 3 out of 50
+Epoch: 31 cost time: 167.1269085407257
+Epoch: 31, Steps: 291, | Train Loss: 0.00349 | validation skipped (eval_freq=5)
+Epoch: 32 cost time: 167.13705730438232
+Epoch: 32, Steps: 291, | Train Loss: 0.00350 | validation skipped (eval_freq=5)
+Epoch: 33 cost time: 167.13416481018066
+Epoch: 33, Steps: 291, | Train Loss: 0.00250 | validation skipped (eval_freq=5)
+Epoch: 34 cost time: 167.27329230308533
+Epoch: 34, Steps: 291, | Train Loss: 0.00198 | validation skipped (eval_freq=5)
+Epoch: 35 cost time: 167.30809044837952
+Epoch: 35, Steps: 291, | Train Loss: 0.00118
+Validation results --- Loss: 8.73311, Accuracy: 0.29132, Precision: 0.29062, Recall: 0.29945, F1: 0.27717, AUROC: 0.60561, AUPRC: 0.27204
+EarlyStopping counter: 4 out of 50
+Epoch: 36 cost time: 167.20228171348572
+Epoch: 36, Steps: 291, | Train Loss: 0.00120 | validation skipped (eval_freq=5)
+Epoch: 37 cost time: 166.03625392913818
+Epoch: 37, Steps: 291, | Train Loss: 0.00052 | validation skipped (eval_freq=5)
+Epoch: 38 cost time: 167.43905019760132
+Epoch: 38, Steps: 291, | Train Loss: 0.00040 | validation skipped (eval_freq=5)
+Epoch: 39 cost time: 167.30604076385498
+Epoch: 39, Steps: 291, | Train Loss: 0.00099 | validation skipped (eval_freq=5)
+Epoch: 40 cost time: 167.45315742492676
+Epoch: 40, Steps: 291, | Train Loss: 0.00023
+Validation results --- Loss: 8.75506, Accuracy: 0.29272, Precision: 0.29201, Recall: 0.30147, F1: 0.28258, AUROC: 0.60965, AUPRC: 0.27832
+EarlyStopping counter: 5 out of 50
+Epoch: 41 cost time: 167.68676924705505
+Epoch: 41, Steps: 291, | Train Loss: 0.00028 | validation skipped (eval_freq=5)
+Epoch: 42 cost time: 167.00125432014465
+Epoch: 42, Steps: 291, | Train Loss: 0.00017 | validation skipped (eval_freq=5)
+Epoch: 43 cost time: 167.1243941783905
+Epoch: 43, Steps: 291, | Train Loss: 0.00013 | validation skipped (eval_freq=5)
+Epoch: 44 cost time: 166.48374247550964
+Epoch: 44, Steps: 291, | Train Loss: 0.00023 | validation skipped (eval_freq=5)
+Epoch: 45 cost time: 166.67400312423706
+Epoch: 45, Steps: 291, | Train Loss: 0.00011
+Validation results --- Loss: 8.80551, Accuracy: 0.29202, Precision: 0.29172, Recall: 0.30179, F1: 0.27993, AUROC: 0.61180, AUPRC: 0.27990
+EarlyStopping counter: 6 out of 50
+Epoch: 46 cost time: 167.80227661132812
+Epoch: 46, Steps: 291, | Train Loss: 0.00014 | validation skipped (eval_freq=5)
+Epoch: 47 cost time: 166.53410005569458
+Epoch: 47, Steps: 291, | Train Loss: 0.00011 | validation skipped (eval_freq=5)
+Epoch: 48 cost time: 166.74412655830383
+Epoch: 48, Steps: 291, | Train Loss: 0.00014 | validation skipped (eval_freq=5)
+Epoch: 49 cost time: 166.62405729293823
+Epoch: 49, Steps: 291, | Train Loss: 0.00012 | validation skipped (eval_freq=5)
+Epoch: 50 cost time: 166.3092291355133
+Epoch: 50, Steps: 291, | Train Loss: 0.00011
+Validation results --- Loss: 8.83121, Accuracy: 0.29132, Precision: 0.29275, Recall: 0.30143, F1: 0.27963, AUROC: 0.61112, AUPRC: 0.27869
+EarlyStopping counter: 7 out of 50
+>>>>>>>testing : eeg_mixer_v11_1_spatial_multilevel_SEED_V_seed_43_dm_128_dp_0.2_tl_6_bs_32_lr0.0005_aug_none_pl_64_cb96_kb32_tb32_pe256_ps16_ca0_cp1_sm0_ml1_selACC_gitnogit_20260722_065456<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+[dataset_cfg] fixed external zarr split: ./configs/splits/SEED_V_10s_benchmark_seed_43.json; train/val/test=9282/1428/714
+[dataset_cfg] fixed external zarr split: ./configs/splits/SEED_V_10s_benchmark_seed_43.json; train/val/test=9282/1428/714
+Validation results --- Loss: 5.17438, Accuracy: 0.30252, Precision: 0.28815, Recall: 0.30868, F1: 0.28059, AUROC: 0.61469, AUPRC: 0.28154
+Test results --- Loss: 5.11911, Accuracy: 0.26891, Precision: 0.29188, Recall: 0.28395, F1: 0.25739, AUROC: 0.59346, AUPRC: 0.26764
+
+[result] Saved experiment record to: results/runs/<RUN_RECORD>.yaml
+Mean accuracy: 0.2689, precision: 0.2919,recall: 0.2839, f1: 0.2574, AUROC: 0.5935, AUPRC: 0.2676
+Std accuracy: 0.0000, precision: 0.0000,recall: 0.0000, f1: 0.0000, AUROC: 0.0000, AUPRC: 0.0000
+================================================================================
+[CONFIG CHECK] 当前使用的 block_type 是：【 full 】
+================================================================================

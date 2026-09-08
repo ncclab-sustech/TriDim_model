@@ -51,9 +51,6 @@ def write_simple_yaml(path, record):
 
 def get_job_id():
     """Get job id from common schedulers. Fall back to timestamped local id."""
-    import os
-    import time
-
     for key in [
         "LSB_JOBID",       # LSF / bsub
         "SLURM_JOB_ID",    # Slurm
@@ -91,8 +88,6 @@ def collect_experiment_record(
         record: dict
         out_path: Path
     """
-
-    # job_id = os.environ.get("LSB_JOBID", "local")
     job_id = get_job_id()
     branch = _run_cmd("git branch --show-current")
     commit = _run_cmd("git rev-parse --short HEAD")

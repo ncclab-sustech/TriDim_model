@@ -1,4 +1,4 @@
-import copy
+import json
 import os
 from pathlib import Path
 import numpy as np
@@ -7,12 +7,11 @@ import glob
 import re
 import h5py
 import torch
-from torch.utils.data import Dataset, DataLoader
-from data_provider.uea import (normalize_batch_ts,bandpass_filter_func)
+from torch.utils.data import Dataset
+from data_provider.uea import normalize_batch_ts
 import warnings
-import random
+import hashlib
 from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
 from natsort import natsorted
 try:
     import zarr
@@ -21,12 +20,84 @@ except Exception:
 
 warnings.filterwarnings("ignore")
 
-class APAVALoader(Dataset):
+
+def _split_subjects_stratified_random(subject_to_label, train_r, val_r, seed):
+    """Deterministically split subject IDs within each class."""
+    rng = np.random.RandomState(int(seed))
+    by_label = {}
+    for sid, label in subject_to_label.items():
+        by_label.setdefault(int(label), []).append(int(sid))
+
+    train_ids, val_ids, test_ids = [], [], []
+    split_b = float(train_r) + float(val_r)
+    for label in sorted(by_label):
+        members = sorted(by_label[label])
+        rng.shuffle(members)
+        n = len(members)
+        if n < 3:
+            raise ValueError(
+                f"Class {label} has only {n} subjects; cannot create train/val/test splits"
+            )
+        train_end = min(max(1, int(round(float(train_r) * n))), n - 2)
+        val_end = min(max(train_end + 1, int(round(split_b * n))), n - 1)
+        train_ids.extend(members[:train_end])
+        val_ids.extend(members[train_end:val_end])
+        test_ids.extend(members[val_end:])
+    return train_ids, val_ids, test_ids
+
+
+def _load_external_subject_split(manifest_spec, seed, expected_ids):
+    if not manifest_spec:
+        raise ValueError("split_mode=external_manifest requires external_split_manifest")
+    manifest_path = str(manifest_spec).format(seed=int(seed))
+    if not os.path.isfile(manifest_path):
+        raise FileNotFoundError(f"External subject split manifest not found: {manifest_path}")
+    with open(manifest_path, "r", encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    splits = manifest.get("splits", {})
+    result = {}
+    for name in ("train", "val", "test"):
+        values = [int(value) for value in splits.get(name, [])]
+        if not values or len(values) != len(set(values)):
+            raise ValueError(f"Invalid or duplicate subject IDs in {name}: {manifest_path}")
+        result[name] = values
+
+    split_sets = {name: set(values) for name, values in result.items()}
+    if (
+        split_sets["train"] & split_sets["val"]
+        or split_sets["train"] & split_sets["test"]
+        or split_sets["val"] & split_sets["test"]
+    ):
+        raise ValueError(f"External subject split contains overlap: {manifest_path}")
+    covered = set().union(*split_sets.values())
+    if covered != set(int(value) for value in expected_ids):
+        raise ValueError(f"External subject split does not exactly cover the dataset: {manifest_path}")
+
+    canonical = json.dumps(result, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    fingerprint = hashlib.sha256(canonical).hexdigest()
+    print(
+        "[subject_split] "
+        f"manifest={manifest_path} sha256={fingerprint} "
+        f"train/val/test={len(result['train'])}/{len(result['val'])}/{len(result['test'])}"
+    )
+    return result["train"], result["val"], result["test"]
+
+
+class EEGDatasetLoader(Dataset):
+    _label_map_cache = {}
+
     def __init__(self, args, root_path, flag=None):
         self.root_path = root_path
-        self.data_path = os.path.join(root_path, "Feature/")
-        self.label_path = os.path.join(root_path, "Label/label.npy")
+        self.flag = str(flag).upper() if flag is not None else None
+        if self.flag not in {None, "TRAIN", "VAL", "TEST"}:
+            raise ValueError(f"Unsupported data split flag: {flag!r}")
+
         self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
+        if self.split_mode not in {"stratified_random", "external_manifest"}:
+            raise ValueError(
+                "Public release supports only subject-aware stratified_random "
+                "or immutable external_manifest splits"
+            )
         self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
         self.train_ratio = float(getattr(args, "train_ratio", 0.8))
         self.val_ratio = float(getattr(args, "val_ratio", 0.1))
@@ -35,302 +106,130 @@ class APAVALoader(Dataset):
             or self.val_ratio <= 0
             or self.train_ratio + self.val_ratio >= 1.0
         ):
-            self.train_ratio, self.val_ratio = 0.8, 0.1
+            raise ValueError("train_ratio and val_ratio must be positive and sum to < 1")
 
-        if self.split_mode == "segment_stratified_random":
-            self.X, self.y = self.load_apava_segment_split(
-                self.data_path, self.label_path, flag=flag
-            )
-        else:
-            a = float(getattr(args, "train_ratio", 0.8))
-            b = a + float(getattr(args, "val_ratio", 0.1))
-            self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-                self.label_path,
-                a=a,
-                b=b,
-                seed=self.split_seed,
-                random_split=self.split_mode != "label_order",
-            )
-            self.X, self.y = self.load_apava(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        self.X = normalize_batch_ts(self.X)
-        # self.X = bandpass_filter_func(self.X, fs=256, lowcut=0.5, highcut=45)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_train_val_test_list(self, label_path, a=0.8, b=0.9, seed=42, random_split=True):
-        """
-        Build subject-level split for APAVA.
-        By default, each seed gets a new stratified random 8:1:1 split.
-        """
-        data_list = np.load(label_path)
-        by_label = {}
-        for row in data_list:
-            lbl = int(row[0])
-            sid = int(row[1])
-            by_label.setdefault(lbl, [])
-            if sid not in by_label[lbl]:
-                by_label[lbl].append(sid)
-
-        train_ids, val_ids, test_ids = [], [], []
-        rng = np.random.RandomState(seed)
-        for lbl in sorted(by_label.keys()):
-            members = list(by_label[lbl])
-            if random_split:
-                rng.shuffle(members)
-            n = len(members)
-            t0 = int(a * n)
-            t1 = int(b * n)
-            train_ids.extend(members[:t0])
-            val_ids.extend(members[t0:t1])
-            test_ids.extend(members[t1:])
-
-        return train_ids, val_ids, test_ids
-
-    def load_apava(self, data_path, label_path, flag=None):
-        """
-        Loads APAVA data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        """
-        feature_list = []
-        label_list = []
-        filenames = natsorted(list(os.listdir(data_path)))
-        subject_label = np.load(label_path)
-
-        if flag == "TRAIN":
-            ids = set(self.train_ids)
-        elif flag == "VAL":
-            ids = set(self.val_ids)
-        elif flag == "TEST":
-            ids = set(self.test_ids)
-        else:
-            ids = set(int(v) for v in subject_label[:, 1].tolist())
-
-        for j, filename in enumerate(filenames):
-            trial_label = subject_label[j]
-            path = os.path.join(data_path, filename)
-            subject_feature = np.load(path)
-            if int(trial_label[1]) in ids:
-                for trial_feature in subject_feature:
-                    feature_list.append(trial_feature)
-                    label_list.append(int(trial_label[0]))
-
-        X = np.asarray(feature_list, dtype=np.float32)
-        y = np.asarray(label_list, dtype=np.int64)
-        X, y = shuffle(X, y, random_state=self.split_seed)
-        return X, y
-
-    def load_apava_segment_split(self, data_path, label_path, flag=None):
-        """
-        Non-cross-subject split for APAVA:
-        collect all segments, then stratified 8:1:1 (or CLI ratios) by segment label.
-        """
-        feature_list = []
-        label_list = []
-        filenames = natsorted(list(os.listdir(data_path)))
-        subject_label = np.load(label_path)
-
-        for j, filename in enumerate(filenames):
-            trial_label = subject_label[j]
-            path = os.path.join(data_path, filename)
-            subject_feature = np.load(path)
-            for trial_feature in subject_feature:
-                feature_list.append(trial_feature)
-                label_list.append(int(trial_label[0]))
-
-        X_all = np.asarray(feature_list, dtype=np.float32)
-        y_all = np.asarray(label_list, dtype=np.int64)
-
-        all_idx = np.arange(len(y_all))
-        train_idx, rest_idx = train_test_split(
-            all_idx,
-            test_size=(1.0 - self.train_ratio),
-            random_state=self.split_seed,
-            stratify=y_all,
-            shuffle=True,
-        )
-        val_portion = self.val_ratio / (1.0 - self.train_ratio)
-        val_idx, test_idx = train_test_split(
-            rest_idx,
-            test_size=(1.0 - val_portion),
-            random_state=self.split_seed,
-            stratify=y_all[rest_idx],
-            shuffle=True,
-        )
-
-        if flag == "TRAIN":
-            idx = train_idx
-        elif flag == "VAL":
-            idx = val_idx
-        elif flag == "TEST":
-            idx = test_idx
-        else:
-            idx = all_idx
-
-        X = X_all[idx]
-        y = y_all[idx]
-        X, y = shuffle(X, y, random_state=self.split_seed)
-        return X, y
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), torch.from_numpy(
-            np.asarray(self.y[index])
-        )
-
-    def __len__(self):
-        return len(self.y)
-
-
-class TDBRAINLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, "Feature/")
-        self.label_path = os.path.join(root_path, "Label/label.npy")
-
-        train_ids = list(range(1, 18)) + list(
-            range(29, 46)
-        )  # specify patient ID for training, validation, and test set
-        val_ids = [18, 19, 20, 21] + [46, 47, 48, 49]  # 8 patients, 4 positive 4 healthy
-        test_ids = [22, 23, 24, 25] + [50, 51, 52, 53]  # 8 patients, 4 positive 4 healthy
-
-        # list of IDs for training, val, and test sets
-        self.train_ids, self.val_ids, self.test_ids = train_ids, val_ids, test_ids
-
-        self.X, self.y = self.load_tdbrain(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        self.X = normalize_batch_ts(self.X)
-        # self.X = bandpass_filter_func(self.X, fs=256, lowcut=0.5, highcut=45)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_tdbrain(self, data_path, label_path, flag=None):
-        """
-        Loads tdbrain data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        """
-        feature_list = []
-        label_list = []
-        filenames = []
-        # The first column is the label; the second column is the patient ID
-        subject_label = np.load(label_path)
-        for filename in os.listdir(data_path):
-            filenames.append(filename)
-        filenames = natsorted(filenames)
-        if flag == "TRAIN":
-            ids = self.train_ids
-            # print("train ids:", ids)
-        elif flag == "VAL":
-            ids = self.val_ids
-            # print("val ids:", ids)
-        elif flag == "TEST":
-            ids = self.test_ids
-            # print("test ids:", ids)
-        else:
-            ids = subject_label[:, 1]
-            # print("all ids:", ids)
-
-        for j in range(len(filenames)):
-            trial_label = subject_label[j]
-            path = data_path + filenames[j]
-            subject_feature = np.load(path)
-            for trial_feature in subject_feature:
-                # load data by ids
-                if int(trial_label[1]) in ids:
-                    feature_list.append(trial_feature)
-                    label_list.append(trial_label)
-        # reshape and shuffle
-        X = np.array(feature_list)
-        y = np.array(label_list)
-        X, y = shuffle(X, y, random_state=self.split_seed)
-
-        return X, y[:, 0]  # only use the first column (label)
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), torch.from_numpy(
-            np.asarray(self.y[index])
-        )
-
-    def __len__(self):
-        return len(self.y)
-
-
-class ADHDLoader(Dataset):
-    _label_map_cache = {}
-
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
         self.file_paths = natsorted(glob.glob(os.path.join(root_path, "sub_*.h5")))
-        if len(self.file_paths) == 0:
+        if not self.file_paths:
             self.file_paths = natsorted(glob.glob(os.path.join(root_path, "*.h5")))
+
         self.zarr_path = None
-        if len(self.file_paths) == 0:
+        if not self.file_paths:
             if str(root_path).lower().endswith(".zarr") and os.path.isdir(root_path):
                 self.zarr_path = root_path
             else:
-                zarr_candidates = natsorted(glob.glob(os.path.join(root_path, "*.zarr")))
-                if len(zarr_candidates) > 0:
-                    self.zarr_path = zarr_candidates[0]
+                candidates = natsorted(glob.glob(os.path.join(root_path, "*.zarr")))
+                if candidates:
+                    self.zarr_path = candidates[0]
         self.use_zarr = self.zarr_path is not None
-        if len(self.file_paths) == 0 and not self.use_zarr:
-            raise FileNotFoundError(f"No ADHD h5/zarr dataset found under: {root_path}")
+        if not self.file_paths and not self.use_zarr:
+            raise FileNotFoundError(f"No EEG HDF5/Zarr dataset found under: {root_path}")
 
-        self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
-        self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
-        self.train_ratio = float(getattr(args, "train_ratio", 0.8))
-        self.val_ratio = float(getattr(args, "val_ratio", 0.1))
-        if self.train_ratio <= 0 or self.val_ratio <= 0 or self.train_ratio + self.val_ratio >= 1.0:
-            self.train_ratio, self.val_ratio = 0.8, 0.1
         if self.use_zarr:
             self._load_zarr_arrays()
-        if self.split_mode == "segment_stratified_random":
+
+        manifest_spec = getattr(args, "external_split_manifest", None)
+        self._external_split_indices = None
+        if self.split_mode == "external_manifest":
+            self._external_split_indices = self._load_external_zarr_split_indices(
+                manifest_spec
+            )
+            if self._external_split_indices is None:
+                raise ValueError(
+                    "split_mode=external_manifest requires external_split_manifest"
+                )
             self.train_ids, self.val_ids, self.test_ids = [], [], []
         else:
-            if self.use_zarr:
-                subject_to_label = self._build_subject_label_map_zarr()
-            else:
-                subject_to_label = self._build_subject_label_map(self.file_paths)
-            if self.split_mode == "label_order":
-                self.train_ids, self.val_ids, self.test_ids = self._split_subjects_by_label_order(
-                    subject_to_label, train_r=self.train_ratio, val_r=self.val_ratio
+            if manifest_spec:
+                raise ValueError(
+                    "external_split_manifest requires split_mode=external_manifest"
                 )
-            else:
-                self.train_ids, self.val_ids, self.test_ids = self._split_subjects_stratified_random(
-                    subject_to_label, train_r=self.train_ratio, val_r=self.val_ratio, seed=self.split_seed
+            subject_to_label = (
+                self._build_subject_label_map_zarr()
+                if self.use_zarr
+                else self._build_subject_label_map(self.file_paths)
+            )
+            self.train_ids, self.val_ids, self.test_ids = (
+                self._split_subjects_stratified_random(
+                    subject_to_label,
+                    train_r=self.train_ratio,
+                    val_r=self.val_ratio,
+                    seed=self.split_seed,
                 )
+            )
 
-        cache_key = os.path.abspath(self.root_path) + ("::zarr" if self.use_zarr else "::h5")
-        if cache_key in ADHDLoader._label_map_cache:
-            self.label_map = ADHDLoader._label_map_cache[cache_key]
-        else:
-            if self.use_zarr:
-                unique_labels = self._collect_unique_labels_zarr()
-            else:
-                unique_labels = self._collect_unique_labels(self.file_paths)
-            self.label_map = {int(lbl): i for i, lbl in enumerate(sorted(unique_labels))}
-            ADHDLoader._label_map_cache[cache_key] = self.label_map
+        cache_key = os.path.abspath(self.root_path) + (
+            "::zarr" if self.use_zarr else "::h5"
+        )
+        if cache_key not in EEGDatasetLoader._label_map_cache:
+            unique_labels = (
+                self._collect_unique_labels_zarr()
+                if self.use_zarr
+                else self._collect_unique_labels(self.file_paths)
+            )
+            EEGDatasetLoader._label_map_cache[cache_key] = {
+                int(label): index
+                for index, label in enumerate(sorted(unique_labels))
+            }
+        self.label_map = EEGDatasetLoader._label_map_cache[cache_key]
 
         if self.use_zarr:
-            self.X, self.y = self.load_adhd_zarr(flag=flag)
+            self.X, self.y = self.load_zarr_split()
         else:
-            self.X, self.y = self.load_adhd(flag=flag)
-
-        # pre_process
+            self.X, self.y = self.load_h5_split()
         self.X = normalize_batch_ts(self.X)
         self.max_seq_len = self.X.shape[1]
+
+    def _load_external_zarr_split_indices(self, manifest_spec):
+        """Load a fixed train/val/test index manifest for an identical zarr export.
+
+        ``manifest_spec`` may include ``{seed}``, which is resolved with the
+        experiment seed.  This enables exact replay of an external benchmark
+        split while retaining the model's usual training code.
+        """
+        if not manifest_spec:
+            return None
+        if not self.use_zarr:
+            raise ValueError("external_split_manifest is supported only for zarr datasets")
+
+        manifest_path = str(manifest_spec).format(seed=self.split_seed)
+        if not os.path.isfile(manifest_path):
+            raise FileNotFoundError(f"External split manifest not found: {manifest_path}")
+        with open(manifest_path, "r", encoding="utf-8") as handle:
+            manifest = json.load(handle)
+        splits = manifest.get("splits", {})
+        required = ("train", "val", "test")
+        if any(name not in splits for name in required):
+            raise KeyError(
+                f"External split manifest must contain {required}; got {sorted(splits)}"
+            )
+
+        n_samples = int(self._zarr_X_all.shape[0])
+        result = {}
+        for name in required:
+            indices = np.asarray(splits[name], dtype=np.int64).reshape(-1)
+            if indices.size == 0:
+                raise ValueError(f"External split '{name}' is empty in {manifest_path}")
+            if indices.min() < 0 or indices.max() >= n_samples:
+                raise IndexError(
+                    f"External split '{name}' contains indices outside [0, {n_samples})"
+                )
+            if np.unique(indices).size != indices.size:
+                raise ValueError(f"External split '{name}' contains duplicate indices")
+            result[name] = indices
+
+        if (
+            np.intersect1d(result["train"], result["val"]).size
+            or np.intersect1d(result["train"], result["test"]).size
+            or np.intersect1d(result["val"], result["test"]).size
+        ):
+            raise ValueError("External train/val/test indices overlap")
+
+        print(
+            "[dataset_cfg] fixed external zarr split: "
+            f"{manifest_path}; train/val/test="
+            f"{len(result['train'])}/{len(result['val'])}/{len(result['test'])}"
+        )
+        return result
 
     def _subject_id_from_path(self, file_path):
         name = os.path.basename(file_path)
@@ -369,10 +268,14 @@ class ADHDLoader(Dataset):
         if m is not None:
             return 500000 + int(m.group(1))
         # BCIC2A style: A01T.h5 (training) / A01E.h5 (evaluation). Treat T/E as distinct subjects.
+        # m = re.match(r"A(\d+)([ET])\.h5$", name)
+        # if m is not None:
+        #     num = int(m.group(1))
+        #     return (600000 if m.group(2) == "T" else 700000) + num
         m = re.match(r"A(\d+)([ET])\.h5$", name)
         if m is not None:
             num = int(m.group(1))
-            return (600000 if m.group(2) == "T" else 700000) + num
+            return 600000 + num
         # MDD style: "H S1 EC.h5" (healthy) / "MDD S1 EC.h5" (patient) / "6921143_H S15 EO.h5".
         # Group prefix disambiguates healthy vs patient; condition (EC/EO/TASK) merges into same subject.
         m = re.search(r"(?:^|[_\s])([A-Za-z]+)\s+S(\d+)\b", name)
@@ -388,7 +291,7 @@ class ADHDLoader(Dataset):
         m = re.match(r"(\d+)", name)
         if m is not None:
             return int(m.group(1))
-        raise ValueError(f"Unexpected ADHD filename format: {file_path}")
+        raise ValueError(f"Unexpected EEG filename format: {file_path}")
 
     def _extract_label(self, eeg_dataset, seg_group=None):
         raw_label = None
@@ -402,7 +305,7 @@ class ADHDLoader(Dataset):
             raise KeyError("Missing 'label' in eeg attrs and segment attrs/datasets.")
         if isinstance(raw_label, np.ndarray):
             if raw_label.size == 0:
-                raise ValueError("Empty 'label' attr in ADHD eeg segment.")
+                raise ValueError("Empty 'label' attr in EEG eeg segment.")
             raw_label = raw_label.reshape(-1)[0]
         return int(raw_label)
 
@@ -426,7 +329,7 @@ class ADHDLoader(Dataset):
             except OSError as e:
                 warnings.warn(f"Skip unreadable h5 file while collecting labels: {file_path} ({e})")
         if not labels:
-            raise RuntimeError("No valid labels found in ADHD-style h5 dataset.")
+            raise RuntimeError("No valid labels found in EEG-style h5 dataset.")
         return labels
 
     def _load_zarr_arrays(self):
@@ -444,7 +347,7 @@ class ADHDLoader(Dataset):
         X = np.asarray(group["signals"], dtype=np.float32)
         if X.ndim != 3:
             raise ValueError(f"Expected signals ndim=3, got {X.ndim} in {self.zarr_path}")
-        # Raw zarr shape is (N, C, T); convert to (N, T, C) for TeCh.
+        # Raw zarr shape is (N, C, T); convert to (N, T, C) for TriDim.
         X = np.transpose(X, (0, 2, 1))
         y = np.asarray(group["labels"], dtype=np.int64).reshape(-1)
         n = int(X.shape[0])
@@ -466,6 +369,7 @@ class ADHDLoader(Dataset):
             # while preserving it in sample_index.parquet.
             sid_source = "sample_index.parquet"
             sids = self._load_subject_ids_from_sample_index(expected_len=n)
+
 
         self._zarr_subject_id_source = sid_source
 
@@ -584,44 +488,11 @@ class ADHDLoader(Dataset):
             unique_vals, counts = np.unique(np.asarray(labels, dtype=np.int64), return_counts=True)
             subject_to_label[sid] = int(unique_vals[np.argmax(counts)])
         if len(subject_to_label) == 0:
-            raise RuntimeError("No valid ADHD subjects with labels were found.")
+            raise RuntimeError("No valid EEG subjects with labels were found.")
         return subject_to_label
 
-    def _split_subjects_by_label_order(self, subject_to_label, train_r=0.8, val_r=0.1):
-        by_label = {}
-        for sid in sorted(subject_to_label.keys(), key=lambda x: str(x)):
-            lbl = int(subject_to_label[sid])
-            by_label.setdefault(lbl, [])
-            by_label[lbl].append(sid)
 
-        train_ids, val_ids, test_ids = [], [], []
-        split_b = train_r + val_r
-        for lbl in sorted(by_label.keys()):
-            members = by_label[lbl]
-            n = len(members)
-            if n == 1:
-                t0, t1 = 1, 1
-            elif n == 2:
-                t0, t1 = 1, 2
-            else:
-                t0 = max(1, int(round(train_r * n)))
-                t0 = min(t0, n - 2)
-                t1 = int(round(split_b * n))
-                t1 = max(t0 + 1, t1)
-                t1 = min(t1, n - 1)
-            train_ids.extend(members[:t0])
-            val_ids.extend(members[t0:t1])
-            test_ids.extend(members[t1:])
-
-        # Guard against accidental empty split when class count is very small.
-        if len(val_ids) == 0 and len(train_ids) > 1:
-            val_ids.append(train_ids.pop(-1))
-        if len(test_ids) == 0 and len(train_ids) > 1:
-            test_ids.append(train_ids.pop(-1))
-
-        return train_ids, val_ids, test_ids
-
-    def _split_subjects_stratified_random(self, subject_to_label, train_r=0.8, val_r=0.1, seed=42):
+    def _split_subjects_stratified_random(self, subject_to_label, train_r=0.4, val_r=0.3, seed=42):
         rng = np.random.RandomState(int(seed))
         by_label = {}
         for sid, lbl in subject_to_label.items():
@@ -656,611 +527,88 @@ class ADHDLoader(Dataset):
 
         return train_ids, val_ids, test_ids
 
-    def _load_all_segments(self):
-        feature_list, label_list = [], []
-        for file_path in self.file_paths:
-            x_list, y_list = self._load_file_segments(file_path)
-            feature_list.extend(x_list)
-            label_list.extend(y_list)
-        if len(feature_list) == 0:
-            raise RuntimeError("No ADHD samples loaded from h5 files.")
-        X = np.asarray(feature_list, dtype=np.float32)
-        y = np.asarray(label_list, dtype=np.int64)
-        return X, y
 
-    def _split_segment_indices_stratified_random(self, labels, train_r=0.8, val_r=0.1, seed=42):
-        if labels.ndim != 1:
-            labels = labels.reshape(-1)
-        indices = np.arange(labels.shape[0], dtype=np.int64)
-        if labels.shape[0] < 3:
-            return indices, np.array([], dtype=np.int64), np.array([], dtype=np.int64)
 
-        split_b = float(train_r) + float(val_r)
-        rest_r = max(1e-8, 1.0 - float(train_r))
-        val_from_rest = float(val_r) / rest_r
-        val_from_rest = min(max(val_from_rest, 1e-8), 1.0 - 1e-8)
-
-        strat_all = labels if len(np.unique(labels)) > 1 else None
-        try:
-            train_idx, rest_idx = train_test_split(
-                indices,
-                train_size=float(train_r),
-                random_state=int(seed),
-                shuffle=True,
-                stratify=strat_all,
-            )
-            rest_labels = labels[rest_idx]
-            strat_rest = rest_labels if len(np.unique(rest_labels)) > 1 else None
-            val_idx, test_idx = train_test_split(
-                rest_idx,
-                train_size=val_from_rest,
-                random_state=int(seed),
-                shuffle=True,
-                stratify=strat_rest,
-            )
-        except ValueError:
-            rng = np.random.RandomState(int(seed))
-            shuffled = indices.copy()
-            rng.shuffle(shuffled)
-            n = len(shuffled)
-            t0 = int(round(float(train_r) * n))
-            t1 = int(round(split_b * n))
-            t0 = min(max(1, t0), max(1, n - 2))
-            t1 = min(max(t0 + 1, t1), max(t0 + 1, n - 1))
-            train_idx = shuffled[:t0]
-            val_idx = shuffled[t0:t1]
-            test_idx = shuffled[t1:]
-
-        return (
-            np.asarray(train_idx, dtype=np.int64),
-            np.asarray(val_idx, dtype=np.int64),
-            np.asarray(test_idx, dtype=np.int64),
-        )
-
-    def load_adhd_zarr(self, flag=None):
+    def load_zarr_split(self):
         X_all = self._zarr_X_all
         y_all = self._encode_labels(self._zarr_y_all_raw)
-        sid_all = self._zarr_subject_ids
+        subject_ids = self._zarr_subject_ids
 
-        if self.split_mode == "segment_stratified_random":
-            train_idx, val_idx, test_idx = self._split_segment_indices_stratified_random(
-                y_all, train_r=self.train_ratio, val_r=self.val_ratio, seed=self.split_seed
+        if self._external_split_indices is not None:
+            split_name = {
+                "TRAIN": "train",
+                "VAL": "val",
+                "TEST": "test",
+            }.get(self.flag)
+            indices = (
+                np.arange(len(y_all), dtype=np.int64)
+                if split_name is None
+                else self._external_split_indices[split_name]
             )
-            if flag == "TRAIN":
-                idx = train_idx
-            elif flag == "VAL":
-                idx = val_idx
-            elif flag == "TEST":
-                idx = test_idx
+            X, y = X_all[indices], y_all[indices]
+            if (
+                split_name == "train"
+                and os.environ.get("SHUFFLE_TRAIN_LABELS", "0") == "1"
+            ):
+                shuffle_seed = int(
+                    os.environ.get("SHUFFLE_TRAIN_LABELS_SEED", "42")
+                )
+                rng = np.random.RandomState(shuffle_seed)
+                y = y[rng.permutation(len(y))]
+                print(
+                    "[SHUFFLE_TRAIN_LABELS] train labels permuted with "
+                    f"seed {shuffle_seed}; validation/test labels unchanged"
+                )
+        else:
+            if self.flag == "TRAIN":
+                target_ids = set(self.train_ids)
+            elif self.flag == "VAL":
+                target_ids = set(self.val_ids)
+            elif self.flag == "TEST":
+                target_ids = set(self.test_ids)
             else:
-                idx = np.arange(len(y_all), dtype=np.int64)
-            X = X_all[idx]
-            y = y_all[idx]
-            X, y = shuffle(X, y, random_state=42)
-            return X, y
+                target_ids = set(np.unique(subject_ids).tolist())
+            mask = np.asarray(
+                [subject_id in target_ids for subject_id in subject_ids],
+                dtype=bool,
+            )
+            if not np.any(mask):
+                raise RuntimeError(f"No Zarr EEG samples loaded for split: {self.flag}")
+            X, y = X_all[mask], y_all[mask]
 
-        if flag == "TRAIN":
+        return shuffle(X, y, random_state=42)
+
+    def load_h5_split(self):
+        if self.flag == "TRAIN":
             target_ids = set(self.train_ids)
-        elif flag == "VAL":
+        elif self.flag == "VAL":
             target_ids = set(self.val_ids)
-        elif flag == "TEST":
+        elif self.flag == "TEST":
             target_ids = set(self.test_ids)
         else:
-            target_ids = set(np.unique(sid_all).tolist())
+            target_ids = {
+                self._subject_id_from_path(path) for path in self.file_paths
+            }
 
-        mask = np.asarray([sid in target_ids for sid in sid_all], dtype=bool)
-        if not np.any(mask):
-            raise RuntimeError(f"No zarr samples loaded for split: {flag}")
-        X = X_all[mask]
-        y = y_all[mask]
-        X, y = shuffle(X, y, random_state=42)
-        return X, y
-
-    def load_adhd(self, flag=None):
-        if self.split_mode == "segment_stratified_random":
-            X_all, y_all = self._load_all_segments()
-            y_all = self._encode_labels(y_all)
-            train_idx, val_idx, test_idx = self._split_segment_indices_stratified_random(
-                y_all, train_r=self.train_ratio, val_r=self.val_ratio, seed=self.split_seed
-            )
-            if flag == "TRAIN":
-                X = X_all[train_idx]
-                y = y_all[train_idx]
-            elif flag == "VAL":
-                X = X_all[val_idx]
-                y = y_all[val_idx]
-            elif flag == "TEST":
-                X = X_all[test_idx]
-                y = y_all[test_idx]
-            else:
-                X = X_all
-                y = y_all
-            X, y = shuffle(X, y, random_state=42)
-            return X, y
-
-        if flag == "TRAIN":
-            target_ids = set(self.train_ids)
-        elif flag == "VAL":
-            target_ids = set(self.val_ids)
-        elif flag == "TEST":
-            target_ids = set(self.test_ids)
-        else:
-            target_ids = set(self._subject_id_from_path(p) for p in self.file_paths)
-
-        feature_list, label_list = [], []
+        features, labels = [], []
         for file_path in self.file_paths:
-            sid = self._subject_id_from_path(file_path)
-            if sid not in target_ids:
+            subject_id = self._subject_id_from_path(file_path)
+            if subject_id not in target_ids:
                 continue
-            x_list, y_list = self._load_file_segments(file_path)
-            feature_list.extend(x_list)
-            label_list.extend(y_list)
+            file_features, file_labels = self._load_file_segments(file_path)
+            features.extend(file_features)
+            labels.extend(file_labels)
 
-        if len(feature_list) == 0:
-            raise RuntimeError(f"No ADHD samples loaded for split: {flag}")
-
-        X = np.asarray(feature_list, dtype=np.float32)
-        y = self._encode_labels(np.asarray(label_list, dtype=np.int64))
-        X, y = shuffle(X, y, random_state=42)
-        return X, y
+        if not features:
+            raise RuntimeError(f"No HDF5 EEG samples loaded for split: {self.flag}")
+        X = np.asarray(features, dtype=np.float32)
+        y = self._encode_labels(np.asarray(labels, dtype=np.int64))
+        return shuffle(X, y, random_state=42)
 
     def __getitem__(self, index):
         return torch.from_numpy(self.X[index]), torch.from_numpy(
             np.asarray(self.y[index])
         )
-
-    def __len__(self):
-        return len(self.y)
-
-
-class ADFTDLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, "Feature/")
-        self.label_path = os.path.join(root_path, "Label/label.npy")
-
-        self.split_seed = int(getattr(args, "seed", getattr(args, "seed_start", 42)))
-        self.split_mode = str(getattr(args, "split_mode", "stratified_random"))
-        a = float(getattr(args, "train_ratio", 0.8))
-        b = a + float(getattr(args, "val_ratio", 0.1))
-        self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-            self.label_path,
-            a,
-            b,
-            seed=self.split_seed,
-            random_split=self.split_mode != "label_order",
-        )
-        self.X, self.y = self.load_adfd(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        # self.X = bandpass_filter_func(self.X, fs=256, lowcut=0.5, highcut=45)
-        self.X = normalize_batch_ts(self.X)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_train_val_test_list(self, label_path, a=0.8, b=0.9, seed=42, random_split=True):
-        """
-        Loads IDs for training, validation, and test sets
-        Args:
-            label_path: directory of label.npy file
-            a: ratio of ids in training set
-            b: ratio of ids in training and validation set
-        Returns:
-            train_ids: list of IDs for training set
-            val_ids: list of IDs for validation set
-            test_ids: list of IDs for test set
-        """
-        data_list = np.load(label_path)
-        # Deduplicate subject IDs while preserving first-seen order.
-        cn_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 0)][:, 1]))
-        ftd_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 1)][:, 1]))
-        ad_list = list(dict.fromkeys(int(v) for v in data_list[np.where(data_list[:, 0] == 2)][:, 1]))
-        if random_split:
-            rng = np.random.RandomState(seed)
-            rng.shuffle(cn_list)
-            rng.shuffle(ftd_list)
-            rng.shuffle(ad_list)
-
-        train_ids = (
-            cn_list[: int(a * len(cn_list))]
-            + ftd_list[: int(a * len(ftd_list))]
-            + ad_list[: int(a * len(ad_list))]
-        )
-        val_ids = (
-            cn_list[int(a * len(cn_list)) : int(b * len(cn_list))]
-            + ftd_list[int(a * len(ftd_list)) : int(b * len(ftd_list))]
-            + ad_list[int(a * len(ad_list)) : int(b * len(ad_list))]
-        )
-        test_ids = (
-            cn_list[int(b * len(cn_list)) :]
-            + ftd_list[int(b * len(ftd_list)) :]
-            + ad_list[int(b * len(ad_list)) :]
-        )
-
-        return train_ids, val_ids, test_ids
-
-    def load_adfd(self, data_path, label_path, flag=None):
-        """
-        Loads adfd or cnbpm data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        """
-        feature_list = []
-        label_list = []
-        filenames = natsorted(list(os.listdir(data_path)))
-        subject_label = np.load(label_path)
-
-        if flag == "TRAIN":
-            ids = set(self.train_ids)
-        elif flag == "VAL":
-            ids = set(self.val_ids)
-        elif flag == "TEST":
-            ids = set(self.test_ids)
-        else:
-            ids = set(int(v) for v in subject_label[:, 1].tolist())
-
-        for j, filename in enumerate(filenames):
-            trial_label = subject_label[j]
-            path = data_path + filename
-            subject_feature = np.load(path)
-            if int(trial_label[1]) in ids:
-                for trial_feature in subject_feature:
-                    feature_list.append(trial_feature)
-                    label_list.append(int(trial_label[0]))
-
-        X = np.asarray(feature_list, dtype=np.float32)
-        y = np.asarray(label_list, dtype=np.int64)
-        X, y = shuffle(X, y, random_state=42)
-        return X, y
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), torch.from_numpy(
-            np.asarray(self.y[index])
-        )
-
-    def __len__(self):
-        return len(self.y)
-
-
-class PTBLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, "Feature/")
-        self.label_path = os.path.join(root_path, "Label/label.npy")
-
-        a = float(getattr(args, "train_ratio", 0.8))
-        b = a + float(getattr(args, "val_ratio", 0.1))
-
-        # list of IDs for training, val, and test sets
-        self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-            self.label_path, a, b
-        )
-
-        self.X, self.y = self.load_ptb(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        self.X = normalize_batch_ts(self.X)
-        # self.X = bandpass_filter_func(self.X, fs=250, lowcut=0.5, highcut=45)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_train_val_test_list(self, label_path, a=0.8, b=0.9):
-        """
-        Loads IDs for training, validation, and test sets
-        Args:
-            label_path: directory of label.npy file
-            a: ratio of ids in training set
-            b: ratio of ids in training and validation set
-        Returns:
-            train_ids: list of IDs for training set
-            val_ids: list of IDs for validation set
-            test_ids: list of IDs for test set
-        """
-        data_list = np.load(label_path)
-        hc_list = list(data_list[np.where(data_list[:, 0] == 0)][:, 1])  # healthy IDs
-        my_list = list(
-            data_list[np.where(data_list[:, 0] == 1)][:, 1]
-        )  # Myocardial infarction IDs
-
-        train_ids = hc_list[: int(a * len(hc_list))] + my_list[: int(a * len(my_list))]
-        val_ids = (
-            hc_list[int(a * len(hc_list)) : int(b * len(hc_list))]
-            + my_list[int(a * len(my_list)) : int(b * len(my_list))]
-        )
-        test_ids = hc_list[int(b * len(hc_list)) :] + my_list[int(b * len(my_list)) :]
-
-        return train_ids, val_ids, test_ids
-
-    def load_ptb(self, data_path, label_path, flag=None):
-        """
-        Loads ptb data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        """
-        feature_list = []
-        label_list = []
-        filenames = []
-        # The first column is the label; the second column is the patient ID
-        subject_label = np.load(label_path)
-        for filename in os.listdir(data_path):
-            filenames.append(filename)
-        filenames = natsorted(filenames)
-        if flag == "TRAIN":
-            ids = self.train_ids
-            # print("train ids:", ids)
-        elif flag == "VAL":
-            ids = self.val_ids
-            # print("val ids:", ids)
-        elif flag == "TEST":
-            ids = self.test_ids
-            # print("test ids:", ids)
-        else:
-            ids = subject_label[:, 1]
-            # print("all ids:", ids)
-
-        for j in range(len(filenames)):
-            trial_label = subject_label[j]
-            path = data_path + filenames[j]
-            subject_feature = np.load(path)
-            for trial_feature in subject_feature:
-                # load data by ids
-                if int(trial_label[1]) in ids:
-                    feature_list.append(trial_feature)
-                    label_list.append(trial_label)
-        # reshape and shuffle
-        X = np.array(feature_list)
-        y = np.array(label_list)
-        X, y = shuffle(X, y, random_state=42)
-
-        return X, y[:, 0]  # only use the first column (label)
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), torch.from_numpy(
-            np.asarray(self.y[index])
-        )
-
-    def __len__(self):
-        return len(self.y)
-
-
-class PTBXLLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, "Feature/")
-        self.label_path = os.path.join(root_path, "Label/label.npy")
-
-        a = float(getattr(args, "train_ratio", 0.8))
-        b = a + float(getattr(args, "val_ratio", 0.1))
-
-        # list of IDs for training, val, and test sets
-        self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
-            self.label_path, a, b
-        )
-
-        self.X, self.y = self.load_ptbxl(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        self.X = normalize_batch_ts(self.X)
-        # self.X = bandpass_filter_func(self.X, fs=250, lowcut=0.5, highcut=45)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_train_val_test_list(self, label_path, a=0.8, b=0.9):
-        """
-        Loads IDs for training, validation, and test sets
-        Args:
-            label_path: directory of label.npy file
-            a: ratio of ids in training set
-            b: ratio of ids in training and validation set
-        Returns:
-            train_ids: list of IDs for training set
-            val_ids: list of IDs for validation set
-            test_ids: list of IDs for test set
-        """
-        data_list = np.load(label_path)
-        no_list = list(
-            data_list[np.where(data_list[:, 0] == 0)][:, 1]
-        )  # Normal ECG IDs
-        mi_list = list(
-            data_list[np.where(data_list[:, 0] == 1)][:, 1]
-        )  # Myocardial Infarction IDs
-        sttc_list = list(
-            data_list[np.where(data_list[:, 0] == 2)][:, 1]
-        )  # ST/T Change IDs
-        cd_list = list(
-            data_list[np.where(data_list[:, 0] == 3)][:, 1]
-        )  # Conduction Disturbance IDs
-        hyp_list = list(
-            data_list[np.where(data_list[:, 0] == 4)][:, 1]
-        )  # Hypertrophy IDs
-
-        train_ids = (
-            no_list[: int(a * len(no_list))]
-            + mi_list[: int(a * len(mi_list))]
-            + sttc_list[: int(a * len(sttc_list))]
-            + cd_list[: int(a * len(cd_list))]
-            + hyp_list[: int(a * len(hyp_list))]
-        )
-        val_ids = (
-            no_list[int(a * len(no_list)) : int(b * len(no_list))]
-            + mi_list[int(a * len(mi_list)) : int(b * len(mi_list))]
-            + sttc_list[int(a * len(sttc_list)) : int(b * len(sttc_list))]
-            + cd_list[int(a * len(cd_list)) : int(b * len(cd_list))]
-            + hyp_list[int(a * len(hyp_list)) : int(b * len(hyp_list))]
-        )
-        test_ids = (
-            no_list[int(b * len(no_list)) :]
-            + mi_list[int(b * len(mi_list)) :]
-            + sttc_list[int(b * len(sttc_list)) :]
-            + cd_list[int(b * len(cd_list)) :]
-            + hyp_list[int(b * len(hyp_list)) :]
-        )
-
-        return train_ids, val_ids, test_ids
-
-    def load_ptbxl(self, data_path, label_path, flag=None):
-        """
-        Loads ptb-xl data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        """
-        feature_list = []
-        label_list = []
-        filenames = []
-        # The first column is the label; the second column is the patient ID
-        subject_label = np.load(label_path)
-        for filename in os.listdir(data_path):
-            filenames.append(filename)
-        filenames = natsorted(filenames)
-        if flag == "TRAIN":
-            ids = self.train_ids
-            # print("train ids:", ids)
-        elif flag == "VAL":
-            ids = self.val_ids
-            # print("val ids:", ids)
-        elif flag == "TEST":
-            ids = self.test_ids
-            # print("test ids:", ids)
-        else:
-            ids = subject_label[:, 1]
-            # print("all ids:", ids)
-
-        for j in range(len(filenames)):
-            trial_label = subject_label[j]
-            path = data_path + filenames[j]
-            subject_feature = np.load(path)
-            for trial_feature in subject_feature:
-                # load data by ids
-                if int(trial_label[1]) in ids:
-                    feature_list.append(trial_feature)
-                    label_list.append(trial_label)
-        # reshape and shuffle
-        X = np.array(feature_list)
-        y = np.array(label_list)
-        X, y = shuffle(X, y, random_state=42)
-
-        return X, y[:, 0]  # only use the first column (label)
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), torch.from_numpy(
-            np.asarray(self.y[index])
-        )
-
-    def __len__(self):
-        return len(self.y)
-
-
-
-class FLAAPLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, 'Feature/feature.npy')
-        self.label_path = os.path.join(root_path, 'Label/label.npy')
-
-        self.X, self.y = self.load_flaap_dependent(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        # self.X = normalize_batch_ts(self.X)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_flaap_dependent(self, data_path, label_path, flag=None):
-        '''
-        Loads fl-aap data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        '''
-        X_train = np.load(data_path)
-        y_train = np.load(label_path)
-        # print(X_train.shape, y_train.shape)
-
-        # 60 : 20 : 20
-        X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
-        X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
-
-        if flag == 'TRAIN':
-            return X_train, y_train
-        elif flag == 'VAL':
-            return X_val, y_val
-        elif flag == 'TEST':
-            return X_test, y_test
-        else:
-            raise Exception('flag must be TRAIN, VAL, or TEST')
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), \
-            torch.from_numpy(np.asarray(self.y[index]))
-
-    def __len__(self):
-        return len(self.y)
-
-
-class UCIHARLoader(Dataset):
-    def __init__(self, args, root_path, flag=None):
-        self.root_path = root_path
-        self.data_path = os.path.join(root_path, 'Feature/feature.npy')
-        self.label_path = os.path.join(root_path, 'Label/label.npy')
-
-        self.X, self.y = self.load_har_dependent(self.data_path, self.label_path, flag=flag)
-
-        # pre_process
-        # self.X = normalize_batch_ts(self.X)
-
-        self.max_seq_len = self.X.shape[1]
-
-    def load_har_dependent(self, data_path, label_path, flag=None):
-        '''
-        Loads fl-aap data from npy files in data_path based on flag and ids in label_path
-        Args:
-            data_path: directory of data files
-            label_path: directory of label.npy file
-            flag: 'train', 'val', or 'test'
-        Returns:
-            X: (num_samples, seq_len, feat_dim) np.array of features
-            y: (num_samples, ) np.array of labels
-        '''
-        X_train = np.load(data_path)
-        y_train = np.load(label_path)
-        # print(X_train.shape, y_train.shape)
-
-        X_test = X_train[-2947:]
-        y_test = y_train[-2947:]
-
-        X_train, X_val, y_train, y_val = train_test_split(X_train[:-2947], y_train[:-2947], test_size=0.2, random_state=42)
-        # X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
-
-        if flag == 'TRAIN':
-            return X_train, y_train
-        elif flag == 'VAL':
-            return X_val, y_val
-        elif flag == 'TEST':
-            return X_test, y_test
-        else:
-            raise Exception('flag must be TRAIN, VAL, or TEST')
-
-    def __getitem__(self, index):
-        return torch.from_numpy(self.X[index]), \
-            torch.from_numpy(np.asarray(self.y[index]))
 
     def __len__(self):
         return len(self.y)

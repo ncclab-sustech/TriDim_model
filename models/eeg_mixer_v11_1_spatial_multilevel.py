@@ -1,5 +1,5 @@
 """
-EEG Mixer V11.2 — V5 backbone + InstanceTimeNorm + DSS + Multi-Level Readout
+EEG Mixer V11.2 〞 V5 backbone + InstanceTimeNorm + DSS + Multi-Level Readout
 =============================================================================
 
 This version removes the multi-scale temporal stem (and its spatial-mix
@@ -7,7 +7,7 @@ sub-module) that earlier V11.1 included. The decision: the stem was too
 close to EEGNet's temporal+spatial conv and diluted the contribution story.
 With the stem gone, the architecture's novelty is concentrated entirely in
 the tri-axis backbone, the dimension-specific stochastic depth, and the
-multi-level readout — none of which overlap with EEGNet.
+multi-level readout 〞 none of which overlap with EEGNet.
 
 Components on top of the V5 backbone (all OUTSIDE the backbone):
 
@@ -30,7 +30,7 @@ Components on top of the V5 backbone (all OUTSIDE the backbone):
         TriAxisAttentionPoolingHead design from V5) and the per-layer
         pooled representations are fused with a learnable softmax weight,
         then passed through a single classifier head. Lightweight analogue
-        of EEG-Deformer's Dense Information Purification (DIP) — improves
+        of EEG-Deformer's Dense Information Purification (DIP) 〞 improves
         gradient flow to shallow layers, gives a multi-scale view.
         Toggle: `use_multi_level_readout = True/False`.
 
@@ -46,253 +46,20 @@ V5 backbone (untouched):
     * shared cross-axis attention (3 modules, each invoked twice)
     * per-channel LayerScale gamma on attn and mlp residual paths
 
-Note on channel coordinates:
-    The optional ChannelAdapter module (use_channel_adapter=True) uses
-    channel coordinates from `canonical_channel_coord_path` (a CSV you
-    supply) or `canonical_channel_coords`. If none provided AND the adapter
-    is enabled, the fallback is fibonacci_sphere (same as V5). When
-    use_channel_adapter=False, no coordinates are used anywhere.
 
-Ablation presets at the bottom of the file:
-    cfg_v5_baseline          — V5 (no input norm, no DSS, no multi-level)
-    cfg_v11_plus_inorm       — V5 + InstanceTimeNorm
-    cfg_v11_inorm_dss        — V5 + InstanceTimeNorm + DSS
-    cfg_v11_2_full           — V5 + InstanceTimeNorm + DSS + multi-level readout
 """
 
-import csv
 import math
-import os
-import random
 from typing import Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-try:
-    from tech.layers.Augmentation import get_augmentation
-except Exception:
-    try:
-        from layers.Augmentation import get_augmentation
-    except Exception:
-        def get_augmentation(spec):
-            return nn.Identity()
 
 
 def _get_config(configs, name: str, default):
     return getattr(configs, name, default)
-
-
-# =============================================================================
-# Channel coordinate utilities  (unchanged from V4 / V5)
-# =============================================================================
-
-def load_channel_coordinate_csv(
-    csv_path: str,
-    expected_channels: Optional[int] = None,
-    channel_order: Optional[Sequence[str]] = None,
-    dtype: torch.dtype = torch.float32,
-) -> Tuple[torch.Tensor, Sequence[str]]:
-    if not os.path.isfile(csv_path):
-        raise FileNotFoundError(f"Channel coordinate CSV not found: {csv_path}")
-    with open(csv_path, "r", newline="") as f:
-        reader = csv.DictReader(f)
-        required = {"channel", "x", "y", "z"}
-        missing = required.difference(set(reader.fieldnames or []))
-        if missing:
-            raise ValueError(
-                f"CSV {csv_path} must contain columns {sorted(required)}, "
-                f"missing {sorted(missing)}"
-            )
-        rows = []
-        for row in reader:
-            rows.append(
-                (str(row["channel"]).strip(),
-                 [float(row["x"]), float(row["y"]), float(row["z"])])
-            )
-    if channel_order is not None:
-        lookup = {name: xyz for name, xyz in rows}
-        names = list(channel_order)
-        missing = [name for name in names if name not in lookup]
-        if missing:
-            raise ValueError(f"CSV {csv_path} missing requested channels: {missing}")
-        coords = [lookup[name] for name in names]
-    else:
-        names = [name for name, _ in rows]
-        coords = [xyz for _, xyz in rows]
-    coords = torch.tensor(coords, dtype=dtype)
-    if expected_channels is not None and coords.size(0) != int(expected_channels):
-        raise ValueError(
-            f"Expected {expected_channels} channels, got {coords.size(0)} from {csv_path}"
-        )
-    return coords, names
-
-
-def fibonacci_sphere(num_points: int, device=None, dtype=None) -> torch.Tensor:
-    if num_points <= 1:
-        return torch.zeros(num_points, 3, device=device, dtype=dtype)
-    indices = torch.arange(num_points, device=device, dtype=torch.float32)
-    phi = math.pi * (3.0 - math.sqrt(5.0))
-    y = 1.0 - (2.0 * indices / (num_points - 1))
-    radius = torch.sqrt(torch.clamp(1.0 - y * y, min=0.0))
-    theta = phi * indices
-    x = torch.cos(theta) * radius
-    z = torch.sin(theta) * radius
-    coords = torch.stack([x, y, z], dim=-1)
-    if dtype is not None:
-        coords = coords.to(dtype=dtype)
-    return coords
-
-
-def pairwise_rbf_logits(
-    target_coords: torch.Tensor,
-    source_coords: torch.Tensor,
-    sigma: float,
-) -> torch.Tensor:
-    rel = target_coords.unsqueeze(-2) - source_coords.unsqueeze(-3)
-    dist2 = (rel ** 2).sum(dim=-1)
-    sigma2 = max(float(sigma), 1e-6) ** 2
-    return -dist2 / (2.0 * sigma2)
-
-
-def masked_softmax(
-    logits: torch.Tensor,
-    mask: Optional[torch.Tensor],
-    dim: int = -1,
-    eps: float = 1e-8,
-) -> torch.Tensor:
-    if mask is None:
-        return torch.softmax(logits, dim=dim)
-    mask = mask.to(dtype=logits.dtype)
-    very_neg = torch.finfo(logits.dtype).min
-    logits = logits.masked_fill(mask == 0, very_neg)
-    weights = torch.softmax(logits, dim=dim)
-    weights = weights * mask
-    denom = weights.sum(dim=dim, keepdim=True).clamp_min(eps)
-    return weights / denom
-
-
-class CoordinateResidualMapper(nn.Module):
-    def __init__(self, hidden_dim: int = 32):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(4, hidden_dim), nn.GELU(),
-            nn.Linear(hidden_dim, hidden_dim), nn.GELU(),
-            nn.Linear(hidden_dim, 1),
-        )
-
-    def forward(
-        self,
-        target_coords: torch.Tensor,
-        source_coords: torch.Tensor,
-    ) -> torch.Tensor:
-        if target_coords.ndim == 2:
-            target_coords = target_coords.unsqueeze(0)
-        if source_coords.ndim == 2:
-            source_coords = source_coords.unsqueeze(0)
-        if target_coords.size(0) != source_coords.size(0):
-            if target_coords.size(0) == 1:
-                target_coords = target_coords.expand(source_coords.size(0), -1, -1)
-            elif source_coords.size(0) == 1:
-                source_coords = source_coords.expand(target_coords.size(0), -1, -1)
-            else:
-                raise ValueError(
-                    "Batch mismatch between target_coords and source_coords"
-                )
-        rel = target_coords.unsqueeze(2) - source_coords.unsqueeze(1)
-        dist = torch.norm(rel, dim=-1, keepdim=True)
-        return self.net(torch.cat([rel, dist], dim=-1)).squeeze(-1)
-
-
-class ChannelAdapter(nn.Module):
-    def __init__(
-        self,
-        canonical_channels: int = 64,
-        use_prior: bool = True,
-        sigma: float = 0.35,
-        residual_hidden_dim: int = 32,
-        residual_scale_init: float = 0.10,
-        canonical_coords: Optional[torch.Tensor] = None,
-        canonical_channel_names: Optional[Sequence[str]] = None,
-    ):
-        super().__init__()
-        self.canonical_channels = int(canonical_channels)
-        self.use_prior = bool(use_prior)
-        self.sigma = float(sigma)
-        self.residual_mapper = CoordinateResidualMapper(hidden_dim=residual_hidden_dim)
-        self.residual_scale = nn.Parameter(torch.tensor(float(residual_scale_init)))
-        if canonical_coords is None:
-            canonical_coords = fibonacci_sphere(self.canonical_channels)
-        self.register_buffer("canonical_coords", canonical_coords.float(), persistent=True)
-        self.canonical_channel_names = (
-            list(canonical_channel_names) if canonical_channel_names is not None else None
-        )
-
-    def _identity_map(self, cin: int, device, dtype) -> torch.Tensor:
-        eye = torch.eye(cin, device=device, dtype=dtype)
-        if cin == self.canonical_channels:
-            return eye
-        out = torch.zeros(self.canonical_channels, cin, device=device, dtype=dtype)
-        copy_n = min(cin, self.canonical_channels)
-        out[:copy_n, :copy_n] = eye[:copy_n, :copy_n]
-        return out
-
-    def _compute_weights(
-        self,
-        channel_coords: torch.Tensor,
-        channel_mask: Optional[torch.Tensor],
-        dtype: torch.dtype,
-    ) -> torch.Tensor:
-        if channel_coords.ndim == 2:
-            channel_coords = channel_coords.unsqueeze(0)
-        batch_size = channel_coords.size(0)
-        target_coords = (
-            self.canonical_coords.to(device=channel_coords.device, dtype=dtype)
-            .unsqueeze(0).expand(batch_size, -1, -1)
-        )
-        geom_logits = pairwise_rbf_logits(
-            target_coords, channel_coords.to(dtype=dtype), sigma=self.sigma,
-        )
-        learned_logits = self.residual_mapper(
-            target_coords, channel_coords.to(dtype=dtype),
-        )
-        mask = None
-        if channel_mask is not None:
-            if channel_mask.ndim == 1:
-                channel_mask = channel_mask.unsqueeze(0)
-            mask = channel_mask.unsqueeze(1).expand(-1, self.canonical_channels, -1)
-        if self.use_prior:
-            geom_weights = masked_softmax(geom_logits, mask, dim=-1)
-            learned_weights = masked_softmax(learned_logits, mask, dim=-1)
-            weights = geom_weights + self.residual_scale * learned_weights
-            weights = weights / weights.sum(dim=-1, keepdim=True).clamp_min(1e-8)
-        else:
-            weights = masked_softmax(learned_logits, mask, dim=-1)
-        return weights
-
-    def forward(
-        self,
-        x: torch.Tensor,
-        channel_coords: Optional[torch.Tensor] = None,
-        channel_mask: Optional[torch.Tensor] = None,
-    ) -> torch.Tensor:
-        batch_size, cin, _ = x.shape
-        if channel_coords is None:
-            if cin != self.canonical_channels:
-                raise ValueError(
-                    "channel_coords is required when input channel count "
-                    "differs from canonical_channels"
-                )
-            weights = (
-                self._identity_map(cin, x.device, x.dtype)
-                .unsqueeze(0).expand(batch_size, -1, -1)
-            )
-        else:
-            weights = self._compute_weights(channel_coords, channel_mask, x.dtype)
-            if weights.size(0) == 1 and batch_size > 1:
-                weights = weights.expand(batch_size, -1, -1)
-        return torch.einsum("boc,bct->bot", weights.to(dtype=x.dtype), x)
 
 
 # =============================================================================
@@ -323,7 +90,7 @@ class InstanceTimeNorm(nn.Module):
 
 
 # =============================================================================
-# NEW: DropPath (per-sample stochastic depth) — needed for DSS
+# NEW: DropPath (per-sample stochastic depth) 〞 needed for DSS
 # =============================================================================
 
 class DropPath(nn.Module):
@@ -375,12 +142,8 @@ class LinearKProjection(nn.Module):
 class ConvTProjection(nn.Module):
     """Conv1d + AdaptiveAvgPool1d along the global temporal patch axis T.
 
-    NOTE (cleanup TODO): the internal Conv1d is 1→1 channel with kernel_size=5
-    shared across all (B, C, K) sequences — only ~6 parameters of expressive
-    capacity in total. A simpler design would replace this whole class with
-    `nn.AdaptiveAvgPool1d(out_t_dim)` directly. Kept here for now to avoid
-    silent behaviour change on existing experiments; replace once an ablation
-    confirms it does not hurt.
+    The shared 1-to-1 Conv1d is intentionally retained because it is part of
+    the reported architecture and published checkpoint parameterization.
     """
 
     def __init__(
@@ -446,7 +209,7 @@ class TriAxisAttentionPoolingHead(nn.Module):
     softmax, and applies a linear classifier to produce logits.
 
     In "feature" mode (`return_features=True`), the classifier head is
-    skipped — the module returns the fused embed_dim vector instead. This
+    skipped 〞 the module returns the fused embed_dim vector instead. This
     mode is used by MultiLevelTriAxisReadout to share one pooling head
     per encoder layer without a classifier per layer.
     """
@@ -546,7 +309,7 @@ class MultiLevelTriAxisReadout(nn.Module):
         1. Runs an independent TriAxisAttentionPoolingHead (in feature mode)
            on each layer's output, producing a per-layer embed_dim vector.
         2. Fuses the per-layer vectors with a learnable softmax weight
-           (n_layers entries, initialised to zero → uniform after softmax).
+           (n_layers entries, initialised to zero ↙ uniform after softmax).
         3. Applies a single classifier head to the fused vector.
 
     Compared to using only the final layer:
@@ -756,7 +519,7 @@ class AxisAttention(nn.Module):
 
 
 # =============================================================================
-# V11 Tri-axis Mixer Block — V5 backbone + DSS DropPath per sub-branch
+# V11 Tri-axis Mixer Block 〞 V5 backbone + DSS DropPath per sub-branch
 # =============================================================================
 
 class TriAxisMixerBlock(nn.Module):
@@ -770,15 +533,15 @@ class TriAxisMixerBlock(nn.Module):
         c_out = dp_c(0.5 * (attn_for_c(norm_c, attend=K) + attn_for_c(norm_c, attend=T)))
         k_out = dp_k(0.5 * (attn_for_k(norm_k, attend=C) + attn_for_k(norm_k, attend=T)))
         t_out = dp_t(0.5 * (attn_for_t(norm_t, attend=C) + attn_for_t(norm_t, attend=K)))
-        attn_branch = w_attn ·-fused (c_out, k_out, t_out)
-        x = x + γ_attn ⊙ attn_branch
+        attn_branch = w_attn ﹞-fused (c_out, k_out, t_out)
+        x = x + 污_attn × attn_branch
 
         # MLP path: 3 sub-branches in parallel, single DropPath at the end
         c_out = channel_mlp(norm_c_mlp, dim=1)
         k_out = k_mlp(norm_k_mlp, dim=2)
         t_out = t_mlp(norm_t_mlp, dim=3)
-        mlp_branch = dp_mlp(w_mlp ·-fused (c_out, k_out, t_out))
-        x = x + γ_mlp ⊙ mlp_branch
+        mlp_branch = dp_mlp(w_mlp ﹞-fused (c_out, k_out, t_out))
+        x = x + 污_mlp × mlp_branch
 
     Differences from V5:
         * Each attention sub-branch is gated by its own DropPath rate (DSS).
@@ -802,6 +565,11 @@ class TriAxisMixerBlock(nn.Module):
         drop_path_k: float = 0.0,
         drop_path_t: float = 0.0,
         drop_path_mlp: float = 0.0,
+        axis_branch_drop_prob: float = 0.0,
+        axis_branch_drop_mode: str = "random_one",
+        axis_execution_mode: str = "parallel",
+        use_axis_attention: bool = True,
+        use_axis_ffn: bool = True,
     ):
         super().__init__()
         self.channel_dim = int(channel_dim)
@@ -830,7 +598,7 @@ class TriAxisMixerBlock(nn.Module):
         self.attn_fusion_logits = nn.Parameter(torch.zeros(3))
         self.mlp_fusion_logits  = nn.Parameter(torch.zeros(3))
 
-        # ---- LayerScale γ ----
+        # ---- LayerScale 污 ----
         ls = float(layer_scale_init)
         self.gamma_attn = nn.Parameter(ls * torch.ones(1, self.channel_dim, 1, 1))
         self.gamma_mlp  = nn.Parameter(ls * torch.ones(1, self.channel_dim, 1, 1))
@@ -842,6 +610,24 @@ class TriAxisMixerBlock(nn.Module):
         self.dp_t_attn = DropPath(drop_path_t)
         # MLP path: a single DropPath on the fused mlp branch output.
         self.dp_mlp    = DropPath(drop_path_mlp)
+
+        # Optional training-only axis branch dropout. With random_one, one
+        # attention axis branch is masked per batch and surviving branches are
+        # scaled so the branch expectation is preserved. Default 0 is no-op.
+        self.axis_branch_drop_prob = max(0.0, min(1.0, float(axis_branch_drop_prob)))
+        self.axis_branch_drop_mode = str(axis_branch_drop_mode).lower()
+        self.axis_execution_mode = str(axis_execution_mode).lower()
+        if self.axis_execution_mode not in {"parallel", "serial_ckt"}:
+            raise ValueError(
+                "axis_execution_mode must be 'parallel' or 'serial_ckt', "
+                f"got {axis_execution_mode!r}"
+            )
+        self.use_axis_attention = bool(use_axis_attention)
+        self.use_axis_ffn = bool(use_axis_ffn)
+        if self.axis_execution_mode == "serial_ckt" and self.axis_branch_drop_prob > 0.0:
+            raise ValueError(
+                "axis_branch_drop_prob must be 0 for serial_ckt"
+            )
 
     # -------------------------------------------------------------------------
     # Branch computations
@@ -873,6 +659,25 @@ class TriAxisMixerBlock(nn.Module):
         )
         t_out = self.dp_t_attn(t_out)
 
+        if self.training and self.axis_branch_drop_prob > 0.0:
+            if self.axis_branch_drop_mode != "random_one":
+                raise ValueError(f"Unsupported axis_branch_drop_mode: {self.axis_branch_drop_mode}")
+            if torch.rand((), device=x.device) < self.axis_branch_drop_prob:
+                drop_idx = int(torch.randint(0, 3, (), device=x.device).item())
+                scale = 1.5
+                if drop_idx == 0:
+                    c_out = torch.zeros_like(c_out)
+                    k_out = k_out * scale
+                    t_out = t_out * scale
+                elif drop_idx == 1:
+                    k_out = torch.zeros_like(k_out)
+                    c_out = c_out * scale
+                    t_out = t_out * scale
+                else:
+                    t_out = torch.zeros_like(t_out)
+                    c_out = c_out * scale
+                    k_out = k_out * scale
+
         w = torch.softmax(self.attn_fusion_logits, dim=0)
         return w[0] * c_out + w[1] * k_out + w[2] * t_out
 
@@ -891,13 +696,75 @@ class TriAxisMixerBlock(nn.Module):
         fused = w[0] * c_out + w[1] * k_out + w[2] * t_out
         return self.dp_mlp(fused)
 
+    def _attn_axis(self, x: torch.Tensor, axis: int) -> torch.Tensor:
+        if axis == 0:
+            x_axis = self.norm_c_attn(x)
+            out = 0.5 * (
+                self.attn_for_c(x_axis, attend_dim=2, embed_axis=1)
+                + self.attn_for_c(x_axis, attend_dim=3, embed_axis=1)
+            )
+            return self.dp_c_attn(out)
+        if axis == 1:
+            x_axis = self.norm_k_attn(x)
+            out = 0.5 * (
+                self.attn_for_k(x_axis, attend_dim=1, embed_axis=2)
+                + self.attn_for_k(x_axis, attend_dim=3, embed_axis=2)
+            )
+            return self.dp_k_attn(out)
+        if axis == 2:
+            x_axis = self.norm_t_attn(x)
+            out = 0.5 * (
+                self.attn_for_t(x_axis, attend_dim=1, embed_axis=3)
+                + self.attn_for_t(x_axis, attend_dim=2, embed_axis=3)
+            )
+            return self.dp_t_attn(out)
+        raise ValueError(f"Unsupported attention axis index: {axis}")
+
+    def _mlp_axis(self, x: torch.Tensor, axis: int) -> torch.Tensor:
+        if axis == 0:
+            return self.channel_mlp(self.norm_c_mlp(x), dim=1)
+        if axis == 1:
+            return self.k_mlp(self.norm_k_mlp(x), dim=2)
+        if axis == 2:
+            return self.t_mlp(self.norm_t_mlp(x), dim=3)
+        raise ValueError(f"Unsupported MLP axis index: {axis}")
+
+    def _serial_forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.use_axis_attention:
+            attention_weights = torch.softmax(self.attn_fusion_logits, dim=0)
+            for axis in range(3):
+                x = (
+                    x
+                    + self.gamma_attn
+                    * attention_weights[axis]
+                    * self._attn_axis(x, axis)
+                )
+
+        if self.use_axis_ffn:
+            mlp_weights = torch.softmax(self.mlp_fusion_logits, dim=0)
+            drop_scale = None
+            if self.training and self.dp_mlp.drop_prob > 0.0:
+                keep_prob = 1.0 - self.dp_mlp.drop_prob
+                shape = (x.shape[0],) + (1,) * (x.ndim - 1)
+                drop_scale = x.new_empty(shape).bernoulli_(keep_prob) / keep_prob
+            for axis in range(3):
+                out = self._mlp_axis(x, axis)
+                if drop_scale is not None:
+                    out = out * drop_scale
+                x = x + self.gamma_mlp * mlp_weights[axis] * out
+        return x
+
     # -------------------------------------------------------------------------
     # Forward: dual residual
     # -------------------------------------------------------------------------
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.gamma_attn * self._attn_branch(x)
-        x = x + self.gamma_mlp  * self._mlp_branch(x)
+        if self.axis_execution_mode == "serial_ckt":
+            return self._serial_forward(x)
+        if self.use_axis_attention:
+            x = x + self.gamma_attn * self._attn_branch(x)
+        if self.use_axis_ffn:
+            x = x + self.gamma_mlp * self._mlp_branch(x)
         return x
 
 
@@ -925,6 +792,11 @@ class TriAxisEncoder(nn.Module):
         drop_path_t: float = 0.0,
         drop_path_mlp: float = 0.0,
         drop_path_schedule: str = "linear",
+        axis_branch_drop_prob: float = 0.0,
+        axis_branch_drop_mode: str = "random_one",
+        axis_execution_mode: str = "parallel",
+        use_axis_attention: bool = True,
+        use_axis_ffn: bool = True,
     ):
         super().__init__()
 
@@ -957,6 +829,11 @@ class TriAxisEncoder(nn.Module):
                 drop_path_k=rates[i][1],
                 drop_path_t=rates[i][2],
                 drop_path_mlp=rates[i][3],
+                axis_branch_drop_prob=axis_branch_drop_prob,
+                axis_branch_drop_mode=axis_branch_drop_mode,
+                axis_execution_mode=axis_execution_mode,
+                use_axis_attention=use_axis_attention,
+                use_axis_ffn=use_axis_ffn,
             )
             for i in range(n_layers)
         ])
@@ -997,14 +874,12 @@ class BasisMixer(nn.Module):
 
         x_enc [B, L, C]
           -> transpose                                 [B, C, L]
-          -> augmentation (training only)               [B, C, L]
           -> InstanceTimeNorm                           [B, C, L]
-          -> ChannelAdapter (optional)                  [B, C', L]
           -> patchify                                   [B, C', K, T]
           -> channel_basis  (1x1 conv: C' -> D)         [B, D, K, T]
           -> k_basis        (Linear: K -> K')           [B, D, K', T]
           -> t_basis        (ConvT: T -> T')            [B, D, K', T']
-          -> TriAxisEncoder (V5 block × N)              [B, D, K', T']
+          -> TriAxisEncoder (V5 block ℅ N)              [B, D, K', T']
           -> Readout:
                  TriAxisAttentionPoolingHead (default)
                  OR MultiLevelTriAxisReadout (V11.1)    [B, num_class]
@@ -1046,8 +921,6 @@ class BasisMixer(nn.Module):
         stride_cfg = _get_config(configs, "patch_stride", None)
         self.patch_stride = self.patch_len if stride_cfg is None else max(1, int(stride_cfg))
 
-        self.use_channel_adapter = bool(_get_config(configs, "use_channel_adapter", False))
-        self.use_channel_prior = bool(_get_config(configs, "use_channel_prior", True))
         self.canonical_channels = int(_get_config(configs, "canonical_channels", 64))
 
         self.channel_basis_dim = int(
@@ -1071,61 +944,35 @@ class BasisMixer(nn.Module):
         )
 
         # -------------------------
-        # NEW: cross-subject frontend flags
+        # Cross-subject frontend
         # -------------------------
         self.use_input_norm = bool(_get_config(configs, "use_input_norm", True))
 
         # -------------------------
-        # NEW: Dimension-Specific Stochastic Depth
+        # Dimension-specific stochastic depth
         # -------------------------
         self.drop_path_c = float(_get_config(configs, "drop_path_c", 0.25))
         self.drop_path_k = float(_get_config(configs, "drop_path_k", 0.05))
         self.drop_path_t = float(_get_config(configs, "drop_path_t", 0.15))
         self.drop_path_mlp = float(_get_config(configs, "drop_path_mlp", 0.05))
         self.drop_path_schedule = str(_get_config(configs, "drop_path_schedule", "linear"))
+        self.axis_branch_drop_prob = float(_get_config(configs, "axis_branch_drop_prob", 0.0))
+        self.axis_branch_drop_mode = str(_get_config(configs, "axis_branch_drop_mode", "random_one"))
+        self.axis_execution_mode = str(_get_config(configs, "axis_execution_mode", "parallel"))
+        self.use_axis_attention = bool(_get_config(configs, "use_axis_attention", True))
+        self.use_axis_ffn = bool(_get_config(configs, "use_axis_ffn", True))
 
         # -------------------------
-        # V11.1: multi-level readout
+        # Multi-level readout
         # -------------------------
         self.use_multi_level_readout = bool(
             _get_config(configs, "use_multi_level_readout", False)
         )
 
         # -------------------------
-        # Optional channel adapter
+        # Channel adapter removed (public release)
         # -------------------------
-        canonical_coords = _get_config(configs, "canonical_channel_coords", None)
-        canonical_names = _get_config(configs, "canonical_channel_names", None)
-        canonical_coord_path = _get_config(configs, "canonical_channel_coord_path", None)
-
-        if canonical_coord_path is not None:
-            canonical_coords, canonical_names = load_channel_coordinate_csv(
-                str(canonical_coord_path),
-                expected_channels=self.canonical_channels,
-                channel_order=canonical_names,
-            )
-        elif canonical_coords is not None:
-            canonical_coords = torch.as_tensor(canonical_coords, dtype=torch.float32)
-
-        if canonical_coords is None:
-            canonical_coords = fibonacci_sphere(self.canonical_channels)
-
-        self.channel_adapter = None
         active_channels = self.in_channels
-
-        if self.use_channel_adapter:
-            self.channel_adapter = ChannelAdapter(
-                canonical_channels=self.canonical_channels,
-                use_prior=self.use_channel_prior,
-                sigma=float(_get_config(configs, "channel_adapter_sigma", 0.35)),
-                residual_hidden_dim=int(_get_config(configs, "channel_adapter_hidden", 32)),
-                residual_scale_init=float(
-                    _get_config(configs, "channel_adapter_residual_scale", 0.10)
-                ),
-                canonical_coords=canonical_coords,
-                canonical_channel_names=canonical_names,
-            )
-            active_channels = self.canonical_channels
 
         # -------------------------
         # NEW: input normalisation
@@ -1152,20 +999,6 @@ class BasisMixer(nn.Module):
         )
 
         # -------------------------
-        # Augmentations
-        # -------------------------
-        aug_specs = [
-            s.strip()
-            for s in str(_get_config(configs, "augmentations", "none")).split(",")
-            if s.strip()
-        ]
-        if not aug_specs:
-            aug_specs = ["none"]
-        self.augmentations = nn.ModuleList(
-            [get_augmentation(spec) for spec in aug_specs]
-        )
-
-        # -------------------------
         # Tri-axis encoder (V11 block with DSS)
         # -------------------------
         self.encoder = TriAxisEncoder(
@@ -1181,6 +1014,11 @@ class BasisMixer(nn.Module):
             drop_path_t=self.drop_path_t,
             drop_path_mlp=self.drop_path_mlp,
             drop_path_schedule=self.drop_path_schedule,
+            axis_branch_drop_prob=self.axis_branch_drop_prob,
+            axis_branch_drop_mode=self.axis_branch_drop_mode,
+            axis_execution_mode=self.axis_execution_mode,
+            use_axis_attention=self.use_axis_attention,
+            use_axis_ffn=self.use_axis_ffn,
         )
 
         # -------------------------
@@ -1275,19 +1113,8 @@ class BasisMixer(nn.Module):
         # [B, L, C] -> [B, C, L]
         x = x_enc.transpose(1, 2)
 
-        # --- AUG FIRST (so input_norm absorbs aug-induced perturbations) ---
-        if self.training and len(self.augmentations) > 0:
-            aug = self.augmentations[random.randint(0, len(self.augmentations) - 1)]
-            x = aug(x)
-
-        # --- NEW: InstanceTimeNorm (raw EEG, removes subject baseline) ---
+        # --- InstanceTimeNorm (raw EEG, removes subject baseline) ---
         x = self.input_norm(x)
-
-        # --- Optional channel adapter (montage harmonisation) ---
-        if self.channel_adapter is not None:
-            x = self.channel_adapter(
-                x, channel_coords=channel_coords, channel_mask=channel_mask,
-            )
 
         # --- Patchify to [B, C, K, T] ---
         x, patch_mask = self._patchify(x, seq_mask=seq_mask)
@@ -1298,8 +1125,8 @@ class BasisMixer(nn.Module):
         x = self.t_basis(x)         # [B, C', K', T']
 
         # --- Tri-axis encoder (V5 block with DSS) ---
-        # V11.1: if multi-level readout is enabled, ask encoder for per-layer
-        # outputs. Otherwise behave like V5/V11 and only return the final layer.
+        # If multi-level readout is enabled, request every encoder layer;
+        # otherwise return only the final layer.
         if self.use_multi_level_readout and self.readout is not None:
             layer_outputs = self.encoder(x, return_all_layers=True)
             x = layer_outputs[-1]    # final layer for patch_embeddings / mode
@@ -1324,7 +1151,7 @@ class BasisMixer(nn.Module):
                 }
             return patch_embeddings
 
-        # V11.1: dispatch to the right readout signature.
+        # Dispatch according to the configured readout.
         if isinstance(self.readout, MultiLevelTriAxisReadout):
             logits = self.readout(layer_outputs)
         else:
@@ -1341,189 +1168,3 @@ class BasisMixer(nn.Module):
 
 
 Model = BasisMixer
-
-
-# =============================================================================
-# Ablation config presets
-# =============================================================================
-#
-# Use these as the rows of your paper's Table 4 (Ablation Study).
-# Each config builds on top of the previous one — only one component changes
-# at a time, so the marginal effect of each is isolated.
-#
-# Suggested experiment order:
-#   1. V5 baseline                  — pure V5 backbone
-#   2. + InstanceTimeNorm           — cross-subject baseline normalisation
-#   3. + Temporal stem              — frequency-band prior
-#   4. + DSS DropPath               — dimension-specific regularisation
-# =============================================================================
-
-class _BaseConfig:
-    """Shared training-side config defaults."""
-    seq_len = 200
-    enc_in = 62
-    num_class = 5
-    patch_len = 25
-    patch_stride = 25
-    channel_basis_dim = 48
-    k_basis_dim = 16
-    t_basis_dim = 12
-    patch_embed_dim = 48
-    n_heads = 4
-    t_layer = 2
-    dropout = 0.1
-    output_mode = "both"
-    use_channel_adapter = False
-    augmentations = "none"
-    layer_scale_init = 1e-2
-
-
-class cfg_v5_baseline(_BaseConfig):
-    """Pure V5 — no input norm, no DSS, no multi-level readout."""
-    use_input_norm = False
-    use_multi_level_readout = False
-    drop_path_c = 0.0
-    drop_path_k = 0.0
-    drop_path_t = 0.0
-    drop_path_mlp = 0.0
-
-
-class cfg_v11_plus_inorm(_BaseConfig):
-    """V5 + InstanceTimeNorm at the input."""
-    use_input_norm = True
-    use_multi_level_readout = False
-    drop_path_c = 0.0
-    drop_path_k = 0.0
-    drop_path_t = 0.0
-    drop_path_mlp = 0.0
-
-
-class cfg_v11_inorm_dss(_BaseConfig):
-    """V5 + InstanceTimeNorm + DSS DropPath (no multi-level readout)."""
-    use_input_norm = True
-    use_multi_level_readout = False
-    drop_path_c = 0.25
-    drop_path_k = 0.05
-    drop_path_t = 0.15
-    drop_path_mlp = 0.05
-    drop_path_schedule = "linear"
-
-
-class cfg_v11_2_full(_BaseConfig):
-    """V11.2 full: V5 + InstanceTimeNorm + DSS + multi-level readout.
-
-    This is the post-stem-removal model. Novelty is concentrated in the
-    tri-axis backbone, the dimension-specific stochastic depth, and the
-    multi-level readout — no EEGNet-style temporal/spatial stem.
-    """
-    use_input_norm = True
-    use_multi_level_readout = True
-    drop_path_c = 0.25
-    drop_path_k = 0.05
-    drop_path_t = 0.15
-    drop_path_mlp = 0.05
-    drop_path_schedule = "linear"
-
-
-class cfg_v11_2_full_constant_dss(_BaseConfig):
-    """V11.2 full with constant DSS schedule + stronger C drop_path.
-
-    Recommended starting point: constant schedule keeps shallow layers
-    regularised (linear schedule drives early-layer rates toward 0, which
-    is wrong for shallow nets).
-    """
-    use_input_norm = True
-    use_multi_level_readout = True
-    drop_path_c = 0.35
-    drop_path_k = 0.05
-    drop_path_t = 0.20
-    drop_path_mlp = 0.05
-    drop_path_schedule = "constant"
-
-
-# =============================================================================
-# Smoke test
-# =============================================================================
-
-if __name__ == "__main__":
-
-    torch.set_num_threads(1)
-
-    print("=" * 70)
-    print("V11.2 (no-stem) smoke test — ablation comparison")
-    print("=" * 70)
-
-    test_configs = [
-        ("V5 baseline",                cfg_v5_baseline),
-        ("V5 + InstanceTimeNorm",      cfg_v11_plus_inorm),
-        ("V5 + InstanceNorm + DSS",    cfg_v11_inorm_dss),
-        ("V11.2 full (linear DSS)",    cfg_v11_2_full),
-        ("V11.2 full (constant DSS)",  cfg_v11_2_full_constant_dss),
-    ]
-
-    x = torch.randn(2, _BaseConfig.seq_len, _BaseConfig.enc_in)
-    seq_mask = torch.ones(2, _BaseConfig.seq_len, dtype=torch.bool)
-
-    for name, cfg_cls in test_configs:
-        print()
-        print(f"--- {name} ---")
-        cfg = cfg_cls()
-        model = Model(cfg)
-        n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"  trainable params: {n_params:,}")
-
-        model.eval()
-        out = model(x, seq_mask=seq_mask)
-        print(f"  patch_embeddings: {tuple(out['patch_embeddings'].shape)}")
-        print(f"  logits:           {tuple(out['logits'].shape)}")
-
-        # Backward sanity
-        model.train()
-        out = model(x, seq_mask=seq_mask)
-        loss = out["logits"].sum()
-        loss.backward()
-        print(f"  backward OK; loss = {float(loss.detach()):.4f}")
-
-    # ----- Detailed inspection of V11.2 full -----
-    print()
-    print("=" * 70)
-    print("V11.2 full (constant DSS) — detailed inspection")
-    print("=" * 70)
-    cfg = cfg_v11_2_full_constant_dss()
-    model = Model(cfg)
-
-    print()
-    print(f"input_norm:    {type(model.input_norm).__name__}")
-    print(f"(temporal stem removed in this version)")
-    print(f"channel_basis: {type(model.channel_basis).__name__}")
-    print(f"readout type:  {type(model.readout).__name__}")
-    if isinstance(model.readout, MultiLevelTriAxisReadout):
-        print(f"  n_layers in readout: {model.readout.n_layers}")
-        print(
-            f"  initial layer fusion softmax: "
-            f"{torch.softmax(model.readout.layer_fusion_logits, dim=0).detach().cpu().tolist()}"
-        )
-
-    print()
-    print("DSS DropPath schedule (per layer):")
-    for i, layer in enumerate(model.encoder.layers):
-        print(
-            f"  layer {i}:  dp_c={layer.dp_c_attn.drop_prob:.4f}  "
-            f"dp_k={layer.dp_k_attn.drop_prob:.4f}  "
-            f"dp_t={layer.dp_t_attn.drop_prob:.4f}  "
-            f"dp_mlp={layer.dp_mlp.drop_prob:.4f}"
-        )
-
-    print()
-    blk = model.encoder.layers[0]
-    print("First-block fusion logits (initialised at zero -> uniform softmax):")
-    print(
-        f"  attn_fusion_softmax: "
-        f"{torch.softmax(blk.attn_fusion_logits, dim=0).detach().cpu().tolist()}"
-    )
-    print(
-        f"  mlp_fusion_softmax:  "
-        f"{torch.softmax(blk.mlp_fusion_logits, dim=0).detach().cpu().tolist()}"
-    )
-    print(f"  gamma_attn mean: {float(blk.gamma_attn.mean().detach()):.4f}")
-    print(f"  gamma_mlp  mean: {float(blk.gamma_mlp.mean().detach()):.4f}")

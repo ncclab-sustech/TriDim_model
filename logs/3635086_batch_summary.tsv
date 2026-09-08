@@ -1,4 +1,0 @@
-dataset	model	status	exit_code	log_file
-AD65	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3635086_AD65_eeg_mixer_v4_outAttentionPoolingFusion.train.log
-BCIC2A	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3635086_BCIC2A_eeg_mixer_v4_outAttentionPoolingFusion.train.log
-Physionet_MI	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3635086_Physionet_MI_eeg_mixer_v4_outAttentionPoolingFusion.train.log

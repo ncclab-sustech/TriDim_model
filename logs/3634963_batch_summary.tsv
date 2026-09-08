@@ -1,2 +1,0 @@
-dataset	model	status	exit_code	log_file
-FACED_new	eeg_mixer_v4_outAttentionPoolingFusion	OK	0	logs/3634963_FACED_new_eeg_mixer_v4_outAttentionPoolingFusion.train.log

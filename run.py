@@ -1,26 +1,24 @@
-"""Entry point for the eeg_basis_mixer_v2_nobasis baseline.
+"""Train and evaluate the TriDim paper models.
 
-Single-model release: the only registered model is `eeg_basis_mixer_v2_nobasis`.
-Defaults follow the paper experiments: cross-subject 4:3:3 split (label_order),
-F1-based model selection, deterministic kernels.
+The public protocol uses subject-aware 8:1:1 splits, seeds 5/42/43,
+validation-Accuracy checkpoint selection and sample
+standard deviation across seeds.  SleepEDF and SEED-V use the fixed manifests
+distributed in ``configs/splits``.
 
-Typical usage (full 5-seed cross-subject sweep on FACED_new):
+Example (three-seed Full run on FACED):
 
     python run.py \
-        --model eeg_basis_mixer_v2_nobasis --data FACED_new \
-        --dataset_paths_yaml ./configs/datasets/FACED_new.yaml \
-        --root_path /your/path/to/FACED_new \
+        --model eeg_mixer_v11_1_spatial_multilevel --data FACED_new \
+        --dataset_paths_yaml ./configs/paper/full/FACED_new_full.yaml \
         --gpu 0 --gpu_idx 0 --num_workers 4 \
-        --itr 5 --seed_start 42 \
-        --split_mode label_order --train_ratio 0.4 --val_ratio 0.3 \
-        --augmentations none --select_metric F1
+        --seeds 5 42 43
 """
 from utils.experiment_record import collect_experiment_record
 import time
 import argparse
-import math
 import os
 import random
+import subprocess
 import sys
 
 import numpy as np
@@ -28,6 +26,33 @@ import psutil
 import torch
 
 from exp.exp_classification import Exp_Classification
+
+
+PAPER_MODELS = ("eeg_mixer_v11_1_spatial_multilevel",)
+
+# YAML parameters accepted by the public runner.  Rejecting unknown keys avoids
+# the silent no-op behavior that affected several historical experiment files.
+ALLOWED_CONFIG_PARAMS = {
+    "batch_size", "canonical_channel_coord_path",
+    "canonical_channel_names", "canonical_channels",
+    "channel_basis_dim", "class_weight_mode", "d_model", "dataset",
+    "drop_path_c", "drop_path_k", "drop_path_mlp", "drop_path_schedule",
+    "drop_path_t", "dropout", "electrode_channel_count", "electrode_csv",
+    "electrode_montage_used", "eta_min", "eval_freq",
+    "external_split_manifest", "focal_gamma", "gpu", "gpu_idx",
+    "gradient_clip_norm", "input_channel_coord_path", "itr", "k_basis_dim",
+    "label_smoothing", "layer_scale_init", "learning_rate", "lradj", "model",
+    "n_heads", "no_channel_prior", "num_class", "num_workers", "optimizer",
+    "patch_embed_dim", "patch_len", "patch_stride", "patience", "root_path",
+    "seed", "seeds", "seed_start", "select_metric", "seq_len", "split_mode",
+    "stem_dropout", "stem_hidden_mult", "stem_kernels", "t_basis_dim",
+    "t_layer", "train_epochs", "train_ratio", "use_amp",
+    "use_channel_prior", "use_cosine_scheduler",
+    "use_focal_loss", "use_gpu", "use_input_norm", "use_multi_gpu",
+    "use_multi_level_readout", "use_subject_balanced_sampler",
+    "axis_execution_mode", "use_axis_attention", "use_axis_ffn",
+    "use_subject_label_for_split", "val_ratio", "warmup_epochs", "weight_decay",
+}
 
 
 def use_cpus(gpus, cpus_per_gpu):
@@ -123,6 +148,34 @@ def _coerce_value(current_value, new_value):
     return new_value
 
 
+def _coerce_untyped_yaml_value(value):
+    if isinstance(value, list):
+        return [_coerce_untyped_yaml_value(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _coerce_untyped_yaml_value(v) for k, v in value.items()}
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    lower = text.lower()
+    if lower in ("true", "yes", "y", "on"):
+        return True
+    if lower in ("false", "no", "n", "off"):
+        return False
+    if lower in ("none", "null", "~"):
+        return None
+    try:
+        if text and all(ch in "+-0123456789" for ch in text):
+            return int(text)
+    except ValueError:
+        pass
+    try:
+        if any(ch in text for ch in ".eE"):
+            return float(text)
+    except ValueError:
+        pass
+    return value
+
+
 def _extract_dataset_cfg(yaml_path, data_key):
     """Read a per-dataset yaml. Supports flat / nested / single-dataset schemas."""
     raw = _load_yaml_obj(yaml_path)
@@ -134,7 +187,7 @@ def _extract_dataset_cfg(yaml_path, data_key):
     # Single-dataset schema: top-level "dataset: <name>" + root_path + params.
     if str(raw.get("dataset", "")).strip() == str(data_key):
         if isinstance(raw.get("root_path"), str):
-            cfg["root_path"] = os.path.expanduser(raw["root_path"])
+            cfg["root_path"] = os.path.expandvars(os.path.expanduser(raw["root_path"]))
         if isinstance(raw.get("params"), dict):
             cfg["params"] = dict(raw["params"])
         return cfg
@@ -143,11 +196,11 @@ def _extract_dataset_cfg(yaml_path, data_key):
     if isinstance(raw.get("dataset_paths"), dict):
         node = raw["dataset_paths"].get(data_key)
         if isinstance(node, str):
-            return {"root_path": os.path.expanduser(node)}
+            return {"root_path": os.path.expandvars(os.path.expanduser(node))}
         if isinstance(node, dict):
             out = {}
             if isinstance(node.get("root_path"), str):
-                out["root_path"] = os.path.expanduser(node["root_path"])
+                out["root_path"] = os.path.expandvars(os.path.expanduser(node["root_path"]))
             if isinstance(node.get("params"), dict):
                 out["params"] = dict(node["params"])
             return out
@@ -155,11 +208,11 @@ def _extract_dataset_cfg(yaml_path, data_key):
     # Direct by dataset key.
     node = raw.get(data_key)
     if isinstance(node, str):
-        return {"root_path": os.path.expanduser(node)}
+        return {"root_path": os.path.expandvars(os.path.expanduser(node))}
     if isinstance(node, dict):
         out = {}
         if isinstance(node.get("root_path"), str):
-            out["root_path"] = os.path.expanduser(node["root_path"])
+            out["root_path"] = os.path.expandvars(os.path.expanduser(node["root_path"]))
         if isinstance(node.get("params"), dict):
             out["params"] = dict(node["params"])
         if "params" not in out:
@@ -170,7 +223,7 @@ def _extract_dataset_cfg(yaml_path, data_key):
 
     # Flat map fallback.
     if data_key in raw and isinstance(raw[data_key], str):
-        return {"root_path": os.path.expanduser(raw[data_key])}
+        return {"root_path": os.path.expandvars(os.path.expanduser(raw[data_key]))}
     return {}
 
 
@@ -180,21 +233,9 @@ def _resolve_downstream_dataset_root(downstream_root, data_key):
     base = os.path.expanduser(str(downstream_root))
     if not os.path.isdir(base):
         return None
-    aliases = {
-        "ADHD": "ADHD_old",
-        "ISRUC-Sleep_1": "ISRUC_S1",
-    }
-    candidates = []
-    if data_key in aliases:
-        candidates.append(aliases[data_key])
-    candidates.append(str(data_key))
-    for folder in candidates:
-        path = os.path.join(base, folder)
-        if os.path.isdir(path):
-            return path
-    return None
+    path = os.path.join(base, str(data_key))
+    return path if os.path.isdir(path) else None
 
-import subprocess
 def get_git_hash():
     try:
         return subprocess.check_output(
@@ -206,17 +247,22 @@ def get_git_hash():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="eeg_basis_mixer_v2_nobasis baseline")
+    parser = argparse.ArgumentParser(description="TriDim paper experiment runner")
 
     # model / data
     parser.add_argument(
         "--model",
         type=str,
-        default="eeg_basis_mixer_v2_nobasis",
-        # choices=["eeg_basis_mixer_v2_nobasis", "eeg_basis_mixer_v2_nobasis_onlyT"],
-        help="only the nobasis baseline is registered in this release",
+        default="eeg_mixer_v11_1_spatial_multilevel",
+        choices=PAPER_MODELS,
+        help="Full TriDim or one of the released axis/block variants",
     )
-    parser.add_argument("--data", type=str, required=True, help="dataset key, see configs/datasets/")
+    parser.add_argument(
+        "--data",
+        type=str,
+        required=True,
+        help="paper dataset key, see configs/paper/full/",
+    )
     parser.add_argument(
         "--root_path",
         type=str,
@@ -226,8 +272,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset_paths_yaml",
         type=str,
-        default="./configs/datasets/FACED_new.yaml",
-        help="per-dataset yaml that supplies root_path + default hyperparameters",
+        default="./configs/paper/full/FACED_new_full.yaml",
+        help="paper YAML supplying the dataset path and all experiment parameters",
     )
     parser.add_argument(
         "--downstream_root",
@@ -255,61 +301,29 @@ if __name__ == "__main__":
     parser.add_argument("--t_basis_dim", type=int, default=None)
     parser.add_argument("--patch_embed_dim", type=int, default=None)
 
-    # channel adapter (used when input channel layout doesn't match canonical)
-    parser.add_argument("--use_channel_adapter", action="store_true")
     parser.add_argument("--canonical_channels", type=int, default=64)
     parser.add_argument("--no_channel_prior", action="store_true")
-    parser.add_argument("--channel_adapter_sigma", type=float, default=0.35)
-    parser.add_argument("--channel_adapter_hidden", type=int, default=32)
-    parser.add_argument("--channel_adapter_residual_scale", type=float, default=0.10)
     parser.add_argument("--input_channel_coord_path", type=str, default=None)
     parser.add_argument("--canonical_channel_coord_path", type=str, default=None)
     parser.add_argument("--canonical_channel_names", type=str, default=None)
 
     # depth / regularization
     parser.add_argument("--t_layer", type=int, default=3, help="number of TriAxis encoder layers")
-    parser.add_argument(
-        "--v_layer",
-        type=int,
-        default=0,
-        help="kept for yaml compatibility; unused by the nobasis model",
-    )
     parser.add_argument("--dropout", type=float, default=0.1)
-    parser.add_argument("--stem_dropout", type=float, default=0.1)
-    parser.add_argument("--use_spatial_mix", action="store_true", default=False)
-    parser.add_argument("--use_multi_level_readout", action="store_true", default=False)
-    parser.add_argument("--weight_decay", type=float, default=0.0, help="L2 weight decay for Adam optimizer")
-    parser.add_argument("--optimizer", type=str, default="Adam", choices=["Adam", "AdamW"], help="Optimizer type")
-    parser.add_argument("--use_cosine_scheduler", action="store_true", help="Use CosineAnnealingLR with warmup")
-    parser.add_argument("--warmup_epochs", type=int, default=0, help="Linear warmup epochs before cosine")
-    parser.add_argument("--eta_min", type=float, default=1e-6, help="Minimum LR for cosine scheduler")
-    parser.add_argument("--label_smoothing", type=float, default=0.0, help="Label smoothing for CrossEntropyLoss")
-    parser.add_argument("--use_focal_loss", action="store_true", help="Use focal loss for imbalanced classification")
-    parser.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss gamma")
-    parser.add_argument('--use_subject_balanced_sampler', action='store_true', help='APAVA TRAIN-only inverse subject-count sampler')
-    parser.add_argument("--class_weight_mode", type=str, default="none", choices=["none", "inverse", "sqrt_inverse"], help="Compute class weights from training labels only")
-    parser.add_argument("--gradient_clip_norm", type=float, default=4.0, help="Gradient clipping max norm")
-
-    # augmentation
-    parser.add_argument(
-        "--augmentations",
-        type=str,
-        default="none",
-        help="comma-separated, e.g. flip0.5,jitter0.1,channel0.4. Use 'none' to disable.",
-    )
-
     # optimization
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--itr", type=int, default=1, help="number of seeds, seeds = [seed_start, seed_start+itr-1]")
     parser.add_argument("--seed_start", type=int, default=42)
+    parser.add_argument("--seeds", nargs="+", type=int, default=None,
+                        help="custom seed list, e.g. --seeds 5 42 43. overrides seed_start and itr when set")
     parser.add_argument("--train_epochs", type=int, default=30)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--patience", type=int, default=8, help="early stopping patience")
     parser.add_argument(
         "--select_metric",
         type=str,
-        default="F1",
-        choices=["F1", "Accuracy", "AUROC", "APAVA_SubjectF1", "APAVA_WeightedF1"],
+        default="Accuracy",
+        choices=["F1", "Accuracy"],
         help="validation metric used for model selection",
     )
 
@@ -317,12 +331,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--split_mode",
         type=str,
-        default="label_order",
-        choices=["stratified_random", "subject_random", "label_order", "segment_stratified_random"],
-        help="label_order = deterministic subject split used in the paper",
+        default="stratified_random",
+        choices=["stratified_random", "external_manifest"],
+        help=(
+            "subject-aware stratified split, or the immutable per-seed "
+            "external manifest specified by the paper YAML"
+        ),
     )
-    parser.add_argument("--train_ratio", type=float, default=0.4)
-    parser.add_argument("--val_ratio", type=float, default=0.3)
+    parser.add_argument("--train_ratio", type=float, default=0.8)
+    parser.add_argument("--val_ratio", type=float, default=0.1)
+    parser.add_argument("--external_split_manifest", type=str, default=None)
 
     # learning rate
     parser.add_argument("--learning_rate", type=float, default=2e-4)
@@ -338,47 +356,81 @@ if __name__ == "__main__":
 
     # GPU
     parser.add_argument("--gpu_idx", nargs="+", type=int, default=[0])
-    parser.add_argument("--use_gpu", type=bool, default=True)
+    parser.add_argument("--use_gpu", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--use_multi_gpu", action="store_true", default=False)
     parser.add_argument("--devices", type=str, default="0,1,2,3")
     
     parser.add_argument("--bsub_script", type=str, default="")
     parser.add_argument("--exp_notes", type=str, default="")
+    parser.add_argument(
+        "--validate_config_only",
+        action="store_true",
+        help="load and validate the merged YAML/CLI configuration without training",
+    )
+
+    # Optimization/model options supplied by the paper YAML files.  Defining
+    # them here gives CLI overrides a type and keeps configuration validation
+    # explicit.
+    parser.add_argument("--optimizer", type=str, default="AdamW")
+    parser.add_argument("--weight_decay", type=float, default=0.0)
+    parser.add_argument("--use_cosine_scheduler", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--warmup_epochs", type=int, default=0)
+    parser.add_argument("--eta_min", type=float, default=1e-6)
+    parser.add_argument("--label_smoothing", type=float, default=0.0)
+    parser.add_argument("--class_weight_mode", type=str, default="none")
+    parser.add_argument("--use_focal_loss", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--focal_gamma", type=float, default=2.0)
+    parser.add_argument("--gradient_clip_norm", type=float, default=4.0)
+    parser.add_argument("--eval_freq", type=int, default=1)
+    parser.add_argument("--use_input_norm", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--use_multi_level_readout", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--use_axis_attention", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--use_axis_ffn", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--axis_execution_mode",
+        choices=["parallel", "serial_ckt"],
+        default="parallel",
+    )
+    parser.add_argument("--use_subject_label_for_split", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--use_subject_balanced_sampler", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--drop_path_c", type=float, default=0.0)
+    parser.add_argument("--drop_path_k", type=float, default=0.0)
+    parser.add_argument("--drop_path_t", type=float, default=0.0)
+    parser.add_argument("--drop_path_mlp", type=float, default=0.0)
+    parser.add_argument("--drop_path_schedule", type=str, default="linear")
+    parser.add_argument("--layer_scale_init", type=float, default=0.0)
+    parser.add_argument("--stem_hidden_mult", type=float, default=1.0)
+    parser.add_argument("--stem_dropout", type=float, default=0.0)
+    parser.add_argument("--stem_kernels", nargs="+", type=int, default=None)
+    parser.add_argument("--electrode_csv", type=str, default=None)
+    parser.add_argument("--electrode_channel_count", type=int, default=None)
+    parser.add_argument("--electrode_montage_used", type=str, default=None)
+    parser.add_argument("--num_class", type=int, default=None)
 
     args = parser.parse_args()
     args.use_channel_prior = not args.no_channel_prior
     # Ensure device visibility is pinned before any CUDA query/initialization.
-    # if args.use_multi_gpu:
-    #     args.devices = args.devices.replace(" ", "")
-    #     os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
-    # else:
-    #     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-        
+
     # GPU
     if args.use_multi_gpu:
         args.devices = args.devices.replace(" ", "")
         if not os.environ.get("CUDA_VISIBLE_DEVICES"):
-            if not torch.cuda.is_available():
-                os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
-                print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
-            else:
-                print("[device] CUDA already available (MPS), skip CUDA_VISIBLE_DEVICES override")
+            os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
         else:
             print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
         args.gpu = 0
     else:
         if not os.environ.get("CUDA_VISIBLE_DEVICES"):
-            if not torch.cuda.is_available():
-                os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-                print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
-            else:
-                print("[device] CUDA already available (MPS), skip CUDA_VISIBLE_DEVICES override")
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+            print(f"[device] set CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
         else:
             print(f"[device] keep scheduler CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
         args.gpu = 0
     
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
+
+    
 
     cli_overrides = _get_cli_overrides(sys.argv[1:])
     dataset_cfg = _extract_dataset_cfg(args.dataset_paths_yaml, args.data)
@@ -397,12 +449,28 @@ if __name__ == "__main__":
 
         cfg_params = dataset_cfg.get("params", {})
         if isinstance(cfg_params, dict):
+            unknown = sorted(
+                str(key).replace("-", "_")
+                for key in cfg_params
+                if str(key).replace("-", "_") not in ALLOWED_CONFIG_PARAMS
+            )
+            if unknown:
+                raise ValueError(
+                    "Unknown YAML parameter(s): {}. Refusing silent no-op config keys.".format(
+                        ", ".join(unknown)
+                    )
+                )
             for key, value in cfg_params.items():
                 attr = str(key).replace("-", "_")
                 if attr in cli_overrides:
                     continue
+                if attr in {
+                    "external_split_manifest", "electrode_csv",
+                    "input_channel_coord_path", "canonical_channel_coord_path",
+                } and isinstance(value, str):
+                    value = os.path.expandvars(os.path.expanduser(value))
                 if not hasattr(args, attr):
-                    setattr(args, attr, value)
+                    setattr(args, attr, _coerce_untyped_yaml_value(value))
                     continue
                 current = getattr(args, attr)
                 try:
@@ -434,6 +502,45 @@ if __name__ == "__main__":
                 )
             args.root_path = downstream_root
 
+    if args.validate_config_only:
+        errors = []
+        if not os.path.isdir(args.root_path):
+            errors.append(f"dataset root does not exist: {args.root_path}")
+        if args.model not in PAPER_MODELS:
+            errors.append(f"unsupported model: {args.model}")
+        if str(args.select_metric) != "Accuracy":
+            errors.append("paper configurations require select_metric=Accuracy")
+        manifest = getattr(args, "external_split_manifest", None)
+        seeds = list(args.seeds or [])
+        is_fixed_loso = (
+            manifest
+            and "{seed}" not in str(manifest)
+            and seeds == [42]
+        )
+        if seeds != [5, 42, 43] and not is_fixed_loso:
+            errors.append(
+                "paper configurations require seeds=[5, 42, 43], except "
+                "released fixed-fold LOSO controls which use seed 42"
+            )
+        if manifest:
+            for seed in args.seeds:
+                path = str(manifest).format(seed=seed)
+                if not os.path.isfile(path):
+                    errors.append(f"split manifest does not exist: {path}")
+        if errors:
+            raise ValueError("Invalid paper configuration:\n- " + "\n- ".join(errors))
+        print(
+            "[CONFIG VALID] dataset={} model={} root={} seeds={} mlr={} manifest={}".format(
+                args.data,
+                args.model,
+                args.root_path,
+                args.seeds,
+                args.use_multi_level_readout,
+                manifest or "generated subject-aware split",
+            )
+        )
+        raise SystemExit(0)
+
     # Re-check CUDA availability after yaml ingestion: yaml may have flipped
     # use_gpu back to True even when torch wasn't built with CUDA. Without this
     # second guard the model would try to .to('cuda:0') and crash on CPU-only
@@ -453,9 +560,16 @@ if __name__ == "__main__":
 
     Exp = Exp_Classification
     avg_metrics = []
+    # 种子列表生成逻辑：优先使用自定义种子列表，否则沿用原连续种子逻辑
+    if args.seeds is not None:
+        seed_list = args.seeds
+        # 同步更新itr，保证后续均值/标准差计算的循环次数正确
+        args.itr = len(seed_list)
+    else:
+        # 原连续种子逻辑，完全保留
+        seed_list = [args.seed_start + ii for ii in range(args.itr)]
     # seed range: [seed_start, seed_start + itr - 1]
-    for ii in range(args.itr):
-        seed = args.seed_start + ii
+    for seed in seed_list:
         random.seed(seed)
         os.environ["PYTHONHASHSEED"] = str(seed)
         np.random.seed(seed)
@@ -480,9 +594,10 @@ if __name__ == "__main__":
         kb = args.k_basis_dim if args.k_basis_dim is not None else "auto"
         tb = args.t_basis_dim if args.t_basis_dim is not None else "auto"
         pe = args.patch_embed_dim if args.patch_embed_dim is not None else "auto"
+        metric_tag = str(getattr(args, "select_metric", "Accuracy")).replace("/", "_")
         setting = (
-            "{}_{}_seed_{}_dm_{}_dp_{}_tl_{}_bs_{}_lr{}_aug_{}_pl_{}"
-            "_cb{}_kb{}_tb{}_pe{}_ps{}_ca{}_cp{}_sm{}_ml{}".format(
+            "{}_{}_seed_{}_dm_{}_dp_{}_tl_{}_bs_{}_lr{}_pl_{}"
+            "_cb{}_kb{}_tb{}_pe{}_ps{}_cp{}_ml{}_sel{}".format(
                 args.model,
                 args.data,
                 args.seed,
@@ -491,17 +606,15 @@ if __name__ == "__main__":
                 args.t_layer,
                 args.batch_size,
                 args.learning_rate,
-                args.augmentations,
                 args.patch_len,
                 cb,
                 kb,
                 tb,
                 pe,
                 stride,
-                int(args.use_channel_adapter),
                 int(args.use_channel_prior),
-                int(getattr(args, 'use_spatial_mix', False)),
-                int(getattr(args, 'use_multi_level_readout', False)),
+                int(getattr(args, "use_multi_level_readout", False)),
+                metric_tag,
             )
         )
 
@@ -514,9 +627,11 @@ if __name__ == "__main__":
         exp.train(setting)
 
         print(">>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(setting))
-        # avg_metrics.append(exp.test(setting))  # fixed: was double-testing
-        
+
+        # Keep a single evaluation so logs and averages describe the same test run.
+
         test_metrics = exp.test(setting)
+
         avg_metrics.append(test_metrics)
 
         val_metrics = getattr(exp, "last_val_metrics", {})
@@ -537,7 +652,11 @@ if __name__ == "__main__":
 
     keys = ("Accuracy", "Precision", "Recall", "F1", "AUROC", "AUPRC")
     means = [np.mean([avg_metrics[i][k] for i in range(args.itr)]) for k in keys]
-    stds = [np.std([avg_metrics[i][k] for i in range(args.itr)]) for k in keys]
+    stds = [
+        np.std([avg_metrics[i][k] for i in range(args.itr)], ddof=1)
+        if args.itr > 1 else 0.0
+        for k in keys
+    ]
     print(
         f"Mean accuracy: {means[0]:.4f}, precision: {means[1]:.4f},"
         f"recall: {means[2]:.4f}, f1: {means[3]:.4f},"
@@ -548,4 +667,13 @@ if __name__ == "__main__":
         f"recall: {stds[2]:.4f}, f1: {stds[3]:.4f},"
         f" AUROC: {stds[4]:.4f}, AUPRC: {stds[5]:.4f}"
     )
-
+    print("=" * 80)
+    print(
+        "[CONFIG CHECK] model={} multi_level_readout={} "
+        "selection={}".format(
+            args.model,
+            args.use_multi_level_readout,
+            args.select_metric,
+        )
+    )
+    print("=" * 80)

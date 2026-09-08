@@ -1,4 +1,4 @@
-from data_provider.data_loader import ADHDLoader, APAVALoader, ADFTDLoader
+from data_provider.data_loader import EEGDatasetLoader
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
 import torch
@@ -11,44 +11,33 @@ def _seed_worker(worker_id):
 
     PyTorch already sets torch's per-worker seed via base_seed + worker_id.
     We mirror that into numpy and Python's random so any worker-side RNG
-    (augmentations, on-the-fly resampling, etc.) is also deterministic.
+    (e.g., on-the-fly resampling) is also deterministic.
     """
     worker_seed = torch.initial_seed() % 2**32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
 
 
-# All datasets in this release share the same subject-wise h5 layout and are
-# routed through ADHDLoader. The loader auto-detects the subject naming scheme
-# (sub_*.h5 / sub-*.h5 / S*.h5 / A01T.h5 etc.) so adding a new dataset is just
-# a matter of dropping a yaml in configs/datasets/ and registering the key here.
+# The eight paper datasets share the HDF5/Zarr loader, which detects the
+# supported subject and session naming schemes and applies the configured
+# subject-aware split.
 data_dict = {
-    "ADHD": ADHDLoader,
-    "AD65": ADHDLoader,
-    "ADFTD": ADFTDLoader,
-    "APAVA": APAVALoader,
-    "BCIC2A": ADHDLoader,
-    "Broderick": ADHDLoader,
-    "ChineseEEG1": ADHDLoader,
-    "EEGMAT": ADHDLoader,
-    "Exoskeleton_WalkStop": ADHDLoader,
-    "FACED_new": ADHDLoader,
-    "ISRUC-Sleep_1": ADHDLoader,
-    "ISRUC_S1": ADHDLoader,
-    "MDD": ADHDLoader,
-    "Physionet_MI": ADHDLoader,
-    "RestCog": ADHDLoader,
-    "SEED": ADHDLoader,
-    "SEEDIV": ADHDLoader,
-    "SEED_V": ADHDLoader,
-    "SEED_VIG": ADHDLoader,
-    "SHU": ADHDLoader,
-    "SleepEDF_full": ADHDLoader,
-    "sleep-cassette-200hz": ADHDLoader,
+    "AD65": EEGDatasetLoader,
+    "BCIC2A": EEGDatasetLoader,
+    "FACED_new": EEGDatasetLoader,
+    "Physionet_MI": EEGDatasetLoader,
+    "SEED": EEGDatasetLoader,
+    "SEED_V": EEGDatasetLoader,
+    "SHU": EEGDatasetLoader,
+    "SleepEDF_full": EEGDatasetLoader,
 }
 
 
 def data_provider(args, flag):
+    if args.data not in data_dict:
+        raise KeyError(
+            f"Unsupported dataset {args.data!r}; expected one of {sorted(data_dict)}"
+        )
     Data = data_dict[args.data]
 
     flag_upper = str(flag).upper()

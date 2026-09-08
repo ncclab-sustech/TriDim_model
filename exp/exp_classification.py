@@ -1,7 +1,6 @@
-from copy import deepcopy
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from utils.tools import EarlyStopping, adjust_learning_rate, cal_accuracy
+from utils.tools import EarlyStopping, adjust_learning_rate
 import torch
 import torch.nn as nn
 from torch import optim
@@ -21,33 +20,6 @@ warnings.filterwarnings("ignore")
 
 
 
-
-class SupConLoss(nn.Module):
-    """Supervised Contrastive Loss."""
-    def __init__(self, temperature=0.07):
-        super().__init__()
-        self.temperature = temperature
-
-    def forward(self, features, labels):
-        device = features.device
-        batch_size = features.shape[0]
-        labels = labels.contiguous().view(-1, 1)
-        mask = torch.eq(labels, labels.T).float().to(device)
-        features = F.normalize(features, dim=1)
-        anchor_dot_contrast = torch.div(
-            torch.matmul(features, features.T),
-            self.temperature
-        )
-        logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
-        logits = anchor_dot_contrast - logits_max.detach()
-        logits_mask = torch.ones_like(mask).scatter_(1,
-            torch.arange(batch_size).view(-1, 1).to(device), 0)
-        mask = mask * logits_mask
-        exp_logits = torch.exp(logits) * logits_mask
-        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
-        mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1).clamp(min=1e-8)
-        loss = -mean_log_prob_pos.mean()
-        return loss
 
 class FocalLoss(nn.Module):
     def __init__(self, gamma=2.0, weight=None):
@@ -93,11 +65,11 @@ class Exp_Classification(Exp_Basic):
 
     def _build_model(self):
         # model input depends on data
-        test_data, test_loader = self._get_data(flag="TEST")
-        self.args.seq_len = test_data.max_seq_len  # redefine seq_len
+        train_data, _ = self._get_data(flag="TRAIN")
+        self.args.seq_len = train_data.max_seq_len  # redefine seq_len
         self.args.pred_len = 0
-        self.args.enc_in = test_data.X.shape[2]  # redefine enc_in
-        self.args.num_class = len(np.unique(test_data.y))
+        self.args.enc_in = train_data.X.shape[2]  # redefine enc_in
+        self.args.num_class = len(np.unique(train_data.y))
         # model init
         model = (
             self.model_dict[self.args.model].Model(self.args).float()
@@ -186,7 +158,6 @@ class Exp_Classification(Exp_Basic):
                 else:
                     outputs = self._forward_model(batch_x, padding_mask=padding_mask)
                 
-                pred = outputs.detach().cpu()
                 loss = criterion(outputs, label.long())
                 total_loss.append(loss.detach().cpu())
 
@@ -211,13 +182,11 @@ class Exp_Classification(Exp_Basic):
             .cpu()
             .numpy()
         )
-        # print(trues_onehot.shape)
         predictions = (
             torch.argmax(probs, dim=1).cpu().numpy()
         )  # (total_samples,) int class index for each sample
         probs = probs.cpu().numpy()
         trues = trues.flatten().cpu().numpy()
-        # accuracy = cal_accuracy(predictions, trues)
         metrics_dict = {
             "Accuracy": accuracy_score(trues, predictions),
             "Precision": precision_score(trues, predictions, average="macro", zero_division=0),
@@ -235,53 +204,16 @@ class Exp_Classification(Exp_Basic):
         except Exception:
             pass
 
-        if getattr(self.args, "data", "") == "APAVA" and getattr(self.args, "select_metric", "") == "APAVA_SubjectF1":
-            subject_ids = np.asarray(vali_data.subject_ids)
-            if len(subject_ids) != len(predictions):
-                raise RuntimeError(f"APAVA subject metric alignment mismatch: {len(subject_ids)} != {len(predictions)}")
-            subject_true, subject_pred = [], []
-            for sid in np.unique(subject_ids):
-                mask = subject_ids == sid
-                true_counts = np.bincount(trues[mask].astype(np.int64), minlength=self.args.num_class)
-                pred_counts = np.bincount(predictions[mask].astype(np.int64), minlength=self.args.num_class)
-                subject_true.append(int(np.argmax(true_counts)))
-                subject_pred.append(int(np.argmax(pred_counts)))
-            metrics_dict["APAVA_SubjectF1"] = f1_score(
-                subject_true, subject_pred, average="macro", zero_division=0
-            )
-            print(
-                f"APAVA validation SubjectF1: {metrics_dict['APAVA_SubjectF1']:.5f} "
-                f"over {len(subject_true)} subjects"
-            )
-
-        if getattr(self.args, "data", "") == "APAVA" and getattr(self.args, "select_metric", "") == "APAVA_WeightedF1":
-            subject_ids = np.asarray(vali_data.subject_ids)
-            if len(subject_ids) != len(predictions):
-                raise RuntimeError(f"APAVA weighted metric alignment mismatch: {len(subject_ids)} != {len(predictions)}")
-            unique_ids, subject_counts = np.unique(subject_ids, return_counts=True)
-            count_map = dict(zip(unique_ids.tolist(), subject_counts.tolist()))
-            sample_weights = np.asarray([1.0 / count_map[int(sid)] for sid in subject_ids])
-            metrics_dict["APAVA_WeightedF1"] = f1_score(
-                trues, predictions, average="macro", sample_weight=sample_weights, zero_division=0
-            )
-            print(
-                f"APAVA validation WeightedF1: {metrics_dict['APAVA_WeightedF1']:.5f} "
-                f"over {len(unique_ids)} subjects"
-            )
-
         self.model.train()
         return total_loss, metrics_dict
 
     def train(self, setting):
         train_data, train_loader = self._get_data(flag="TRAIN")
         vali_data, vali_loader = self._get_data(flag="VAL")
-        test_data, test_loader = self._get_data(flag="TEST")
         print(train_data.X.shape)
         print(train_data.y.shape)
         print(vali_data.X.shape)
         print(vali_data.y.shape)
-        print(test_data.X.shape)
-        print(test_data.y.shape)
 
         path = (
             "./checkpoints/"
@@ -292,8 +224,6 @@ class Exp_Classification(Exp_Basic):
         )
         if not os.path.exists(path):
             os.makedirs(path, exist_ok=True)
-
-        time_now = time.time()
 
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(
@@ -324,14 +254,11 @@ class Exp_Classification(Exp_Basic):
                         param_group['lr'] = lr
                 elif scheduler is not None:
                     scheduler.step()
-            iter_count = 0
             train_loss = []
 
             self.model.train()
             epoch_time = time.time()
-            epoch_count=0
             for i, (batch_x, label, padding_mask) in enumerate(train_loader):
-                iter_count += 1
                 model_optim.zero_grad()
 
                 batch_x = batch_x.float().to(self.device)
@@ -350,19 +277,33 @@ class Exp_Classification(Exp_Basic):
                 if use_amp:
                     scaler.scale(loss).backward()
                     scaler.unscale_(model_optim)
-                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=getattr(self.args, 'gradient_clip_norm', 4.0))
+                    clip_norm = float(getattr(self.args, 'gradient_clip_norm', 4.0))
+                    if clip_norm > 0:
+                        nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=clip_norm)
                     scaler.step(model_optim)
                     scaler.update()
                 else:
                     loss.backward()
-                    nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=getattr(self.args, 'gradient_clip_norm', 4.0))
+                    clip_norm = float(getattr(self.args, 'gradient_clip_norm', 4.0))
+                    if clip_norm > 0:
+                        nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=clip_norm)
                     model_optim.step()
-                epoch_count+=1
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
+            eval_freq = max(1, int(getattr(self.args, "eval_freq", 1)))
+            should_evaluate = (
+                (epoch + 1) % eval_freq == 0
+                or (epoch + 1) == int(self.args.train_epochs)
+            )
+            if not should_evaluate:
+                print(
+                    f"Epoch: {epoch + 1}, Steps: {train_steps}, "
+                    f"| Train Loss: {train_loss:.5f} | validation skipped "
+                    f"(eval_freq={eval_freq})"
+                )
+                continue
             vali_loss, val_metrics_dict = self.vali(vali_data, vali_loader, criterion)
-            test_loss, test_metrics_dict = self.vali(test_data, test_loader, criterion)
 
             print(
                 f"Epoch: {epoch + 1}, Steps: {train_steps}, | Train Loss: {train_loss:.5f}\n"
@@ -372,25 +313,17 @@ class Exp_Classification(Exp_Basic):
                 f"Recall: {val_metrics_dict['Recall']:.5f}, "
                 f"F1: {val_metrics_dict['F1']:.5f}, "
                 f"AUROC: {val_metrics_dict['AUROC']:.5f}, "
-                f"AUPRC: {val_metrics_dict['AUPRC']:.5f}\n"
-                f"Test results --- Loss: {test_loss:.5f}, "
-                f"Accuracy: {test_metrics_dict['Accuracy']:.5f}, "
-                f"Precision: {test_metrics_dict['Precision']:.5f}, "
-                f"Recall: {test_metrics_dict['Recall']:.5f} "
-                f"F1: {test_metrics_dict['F1']:.5f}, "
-                f"AUROC: {test_metrics_dict['AUROC']:.5f}, "
-                f"AUPRC: {test_metrics_dict['AUPRC']:.5f}"
+                f"AUPRC: {val_metrics_dict['AUPRC']:.5f}"
             )
             monitor_key = getattr(self.args, "select_metric", "F1")
+            metric_aliases = {"ACC": "Accuracy", "acc": "Accuracy", "accuracy": "Accuracy"}
+            monitor_key = metric_aliases.get(str(monitor_key), monitor_key)
             if monitor_key not in val_metrics_dict:
                 monitor_key = "F1"
-            # V10: optional test-based model selection for datasets with val/test decoupling
             use_test_select = getattr(self.args, "use_test_metric_for_selection", False)
-            if use_test_select and monitor_key in test_metrics_dict:
-                select_score = -test_metrics_dict[monitor_key]
-                print(f"  [Test-based selection] Using test {monitor_key} = {test_metrics_dict[monitor_key]:.5f}")
-            else:
-                select_score = -val_metrics_dict[monitor_key]
+            if use_test_select:
+                raise ValueError("Test-based checkpoint selection is forbidden")
+            select_score = -val_metrics_dict[monitor_key]
             early_stopping(
                 select_score,
                 self.model,
@@ -399,10 +332,9 @@ class Exp_Classification(Exp_Basic):
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
-            # V8 scheduler support: warmup + CosineAnnealingLR
-            if getattr(self.args, 'use_cosine_scheduler', False) and scheduler is not None:
-                pass  # scheduler.step() is called at epoch start
-            else:
+            # With the cosine scheduler the LR is stepped at epoch start;
+            # otherwise fall back to the lradj policy.
+            if not (getattr(self.args, 'use_cosine_scheduler', False) and scheduler is not None):
                 adjust_learning_rate(model_optim, epoch + 1, self.args)
 
         best_model_path = path + "checkpoint.pth"
@@ -428,9 +360,6 @@ class Exp_Classification(Exp_Basic):
                 raise Exception("No model found at %s" % model_path)
             self.model.load_state_dict(torch.load(model_path))
             
-        # # Uncomment below code for save space on device
-        # self.del_weight(path)
-
         criterion = self._select_criterion()
         vali_loss, val_metrics_dict = self.vali(vali_data, vali_loader, criterion)
         test_loss, test_metrics_dict = self.vali(test_data, test_loader, criterion)
@@ -455,12 +384,3 @@ class Exp_Classification(Exp_Basic):
         self.last_val_metrics = val_metrics_dict
         self.last_test_metrics = test_metrics_dict
         return test_metrics_dict
-    
-    def del_weight(self, path):
-        if os.path.exists(os.path.join(os.path.join(path, 'checkpoint.pth'))):
-            os.remove(os.path.join(os.path.join(path, 'checkpoint.pth')))
-            print('Model weights deleted....')
-
-
-
-
