@@ -1,0 +1,23 @@
+{
+  "release": "paper-811-full-57.70",
+  "model": "eeg_mixer_v11_1_spatial_multilevel",
+  "seeds": [
+    5,
+    42,
+    43
+  ],
+  "configs": {
+    "AD65": "configs/paper/full/AD65_full.yaml",
+    "BCIC2A": "configs/paper/full/BCIC2A_full.yaml",
+    "FACED_new": "configs/paper/full/FACED_new_full.yaml",
+    "Physionet_MI": "configs/paper/full/Physionet_MI_full.yaml",
+    "SEED": "configs/paper/full/SEED_full.yaml",
+    "SEED_V": "configs/paper/full/SEED_V_10s_full.yaml",
+    "SHU": "configs/paper/full/SHU_full.yaml",
+    "SleepEDF_full": "configs/paper/full/SleepEDF_full_senior_t40_full.yaml"
+  },
+  "macro_accuracy_percent": 57.70090416666667,
+  "aggregation": "mean across 8 dataset means, each across seeds5/42/43",
+  "sleepedf": "session-level 122/15/16, train-only t40; not participant-independent",
+  "source_limit": "Portable historical source snapshot. Original result git commit fields are unknown; hashes bind retained records and logs, not a proven original training commit."
+}
