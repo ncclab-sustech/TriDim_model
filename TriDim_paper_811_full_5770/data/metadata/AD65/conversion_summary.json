@@ -1,0 +1,36 @@
+{
+  "dataset_key": "AD65",
+  "n_subjects": 88,
+  "n_source_files": 88,
+  "n_samples": 6938,
+  "expected_n_samples": 6938,
+  "label_counts": {
+    "0": 2397,
+    "1": 1646,
+    "2": 2895
+  },
+  "channel_count_distribution": {
+    "19": 88
+  },
+  "sampling_rate": 200,
+  "shape": [
+    6938,
+    19,
+    2000
+  ],
+  "signal_unit": "uV",
+  "normalization": "none",
+  "segment_kind_counts": {
+    "regular": 6938
+  },
+  "qc_bit_counts": {
+    "EVENT_CLIPPED": 0,
+    "FLAT_CHANNEL": 0,
+    "HIGH_AMPLITUDE": 22,
+    "LOW_CHANNEL_COUNT": 0,
+    "MISSING_CHANNEL_NAME": 0,
+    "NAN_INF_REPLACED": 0,
+    "SHORT_PADDED": 0,
+    "SOURCE_ARTIFACT": 0
+  }
+}

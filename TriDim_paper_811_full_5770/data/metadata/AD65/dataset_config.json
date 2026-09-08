@@ -1,0 +1,42 @@
+{
+  "dataset_key": "AD65",
+  "release": "ds004504-1.0.8",
+  "source_format": "set",
+  "task": "task-eyesclosed",
+  "target_sampling_rate": 200.0,
+  "bandpass_low": 0.3,
+  "bandpass_high": 75.0,
+  "notch_hz": 50.0,
+  "segment_seconds": 10.0,
+  "segment_stride_seconds": 10.0,
+  "segment_rule": "non-overlapping 10-s windows starting at t=0",
+  "split_rule": "splits are assigned by the downstream experiment",
+  "signal_unit": "uV",
+  "channel_names": [
+    "Fp1",
+    "Fp2",
+    "F3",
+    "F4",
+    "C3",
+    "C4",
+    "P3",
+    "P4",
+    "O1",
+    "O2",
+    "F7",
+    "F8",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "Fz",
+    "Cz",
+    "Pz"
+  ],
+  "label_rule": "participants.tsv Group maps C to 0, F to 1, and A to 2; all three groups are retained",
+  "group_counts": {
+    "A": 36,
+    "C": 29,
+    "F": 23
+  }
+}
