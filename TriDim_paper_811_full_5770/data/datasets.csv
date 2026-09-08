@@ -1,0 +1,9 @@
+dataset,application,split_unit,units,samples,classes,channels,time_points,relative_data_path
+AD65,neurological diagnosis,subject,88,6938,3,19,2000,AD65_wsn
+SleepEDF_full,sleep staging,recording session,153,seed-dependent,5,2,6000,SleepEDF_full
+BCIC2A,motor imagery,subject,9,5184,4,22,800,BCIC2A_wsn
+SHU,motor imagery,subject,25,7571,2,32,800,SHU_MI
+Physionet_MI,motor imagery,subject,109,9837,4,64,800,Physionet_MI_wsn
+FACED_new,emotion recognition,subject,123,10332,9,32,2000,FACED_new
+SEED,emotion recognition,subject,15,14895,3,62,2000,SEED
+SEED_V,emotion recognition,subject,16,11424,5,62,2000,SEED_V_10s
