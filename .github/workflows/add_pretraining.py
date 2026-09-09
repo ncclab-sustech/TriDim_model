@@ -11,8 +11,9 @@ PAYLOAD='.github/workflows/pretraining_payload.json'
 def git(*args,data=None,env=None):return subprocess.check_output(['git',*args],cwd=ROOT,input=data,env=env)
 def prepare():
     payload=json.loads((ROOT/PAYLOAD).read_text())
-    head=git('rev-parse','HEAD').decode().strip();base=git('rev-parse','HEAD^').decode().strip()
-    assert base.startswith(payload['expected_base_prefix']),('Unexpected base',base)
+    head=git('rev-parse','HEAD').decode().strip()
+    base=git('rev-parse',payload['expected_base_prefix']+'^{commit}').decode().strip()
+    assert git('merge-base',base,head).decode().strip()==base,'Unexpected history'
     assert set(git('diff','--name-only',base,head).decode().splitlines())=={WF,HELPER,PAYLOAD}
     before=set(git('ls-tree','-r','--name-only',base).decode().splitlines())
     assert not any(p.startswith('pretraining/') for p in before)
