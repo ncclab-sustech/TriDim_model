@@ -27,7 +27,7 @@
   "data/metadata/AD65/conversion_summary.json": "5c0fe5f765915b96f06eae55597a714095a1a6bed12dceff8a5c49bee85bc37d",
   "data/metadata/AD65/dataset_config.json": "af558fe62eca121615a7868a485578e3dc700cf5e8501e105c46716fda139ccf",
   "data/metadata/AD65/label_vocab.json": "ef44d44255465ae0a9bc72e8024b780acf3f9fe9faa5c0a36ce17deba93f5360",
-  "data/README.md": "6696872fee7de618e456da383e9a6f7cfb95eed9a61559c92b041ef34a4757a4",
+  "data/README.md": "e452f6ce0a8edc5d488284c04b1514e7f17375c41e975e032113192814ffe925",
   "data_provider/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "data_provider/data_factory.py": "3e3be671d4858bfebbaa6f79135f3e9b301beaa540639c9b48255cea8cf6910e",
   "data_provider/data_loader.py": "0bd2a3a55eac2fd7c30fa61b875bb51fbedff49606b0a1d17cc3547fc58475bc",
@@ -64,7 +64,7 @@
   "preprocessing/tests/test_core.py": "eeadd95f73681c1c544102aa96d24381ad3b40cc17cb88094e3500b64c584a07",
   "reported/full_24_runs.json": "af4619c1b748c3eedb864b027f7573d5594d3ed321ad9233aee0f9e3c937e547",
   "reported/full_summary.csv": "432468b6fb7f1edca98fb0f6a55adff57e85fbc8aa62636a11c8d689e8088200",
-  "reported/protocol.json": "3050e1c36fb450425920d23871a7e15d31b2110c9f5a099b6569aeabc9cb771f",
+  "reported/protocol.json": "e85ddaf67c84fa000c19b29060f70432ce43f950ebd7f816a3ee3526ef294956",
   "requirements-runtime.txt": "f9bad3aef272e1ab5a28c9e1e7b1b88c325dd56296e7d43b8f865355dc87b3c1",
   "requirements.txt": "4e9ecc474d00a392850c08f699edc50de25fc5bd045993c07e15625cbd0179e3",
   "run.py": "dcf406970551524af2bdeb8d454c7e6d58c6c2b581914c02be7d59768be42621",
@@ -74,8 +74,8 @@
   "utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "utils/experiment_record.py": "1112a99a1d2610fb536e700ca052323184d3d7ecf95e224bb1be4662a9844503",
   "utils/tools.py": "406194a802099fb3ca4d20ea6c9773962fab6036e0bd167633c92579ddee48af",
-  "VALIDATION.md": "b69b64aa393cd14808ccdcd8ffa44bbf55218c127e26804678857e88ed5eec04",
-  "PAPER_PROTOCOL.md": "da016e4455e28a9b033eb3cd8b7424553636f5c06730736e4c7c83cafc45466b",
+  "VALIDATION.md": "0f4d4e5bdd9a76138017ca24ddb5fd4ff6a999ad029faa48b82670399f9318d3",
+  "PAPER_PROTOCOL.md": "a60b88d32bd9e310fee81e751f323a092c7d70feae2cbf72474e5940bdc00f30",
   "logs/full/AD65_seed42.log": "1a6d9ecd3de390391fb7781660cd80d11a70c959ac85d32757b941815ef59e72",
   "logs/full/AD65_seed43.log": "77540cff0a9db9750fe99cfdd77bc9005e0d7878fc25a3d16d7d0ab2e8e641b4",
   "logs/full/AD65_seed5.log": "683b3509d680dd228092c4ae43cbe641be856443151c925c4cfcbb470c51335a",
@@ -99,6 +99,5 @@
   "logs/full/SHU_seed5.log": "a8b1ac5e8f90ab7b798d12811118286d348c50e14e7ced8eda011503eba92b78",
   "logs/full/SleepEDF_full_seed42.log": "f9bf8d1f9b0577dd2f9dd5f30faa5c5ce243f2089001b56757c3102e5a7f489c",
   "logs/full/SleepEDF_full_seed43.log": "400c957b3168eed0d40d55724ab4d61701bb4780e95de8f76b398a49d85e3461",
-  "logs/full/SleepEDF_full_seed5.log": "ef1e5233e87c6345631e169c903777cd086824b1c492d20d7d601717e61ba394",
-  "README.md": "d3e4b99f8e1fb3fb352a0d7dc8fe2e20d242d3fd42b41db3b9fe326272e06547"
+  "logs/full/SleepEDF_full_seed5.log": "ef1e5233e87c6345631e169c903777cd086824b1c492d20d7d601717e61ba394"
 }

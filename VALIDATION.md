@@ -18,7 +18,6 @@ backups and ablation implementations are omitted from the current tree.
 
 The root README is preserved at the owner's request and still describes the
 legacy version. Current execution instructions are in PAPER_PROTOCOL.md.
-Historical training commit IDs remain unknown. SleepEDF uses recording-session
-splits (122/15/16) with train-only t40, not strict participant-independent splits.
+Historical training commit IDs remain unknown.
 Archived logs are the existing sanitized per-seed copies; their provenance headers
 are retained unchanged.

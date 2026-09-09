@@ -14,10 +14,6 @@ six-dataset or LOSO experiments.
 - Nominal train/validation/test ratio: **8:1:1**, rounded at the splitting-unit level.
 - Checkpoint selection: **validation Accuracy**; final held-out test evaluation.
 - Eight dataset means are equally weighted; samples are not pooled across datasets.
-- SleepEDF exception: **122/15/16 recording sessions**, train-only maximum
-  40 epochs per session-stage pair. Two nights of one participant may cross
-  subsets. This reproduces the historical session protocol and is **not a
-  strictly participant-independent evaluation**.
 
 ## Reported Full results
 
