@@ -18,6 +18,5 @@
   },
   "macro_accuracy_percent": 57.70090416666667,
   "aggregation": "mean across 8 dataset means, each across seeds5/42/43",
-  "sleepedf": "session-level 122/15/16, train-only t40; not participant-independent",
   "source_limit": "Portable historical source snapshot. Original result git commit fields are unknown; hashes bind retained records and logs, not a proven original training commit."
 }
