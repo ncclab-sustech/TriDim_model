@@ -8,7 +8,7 @@ distributed in ``configs/splits``.
 Example (three-seed Full run on FACED):
 
     python run.py \
-        --model eeg_mixer_v11_1_spatial_multilevel --data FACED_new \
+        --model tridim --data FACED_new \
         --dataset_paths_yaml ./configs/paper/full/FACED_new_full.yaml \
         --gpu 0 --gpu_idx 0 --num_workers 4 \
         --seeds 5 42 43
@@ -28,7 +28,7 @@ import torch
 from exp.exp_classification import Exp_Classification
 
 
-PAPER_MODELS = ("eeg_mixer_v11_1_spatial_multilevel",)
+PAPER_MODELS = ("tridim",)
 
 # YAML parameters accepted by the public runner.  Rejecting unknown keys avoids
 # the silent no-op behavior that affected several historical experiment files.
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="eeg_mixer_v11_1_spatial_multilevel",
+        default="tridim",
         choices=PAPER_MODELS,
         help="Full TriDim or one of the released axis/block variants",
     )

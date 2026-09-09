@@ -4,7 +4,7 @@ electrode_channel_count: 22
 electrode_csv: ./configs/electrodes/BCIC2A.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   itr: 3
   seeds: [5, 42, 43]
   seed: 5

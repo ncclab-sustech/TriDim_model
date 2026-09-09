@@ -9,7 +9,10 @@ six-dataset or LOSO experiments.
 
 ## Protocol
 
-- Model: `eeg_mixer_v11_1_spatial_multilevel` (Full).
+- Model: `tridim` (Full).
+- Historical records retain their original model label; `reported/protocol.json`
+  maps that label to the current module name. The model implementation and weights
+  are unchanged by the filename and import rename.
 - Split/initialization seeds: **5, 42, 43**, three runs per dataset, 24 total.
 - Nominal train/validation/test ratio: **8:1:1**, rounded at the splitting-unit level.
 - Checkpoint selection: **validation Accuracy**; final held-out test evaluation.
@@ -92,7 +95,7 @@ selects one original seed per process and assigns GPU/work directories.
 ## Scope and provenance limits
 
 The model, training and loader files were taken from the retained historical
-portable release; the Full configuration bytes are retained. The new launcher
+portable release; the training settings are retained, with the model identifier standardized to `tridim`. The new launcher
 adds run isolation. Manifest source-path metadata is made portable without
 changing sample indices. The model registry and smoke check contain only Full;
 this repository publishes only the Full paper result grid.

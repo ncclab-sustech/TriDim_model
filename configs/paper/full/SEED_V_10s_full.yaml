@@ -4,7 +4,7 @@ electrode_channel_count: 62
 electrode_csv: ./configs/electrodes/SEED_V.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   itr: 3
   seeds: [5, 42, 43]
   seed: 5

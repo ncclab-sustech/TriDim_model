@@ -5,7 +5,7 @@ electrode_channel_count: 32
 electrode_csv: ./configs/electrodes/FACED_new.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   seq_len: 2000
   num_class: 9
   n_heads: 4

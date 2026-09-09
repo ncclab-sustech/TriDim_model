@@ -4,7 +4,7 @@ electrode_channel_count: 19
 electrode_csv: ./configs/electrodes/AD65.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   patch_len: 80
   patch_stride: 20
   channel_basis_dim: 96

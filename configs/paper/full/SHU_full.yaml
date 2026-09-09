@@ -4,7 +4,7 @@ electrode_channel_count: 32
 electrode_csv: ./configs/electrodes/SHU.csv
 electrode_montage_used: standard_1020
 params:
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   d_model: 512
   patch_len: 32
   patch_stride: 8

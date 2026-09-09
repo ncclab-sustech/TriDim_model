@@ -61,6 +61,13 @@ stem is not independent proof of participant identity. Matching the original
 data file set and ordering remains necessary; no verified TUH2k file-list
 manifest is included in this package.
 
+## Module naming
+
+The shared TriDim module is `overlays/cbramod/tridim.py`. CBraMod and REVE
+import it as `tridim`. This is a filename/import rename with unchanged model
+implementation and state-dict keys. The source manifest retains original
+source paths and hashes alongside the current publication hashes.
+
 ## Provenance limits
 
 `overlays/reve/src/utils/__init__.py` is a publication portability fix that

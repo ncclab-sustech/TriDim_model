@@ -5,7 +5,9 @@ six fixed manifests, required training/preprocessing code, and the 24 archived
 Full logs for seeds 5, 42 and 43. Legacy 4:3:3, pretraining placeholders, checkpoints,
 backups and ablation implementations are omitted from the current tree.
 
-- Full model implementation and configuration bytes are unchanged.
+- Full model implementation bytes and training settings are unchanged.
+- The module filename, imports and configured model identifier are now `tridim`;
+  historical logs and metric records retain their original labels.
 - The runner, model imports and smoke-test registry now expose only Full.
 - The archived log bytes match the pre-existing result-record SHA256 values.
 - The verifier checks every log's final test accuracy and recomputes the eight-

@@ -4,13 +4,13 @@ import os
 
 import torch
 
-from models import eeg_mixer_v11_1_spatial_multilevel
+from models import tridim
 
 
 class Exp_Basic:
     """Shared device and model setup for classification experiments."""
 
-    MODEL_REGISTRY = {"eeg_mixer_v11_1_spatial_multilevel": eeg_mixer_v11_1_spatial_multilevel}
+    MODEL_REGISTRY = {"tridim": tridim}
 
     def __init__(self, args):
         self.args = args

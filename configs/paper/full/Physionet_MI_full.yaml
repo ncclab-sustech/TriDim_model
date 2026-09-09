@@ -31,7 +31,7 @@ params:
   layer_scale_init: 0.01
   learning_rate: 0.0005
   lradj: cosine
-  model: eeg_mixer_v11_1_spatial_multilevel
+  model: tridim
   n_heads: 4
   no_channel_prior: false
   num_workers: 4

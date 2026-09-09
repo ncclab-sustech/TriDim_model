@@ -6,18 +6,22 @@
   },
   "overlays/cbramod/basis_pretrain_wrapper_v10.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/basis_pretrain_wrapper_v10.py",
-    "sha256": "dcbbc37962706bad59fb5ba78f0a16fd152f5c857bb4c7c25f00f689194c0151",
-    "status": "retained integration source"
+    "sha256": "6093d9d8e1ed3b85e4892efa84d1d164f85889d1759558f47e12aec87cc05f10",
+    "status": "retained integration source",
+    "source_sha256": "dcbbc37962706bad59fb5ba78f0a16fd152f5c857bb4c7c25f00f689194c0151",
+    "publication_change": "module filename/import renamed to tridim; model mathematics unchanged"
   },
   "overlays/cbramod/h5_pretrain_dataset.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/h5_pretrain_dataset.py",
     "sha256": "81747de246458e98bf92843730fdcd61f84767e55ce67c388f66eae7baecd36e",
     "status": "retained integration source"
   },
-  "overlays/cbramod/eeg_mixer_v11_1_spatial_multilevel.py": {
+  "overlays/cbramod/tridim.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/eeg_mixer_v11_1_spatial_multilevel.py",
     "sha256": "d4074cf609539e351e98ffc5f4c806c09dba51d2ab5d876e802fada22c038d31",
-    "status": "retained integration source"
+    "status": "retained integration source",
+    "source_sha256": "d4074cf609539e351e98ffc5f4c806c09dba51d2ab5d876e802fada22c038d31",
+    "publication_change": "module filename/import renamed to tridim; model mathematics unchanged"
   },
   "overlays/cbramod/standard_1020_uppercase_ch_pos.csv": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/standard_1020_uppercase_ch_pos.csv",
@@ -61,8 +65,10 @@
   },
   "overlays/reve/src/models/mae_triaxis.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/reve/src/models/mae_triaxis.py",
-    "sha256": "93e2a72fb2c46632dea767f4fce51c9313e2fc242c97e826acb5aa0f46a9c529",
-    "status": "retained integration source"
+    "sha256": "6a1b04334627a7cd655cbae44f19d8c6f7273271de6f41c14da20fda260ac804",
+    "status": "retained integration source",
+    "source_sha256": "93e2a72fb2c46632dea767f4fce51c9313e2fc242c97e826acb5aa0f46a9c529",
+    "publication_change": "module filename/import renamed to tridim; model mathematics unchanged"
   },
   "overlays/reve/src/utils/h5_tuh_dataset.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/reve/src/utils/h5_tuh_dataset.py",

@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
 
 DEFAULT_CONFIG = ROOT / "configs" / "paper" / "full" / "SEED_full.yaml"
 EXPECTED_SEED_FULL_PARAMS = 3_251_600
-MODEL_MODULES = ["eeg_mixer_v11_1_spatial_multilevel"]
+MODEL_MODULES = ["tridim"]
 
 
 def load_model_config(path: Path, seq_len: int, num_class: int) -> SimpleNamespace:

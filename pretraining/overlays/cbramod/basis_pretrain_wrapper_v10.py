@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from eeg_mixer_v11_1_spatial_multilevel import TriAxisEncoder
+from tridim import TriAxisEncoder
 
 
 class CBraModV11(nn.Module):

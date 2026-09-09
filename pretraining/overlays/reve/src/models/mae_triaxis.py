@@ -13,7 +13,7 @@ from utils.initialization import ConfigInit, init_mae
 class TriAxisMAE(nn.Module):
     def __init__(self, config):
         super().__init__()
-        from eeg_mixer_v11_1_spatial_multilevel import TriAxisEncoder
+        from tridim import TriAxisEncoder
 
         self.config = config
         self.masking_ratio = float(config.decoder.masking.ratio)
