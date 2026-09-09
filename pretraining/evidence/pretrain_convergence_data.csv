@@ -1,0 +1,237 @@
+host,variant,epoch,train_loss,source
+reve,official,1,0.814747,summary.log per-epoch Training Loss
+reve,official,2,0.332288,summary.log per-epoch Training Loss
+reve,official,3,0.281542,summary.log per-epoch Training Loss
+reve,official,4,0.390845,summary.log per-epoch Training Loss
+reve,official,5,0.332007,summary.log per-epoch Training Loss
+reve,official,6,0.302585,summary.log per-epoch Training Loss
+reve,official,7,0.279400,summary.log per-epoch Training Loss
+reve,official,8,0.285637,summary.log per-epoch Training Loss
+reve,official,9,0.269710,summary.log per-epoch Training Loss
+reve,official,10,0.266328,summary.log per-epoch Training Loss
+reve,official,11,0.275011,summary.log per-epoch Training Loss
+reve,official,12,0.235506,summary.log per-epoch Training Loss
+reve,official,13,0.225291,summary.log per-epoch Training Loss
+reve,official,14,0.213011,summary.log per-epoch Training Loss
+reve,official,15,0.196306,summary.log per-epoch Training Loss
+reve,official,16,0.190930,summary.log per-epoch Training Loss
+reve,official,17,0.190383,summary.log per-epoch Training Loss
+reve,official,18,0.183582,summary.log per-epoch Training Loss
+reve,official,19,0.196707,summary.log per-epoch Training Loss
+reve,official,20,0.199339,summary.log per-epoch Training Loss
+reve,official,21,0.170625,summary.log per-epoch Training Loss
+reve,official,22,0.164803,summary.log per-epoch Training Loss
+reve,official,23,0.161198,summary.log per-epoch Training Loss
+reve,official,24,0.157309,summary.log per-epoch Training Loss
+reve,official,25,0.155961,summary.log per-epoch Training Loss
+reve,official,26,0.152096,summary.log per-epoch Training Loss
+reve,official,27,0.149002,summary.log per-epoch Training Loss
+reve,official,28,0.146759,summary.log per-epoch Training Loss
+reve,official,29,0.144943,summary.log per-epoch Training Loss
+reve,official,30,0.143865,summary.log per-epoch Training Loss
+reve,official,31,0.142559,summary.log per-epoch Training Loss
+reve,official,32,0.141663,summary.log per-epoch Training Loss
+reve,official,33,0.140945,summary.log per-epoch Training Loss
+reve,official,34,0.140232,summary.log per-epoch Training Loss
+reve,official,35,0.139737,summary.log per-epoch Training Loss
+reve,official,36,0.139343,summary.log per-epoch Training Loss
+reve,official,37,0.139026,summary.log per-epoch Training Loss
+reve,official,38,0.138885,summary.log per-epoch Training Loss
+reve,official,39,0.138733,summary.log per-epoch Training Loss
+reve,official,40,0.138687,summary.log per-epoch Training Loss
+reve,tridim,1,0.171836,summary.log per-epoch Training Loss
+reve,tridim,2,0.143264,summary.log per-epoch Training Loss
+reve,tridim,3,0.130967,summary.log per-epoch Training Loss
+reve,tridim,4,0.125389,summary.log per-epoch Training Loss
+reve,tridim,5,0.121731,summary.log per-epoch Training Loss
+reve,tridim,6,0.118646,summary.log per-epoch Training Loss
+reve,tridim,7,0.115957,summary.log per-epoch Training Loss
+reve,tridim,8,0.113800,summary.log per-epoch Training Loss
+reve,tridim,9,0.111844,summary.log per-epoch Training Loss
+reve,tridim,10,0.110502,summary.log per-epoch Training Loss
+reve,tridim,11,0.108975,summary.log per-epoch Training Loss
+reve,tridim,12,0.107954,summary.log per-epoch Training Loss
+reve,tridim,13,0.106914,summary.log per-epoch Training Loss
+reve,tridim,14,0.106162,summary.log per-epoch Training Loss
+reve,tridim,15,0.105347,summary.log per-epoch Training Loss
+reve,tridim,16,0.104650,summary.log per-epoch Training Loss
+reve,tridim,17,0.104055,summary.log per-epoch Training Loss
+reve,tridim,18,0.103444,summary.log per-epoch Training Loss
+reve,tridim,19,0.102931,summary.log per-epoch Training Loss
+reve,tridim,20,0.102487,summary.log per-epoch Training Loss
+reve,tridim,21,0.101857,summary.log per-epoch Training Loss
+reve,tridim,22,0.101372,summary.log per-epoch Training Loss
+reve,tridim,23,0.100921,summary.log per-epoch Training Loss
+reve,tridim,24,0.100439,summary.log per-epoch Training Loss
+reve,tridim,25,0.100025,summary.log per-epoch Training Loss
+reve,tridim,26,0.099652,summary.log per-epoch Training Loss
+reve,tridim,27,0.099274,summary.log per-epoch Training Loss
+reve,tridim,28,0.098893,summary.log per-epoch Training Loss
+reve,tridim,29,0.098579,summary.log per-epoch Training Loss
+reve,tridim,30,0.098253,summary.log per-epoch Training Loss
+reve,tridim,31,0.097916,summary.log per-epoch Training Loss
+reve,tridim,32,0.097629,summary.log per-epoch Training Loss
+reve,tridim,33,0.097414,summary.log per-epoch Training Loss
+reve,tridim,34,0.097208,summary.log per-epoch Training Loss
+reve,tridim,35,0.097035,summary.log per-epoch Training Loss
+reve,tridim,36,0.096913,summary.log per-epoch Training Loss
+reve,tridim,37,0.096786,summary.log per-epoch Training Loss
+reve,tridim,38,0.096748,summary.log per-epoch Training Loss
+reve,tridim,39,0.096649,summary.log per-epoch Training Loss
+reve,tridim,40,0.096660,summary.log per-epoch Training Loss
+cbramod,official,1,0.990745,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,2,0.253532,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,3,0.183418,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,4,0.163322,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,5,0.153688,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,6,0.147328,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,7,0.141634,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,8,0.136290,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,9,0.132085,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,10,0.128019,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,11,0.125368,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,12,0.122775,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,13,0.120131,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,14,0.118030,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,15,0.116302,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,16,0.113621,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,17,0.111663,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,18,0.109663,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,19,0.108407,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,20,0.107793,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,21,0.106162,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,22,0.104953,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,23,0.104274,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,24,0.103374,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,25,0.102245,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,26,0.101610,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,27,0.100282,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,28,0.100007,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,29,0.099145,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,30,0.098430,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,31,0.098063,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,32,0.097263,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,33,0.096940,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,34,0.096218,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,35,0.095935,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,36,0.095664,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,37,0.095598,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,38,0.095117,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,official,40,0.094700,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,1,0.193788,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,2,0.150727,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,3,0.139579,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,4,0.132970,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,5,0.128632,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,6,0.125251,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,7,0.122354,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,8,0.119797,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,9,0.117917,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,10,0.116262,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,11,0.114670,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,12,0.113136,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,13,0.111606,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,14,0.110847,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,15,0.109796,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,16,0.108987,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,17,0.108108,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,18,0.107369,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,19,0.106746,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,20,0.105962,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,21,0.105057,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,22,0.104368,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,23,0.103700,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,24,0.103128,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,25,0.102760,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,26,0.102126,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,27,0.101515,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,28,0.100869,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,29,0.100422,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,30,0.099995,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,31,0.099525,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,32,0.098984,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,33,0.098529,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,34,0.098215,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,35,0.097734,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,36,0.097542,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,37,0.097277,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,38,0.096918,checkpoint filename epoch<N>_loss<X>.pth
+cbramod,tridim,40,0.096786,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,2,0.185272,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,3,0.167285,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,4,0.156836,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,5,0.153412,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,6,0.146746,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,7,0.143544,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,8,0.140171,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,9,0.137764,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,10,0.135566,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,11,0.133501,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,12,0.131481,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,13,0.129518,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,14,0.128031,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,15,0.126760,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,16,0.125162,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,17,0.123792,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,18,0.122465,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,19,0.121352,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,20,0.120022,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,21,0.119055,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,22,0.117389,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,23,0.116715,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,24,0.115458,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,25,0.114232,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,26,0.113409,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,27,0.112203,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,28,0.111245,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,29,0.110305,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,30,0.109741,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,31,0.108855,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,32,0.108207,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,33,0.107307,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,34,0.106751,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,35,0.106278,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,36,0.105807,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,37,0.105418,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,38,0.105031,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,39,0.104728,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,official,40,0.104663,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,2,0.217379,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,3,0.190287,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,4,0.177452,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,5,0.168574,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,6,0.162020,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,7,0.156157,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,8,0.152124,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,9,0.148717,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,10,0.145053,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,11,0.142710,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,12,0.140121,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,13,0.137476,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,14,0.135566,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,15,0.133496,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,16,0.131690,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,17,0.130227,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,18,0.128487,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,19,0.126411,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,20,0.125479,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,21,0.124027,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,22,0.122549,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,23,0.121476,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,24,0.120392,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,25,0.118735,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,26,0.117752,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,27,0.117007,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,28,0.115665,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,29,0.114724,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,30,0.113845,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,31,0.113149,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,32,0.112456,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,33,0.111808,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,34,0.110892,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,35,0.110541,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,36,0.110215,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,37,0.109956,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,38,0.109589,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,39,0.109464,checkpoint filename epoch<N>_loss<X>.pth
+csbrain,tridim,40,0.109177,checkpoint filename epoch<N>_loss<X>.pth

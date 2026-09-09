@@ -1,0 +1,8 @@
+upstream/
+__pycache__/
+*.py[cod]
+*.pth
+*.pt
+*.h5
+*.hdf5
+outputs/

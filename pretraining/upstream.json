@@ -1,0 +1,20 @@
+{
+  "reve": {
+    "url": "https://github.com/elouayas/reve_eeg.git",
+    "commit": "368d4a4511218f5befee80f7cf33ae7f0835f946",
+    "license": "MIT",
+    "overlay": "overlays/reve"
+  },
+  "cbramod": {
+    "url": "https://github.com/wjq-learning/CBraMod.git",
+    "commit": "20a57c4a905bc1a4eb5f9f156667f142cf5155b3",
+    "license": "MIT",
+    "overlay": "overlays/cbramod"
+  },
+  "csbrain": {
+    "url": "https://github.com/yuchen2199/CSBrain.git",
+    "commit": "185aee55b24d0410a830df8dd08d03f675616998",
+    "license": "not declared in the pinned repository",
+    "overlay": "overlays/csbrain"
+  }
+}

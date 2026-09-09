@@ -1,0 +1,61 @@
+{
+  "schema": "tridim-pretrained-weights-v1",
+  "pretraining_data": "TUH2k historical label; scripts cap sorted H5 files at max_subjects=2000, not 2000 windows.",
+  "storage": "Reference hashes only. Weight binaries are not included in this repository upload.",
+  "weights": [
+    {
+      "family": "CBraMod",
+      "variant": "official",
+      "filename": "cbramod_official_tuh2k.pth",
+      "bytes": 19775857,
+      "sha256": "5469f0a43f6521ee9568913af2ca75874fa83ff4d62c1b0bc7b261a4e2f6f5ff",
+      "state_dict_location": "root",
+      "tensor_count": 211
+    },
+    {
+      "family": "CBraMod",
+      "variant": "tridim",
+      "filename": "cbramod_tridim_tuh2k.pth",
+      "bytes": 16523302,
+      "sha256": "e8b75365d503c3df79003051169754f29af31df3211cbffcb709a38646b326a6",
+      "state_dict_location": "root",
+      "tensor_count": 427
+    },
+    {
+      "family": "CSBrain",
+      "variant": "official",
+      "filename": "csbrain_official_tuh2k.pth",
+      "bytes": 35715386,
+      "sha256": "56ec90755dbf8953fe9e0e95883f5a8d26eab0af9729c5b90862cde2d67174dd",
+      "state_dict_location": "root",
+      "tensor_count": 295
+    },
+    {
+      "family": "CSBrain",
+      "variant": "tridim",
+      "filename": "csbrain_tridim_tuh2k.pth",
+      "bytes": 18951861,
+      "sha256": "cd71d3872a47e4abd75a03d862e7b4be2ba69fcaadf11e95a42625ec3f076256",
+      "state_dict_location": "root",
+      "tensor_count": 463
+    },
+    {
+      "family": "REVE",
+      "variant": "official",
+      "filename": "reve_official_tuh2k.pth",
+      "bytes": 333326219,
+      "sha256": "b0d2b430335c7898760ae1a4afae5b366af74eb01622208a8e3ca86e542e1002",
+      "state_dict_location": "root",
+      "tensor_count": 170
+    },
+    {
+      "family": "REVE",
+      "variant": "tridim",
+      "filename": "reve_tridim_tuh2k.pth",
+      "bytes": 226963811,
+      "sha256": "2048b207d8d2ddf4b574c6ffef8d5e7a2dd45690defa4827dda3fa9d9a9848e0",
+      "state_dict_location": "root",
+      "tensor_count": 899
+    }
+  ]
+}

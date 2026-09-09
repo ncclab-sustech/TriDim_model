@@ -1,0 +1,42 @@
+{
+  "project": "CBraMod",
+  "entry": "train_pretrain_v11_v5.py",
+  "historical_world_size": 1,
+  "params": {
+    "seed": 42,
+    "epochs": 40,
+    "lr": 0.0005,
+    "weight_decay": 0.05,
+    "clip_value": 1.0,
+    "dropout": 0.1,
+    "in_dim": 200,
+    "out_dim": 200,
+    "d_model": 200,
+    "dim_feedforward": 800,
+    "seq_len": 30,
+    "n_channels": 21,
+    "n_layer": 12,
+    "nhead": 8,
+    "mask_ratio": 0.5,
+    "input_scale": 100.0,
+    "layer_scale_init": 0.01,
+    "drop_path_c": 0.0,
+    "drop_path_k": 0.0,
+    "drop_path_t": 0.0,
+    "drop_path_mlp": 0.0,
+    "drop_path_schedule": "linear",
+    "window_stride": 6000,
+    "max_subjects": 2000,
+    "max_open_files": 4,
+    "lr_scheduler": "CosineAnnealingLR",
+    "batch_size": 128,
+    "num_workers": 8
+  },
+  "flags": [
+    "recursive",
+    "cache_open_files",
+    "need_mask"
+  ],
+  "source": "retained train_basis_pretrain_h5.sh; seed 42 is the trainer default, not independent run-seed proof",
+  "batch_size_semantics": "per process; changing GPU count changes global batch size"
+}

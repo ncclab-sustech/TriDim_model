@@ -1,0 +1,6 @@
+# Install the repository's torch build first; Python 3.11 is recommended.
+-r ../requirements-runtime.txt
+einops==0.8.0
+tqdm==4.67.1
+packaging>=24,<27
+threadpoolctl>=3.5,<4
