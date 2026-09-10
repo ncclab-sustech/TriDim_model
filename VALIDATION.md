@@ -18,8 +18,10 @@ backups and ablation implementations are omitted from the current tree.
   is retained here. Expected SEED Full parameter count: 3,251,600.
 - No new full-dataset training is performed by this repository cleanup.
 
-The root README is preserved at the owner's request and still describes the
-legacy version. Current execution instructions are in PAPER_PROTOCOL.md.
+The root README now describes the paper Full release in English and includes
+the TriDim workflow figure. Detailed execution instructions remain in
+PAPER_PROTOCOL.md. The original README with server-access instructions was
+backed up locally before replacement.
 Historical training commit IDs remain unknown.
 Archived logs are the existing sanitized per-seed copies; their provenance headers
 are retained unchanged.

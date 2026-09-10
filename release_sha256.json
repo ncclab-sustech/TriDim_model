@@ -74,7 +74,7 @@
   "utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "utils/experiment_record.py": "1112a99a1d2610fb536e700ca052323184d3d7ecf95e224bb1be4662a9844503",
   "utils/tools.py": "406194a802099fb3ca4d20ea6c9773962fab6036e0bd167633c92579ddee48af",
-  "VALIDATION.md": "8dc9956d55ee188f2d7a0d8c77e4bf6039fd040150fe8b038519ed2dee3544c6",
+  "VALIDATION.md": "ed80dfc0ebcedeb755e40aa4422fc0f35d58ea2dc18d2c98543322bc224ced7f",
   "PAPER_PROTOCOL.md": "64988913b0295b58531dbdad37758b1db9b5da05290baf0577dff91adc8effec",
   "logs/full/AD65_seed42.log": "1a6d9ecd3de390391fb7781660cd80d11a70c959ac85d32757b941815ef59e72",
   "logs/full/AD65_seed43.log": "77540cff0a9db9750fe99cfdd77bc9005e0d7878fc25a3d16d7d0ab2e8e641b4",
@@ -99,5 +99,7 @@
   "logs/full/SHU_seed5.log": "a8b1ac5e8f90ab7b798d12811118286d348c50e14e7ced8eda011503eba92b78",
   "logs/full/SleepEDF_full_seed42.log": "f9bf8d1f9b0577dd2f9dd5f30faa5c5ce243f2089001b56757c3102e5a7f489c",
   "logs/full/SleepEDF_full_seed43.log": "400c957b3168eed0d40d55724ab4d61701bb4780e95de8f76b398a49d85e3461",
-  "logs/full/SleepEDF_full_seed5.log": "ef1e5233e87c6345631e169c903777cd086824b1c492d20d7d601717e61ba394"
+  "logs/full/SleepEDF_full_seed5.log": "ef1e5233e87c6345631e169c903777cd086824b1c492d20d7d601717e61ba394",
+  "README.md": "b52c003d083684111084bbfe7689b893bd7dc957cbbc573797a2cb9af5c7ad1d",
+  "assets/workflow.jpg": "9844b9826fb0ead4d411052284ed3838c8ef39e38e6d80cbbf48164df79fb4df"
 }
