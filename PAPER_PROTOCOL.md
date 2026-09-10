@@ -1,4 +1,4 @@
-# TriDim — paper Full benchmark (8:1:1, 57.70%)
+# TriDim — Full benchmark (8:1:1, 57.70%)
 
 Portable reproduction snapshot for the Full model in **Beyond Flattened Tokens:
 Structure-Preserving EEG Decoding with Reusable TriDim Blocks**.
