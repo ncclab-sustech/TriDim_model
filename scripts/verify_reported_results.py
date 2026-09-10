@@ -7,7 +7,7 @@ records=json.loads((root/'reported/full_24_runs.json').read_text())
 expected={(d,s) for d in protocol['configs'] for s in [5,42,43]}
 assert len(records)==24 and {(r['dataset'],r['seed']) for r in records}==expected
 for r in records:
-    assert r['model']==protocol['historical_model'] and 0<=r['test_accuracy']<=1
+    assert r['model']==protocol['model'] and 0<=r['test_accuracy']<=1
     log=(root/r['log_file']).read_bytes()
     assert hashlib.sha256(log).hexdigest()==r['log_sha256'],r['log_file']
     values=re.findall(r'Test results ---.*?Accuracy: ([0-9.]+)',log.decode('utf-8'))
