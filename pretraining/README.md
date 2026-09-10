@@ -10,11 +10,6 @@ They do not replace the root model, configurations, seeds or Full logs.
 - Pinned upstream revisions and the required local pretraining overlays.
 - Explicit TUH2k presets and a portable launcher recording the effective command.
 - The retained CSBrain four-GPU DDP entry.
-- Archived convergence data with limitations, checkpoint reference hashes, and
-  per-source provenance. No weight binaries or EEG recordings are uploaded.
-
-The old CSBrain and CBraMod placeholder directories are not the source of this
-package; these files come from retained experiment/release material.
 
 ## Setup
 
