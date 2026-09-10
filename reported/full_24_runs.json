@@ -2,7 +2,7 @@
   {
     "dataset": "AD65",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.708683,
     "test_f1": 0.691916,
     "config": "configs/paper/full/AD65_full.yaml",
@@ -14,7 +14,7 @@
   {
     "dataset": "AD65",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.604457,
     "test_f1": 0.552757,
     "config": "configs/paper/full/AD65_full.yaml",
@@ -26,7 +26,7 @@
   {
     "dataset": "AD65",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.601648,
     "test_f1": 0.568342,
     "config": "configs/paper/full/AD65_full.yaml",
@@ -38,7 +38,7 @@
   {
     "dataset": "BCIC2A",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.583333,
     "test_f1": 0.583247,
     "config": "configs/paper/full/BCIC2A_full.yaml",
@@ -50,7 +50,7 @@
   {
     "dataset": "BCIC2A",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.579861,
     "test_f1": 0.574214,
     "config": "configs/paper/full/BCIC2A_full.yaml",
@@ -62,7 +62,7 @@
   {
     "dataset": "BCIC2A",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.534722,
     "test_f1": 0.525377,
     "config": "configs/paper/full/BCIC2A_full.yaml",
@@ -74,7 +74,7 @@
   {
     "dataset": "FACED_new",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.552579,
     "test_f1": 0.555346,
     "config": "configs/paper/full/FACED_new_full.yaml",
@@ -86,7 +86,7 @@
   {
     "dataset": "FACED_new",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.540675,
     "test_f1": 0.545997,
     "config": "configs/paper/full/FACED_new_full.yaml",
@@ -98,7 +98,7 @@
   {
     "dataset": "FACED_new",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.498016,
     "test_f1": 0.498344,
     "config": "configs/paper/full/FACED_new_full.yaml",
@@ -110,7 +110,7 @@
   {
     "dataset": "Physionet_MI",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.661093,
     "test_f1": 0.661612,
     "config": "configs/paper/full/Physionet_MI_full.yaml",
@@ -122,7 +122,7 @@
   {
     "dataset": "Physionet_MI",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.638889,
     "test_f1": 0.640677,
     "config": "configs/paper/full/Physionet_MI_full.yaml",
@@ -134,7 +134,7 @@
   {
     "dataset": "Physionet_MI",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.512821,
     "test_f1": 0.516782,
     "config": "configs/paper/full/Physionet_MI_full.yaml",
@@ -146,7 +146,7 @@
   {
     "dataset": "SEED",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.507553,
     "test_f1": 0.489794,
     "config": "configs/paper/full/SEED_full.yaml",
@@ -158,7 +158,7 @@
   {
     "dataset": "SEED",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.526687,
     "test_f1": 0.517364,
     "config": "configs/paper/full/SEED_full.yaml",
@@ -170,7 +170,7 @@
   {
     "dataset": "SEED",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.551863,
     "test_f1": 0.527442,
     "config": "configs/paper/full/SEED_full.yaml",
@@ -182,7 +182,7 @@
   {
     "dataset": "SEED_V",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.340336,
     "test_f1": 0.333871,
     "config": "configs/paper/full/SEED_V_10s_full.yaml",
@@ -194,7 +194,7 @@
   {
     "dataset": "SEED_V",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.268908,
     "test_f1": 0.257385,
     "config": "configs/paper/full/SEED_V_10s_full.yaml",
@@ -206,7 +206,7 @@
   {
     "dataset": "SEED_V",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.261905,
     "test_f1": 0.253301,
     "config": "configs/paper/full/SEED_V_10s_full.yaml",
@@ -218,7 +218,7 @@
   {
     "dataset": "SHU",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.552542,
     "test_f1": 0.543729,
     "config": "configs/paper/full/SHU_full.yaml",
@@ -230,7 +230,7 @@
   {
     "dataset": "SHU",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.6841,
     "test_f1": 0.676557,
     "config": "configs/paper/full/SHU_full.yaml",
@@ -242,7 +242,7 @@
   {
     "dataset": "SHU",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.569388,
     "test_f1": 0.564094,
     "config": "configs/paper/full/SHU_full.yaml",
@@ -254,7 +254,7 @@
   {
     "dataset": "SleepEDF_full",
     "seed": 42,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.85291,
     "test_f1": 0.667386,
     "config": "configs/paper/full/SleepEDF_full_senior_t40_full.yaml",
@@ -266,7 +266,7 @@
   {
     "dataset": "SleepEDF_full",
     "seed": 43,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.879325,
     "test_f1": 0.70145,
     "config": "configs/paper/full/SleepEDF_full_senior_t40_full.yaml",
@@ -278,7 +278,7 @@
   {
     "dataset": "SleepEDF_full",
     "seed": 5,
-    "model": "eeg_mixer_v11_1_spatial_multilevel",
+    "model": "tridim",
     "test_accuracy": 0.835923,
     "test_f1": 0.638138,
     "config": "configs/paper/full/SleepEDF_full_senior_t40_full.yaml",
