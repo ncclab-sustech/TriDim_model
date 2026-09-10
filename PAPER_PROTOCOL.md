@@ -92,20 +92,4 @@ Four GPUs execute four independent single-GPU jobs. Full training parameters
 come unchanged from `configs/paper/full/*.yaml`; the launcher only resolves paths,
 selects one original seed per process and assigns GPU/work directories.
 
-## Scope and provenance limits
 
-The model, training and loader files were taken from the retained historical
-portable release; the training settings are retained, with the model identifier standardized to `tridim`. The new launcher
-adds run isolation. Manifest source-path metadata is made portable without
-changing sample indices. The model registry and smoke check contain only Full;
-this repository publishes only the Full paper result grid.
-
-Historical result records mark the training Git commit as `unknown`. Therefore
-this release hash identifies the assembled snapshot and does not prove an
-original training commit. Archived metrics can be recomputed; fresh training
-is not guaranteed to produce identical numbers across hardware/software.
-The 24 long training jobs were not rerun as part of packaging this release.
-
-This snapshot is not a new license grant and does not resolve licensing for
-the entire legacy repository. Repository visibility remains private unless
-the owners separately decide to publish it after their release review.
