@@ -206,16 +206,6 @@ Use `--gpus 0 1 2 3` to override the device list. Changing the number of GPUs ch
 
 Outputs are saved under `runs/pretraining/<family>/<timestamp>/`, including `launch.json`, `train.log`, checkpoints, and `exit_code.txt`. A unified workflow from these pretraining presets to downstream fine-tuning evaluation is not yet included.
 
-### Weights and convergence evidence
-
-[Checkpoint metadata](pretraining/evidence/checkpoints.json) records the filenames, sizes, and hashes of six historical official/TriDim checkpoints; the weight binaries are not hosted in this repository.
-
-[Convergence data](pretraining/evidence/pretrain_convergence_data.csv) contains 236 archived points. REVE curves were extracted from logs; CBraMod and CSBrain curves were reconstructed from checkpoint filenames and contain documented omissions. These records are not complete raw training logs. Read the [source notes](pretraining/evidence/SOURCES.md) before interpreting or comparing the curves.
-
 ## Third-party code and data
 
 See the [third-party notices](pretraining/THIRD_PARTY_NOTICES.md) for pinned upstream projects and retained license information. Dataset access and redistribution are governed by the original distributors' terms. This README does not introduce a repository-wide license grant.
-
-## Citation
-
-When referring to these experiments, use the paper title **Beyond Flattened Tokens: Structure-Preserving EEG Decoding with Reusable TriDim Blocks** and identify the relevant evaluation protocol: the eight-dataset, three-seed supervised Full benchmark or a specific pretraining integration. Formal publication metadata and a BibTeX entry will be added once confirmed.
