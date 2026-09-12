@@ -101,5 +101,7 @@
   "logs/full/SleepEDF_full_seed43.log": "400c957b3168eed0d40d55724ab4d61701bb4780e95de8f76b398a49d85e3461",
   "logs/full/SleepEDF_full_seed5.log": "ef1e5233e87c6345631e169c903777cd086824b1c492d20d7d601717e61ba394",
   "README.md": "cf8cc45a3c0a67882bfa38e1ef4a4654233edf846686aef4dc2b71f6c251a4fb",
-  "assets/workflow.jpg": "9844b9826fb0ead4d411052284ed3838c8ef39e38e6d80cbbf48164df79fb4df"
+  "assets/workflow.jpg": "9844b9826fb0ead4d411052284ed3838c8ef39e38e6d80cbbf48164df79fb4df",
+  "scripts/validate_release.py": "4ab9fc5d939935271ada2e5c98c9982784c4bce5f8c868bc1435e3be335efba6",
+  "release_audit/traceability_audit.py": "23208502a9a82914e0b69ac480c979643103a3205dc38795c524fd3fa9dc91fe"
 }
