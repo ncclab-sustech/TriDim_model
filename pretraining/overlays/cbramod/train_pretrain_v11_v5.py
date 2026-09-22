@@ -246,7 +246,7 @@ def train(model, loader, sampler, optimizer, scheduler, device, args):
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="CBraMod pretraining with original ACPE frontend + V11 tri-axis block stack (DDP-ready)")
+    parser = argparse.ArgumentParser(description="CBraMod pretraining with original ACPE frontend + TriDim tri-axis block stack (DDP-ready)")
 
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cuda", type=int, default=0)

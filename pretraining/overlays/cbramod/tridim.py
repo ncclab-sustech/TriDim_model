@@ -1,63 +1,22 @@
-"""
-EEG Mixer V11.2 — V5 backbone + InstanceTimeNorm + DSS + Multi-Level Readout
-=============================================================================
+"""TriDim: tri-axis EEG encoding with multi-level readout.
 
-This version removes the multi-scale temporal stem (and its spatial-mix
-sub-module) that earlier V11.1 included. The decision: the stem was too
-close to EEGNet's temporal+spatial conv and diluted the contribution story.
-With the stem gone, the architecture's novelty is concentrated entirely in
-the tri-axis backbone, the dimension-specific stochastic depth, and the
-multi-level readout — none of which overlap with EEGNet.
+The model normalizes each channel along time, extracts temporal patches,
+and projects the channel, within-patch and across-patch axes into learned
+basis dimensions. In the implementation these axes are named C, K and T;
+they correspond to C, S and L in the paper.
 
-Components on top of the V5 backbone (all OUTSIDE the backbone):
+Each encoder block applies parallel cross-axis attention and axis-specific
+feed-forward networks, with learned softmax fusion and residual LayerScale.
+Attention weights are shared across the two attention operations within
+each branch. DropPath rates are configurable for each attention branch and
+the feed-forward path. The optional multi-level readout pools each encoder
+layer separately and fuses its representation before classification.
 
-    (1) InstanceTimeNorm at the front
-        Per-sample per-channel time-axis normalisation; removes subject
-        DC offset and amplitude scale. The single most important component
-        for cross-subject generalisation. 0 parameters.
-        Toggle: `use_input_norm = True/False`.
+Key options: use_input_norm, use_multi_level_readout, drop_path_c,
+drop_path_k, drop_path_t, drop_path_mlp, and drop_path_schedule.
 
-    (2) Dimension-Specific Stochastic Depth (DSS)
-        Each attention sub-branch (C / K / T) gets its own DropPath rate;
-        the MLP path gets one rate. C axis (most subject-sensitive) uses a
-        high rate, K axis (most subject-stable) a low rate, T axis a medium
-        rate. No reported prior work sets per-axis stochastic-depth rates.
-        Config: drop_path_c / drop_path_k / drop_path_t / drop_path_mlp.
-
-    (3) Multi-level tri-axis readout
-        Instead of using only the encoder's final-layer output, every
-        layer's [B, D, K, T] is independently pooled (sharing the
-        TriAxisAttentionPoolingHead design from V5) and the per-layer
-        pooled representations are fused with a learnable softmax weight,
-        then passed through a single classifier head. Lightweight analogue
-        of EEG-Deformer's Dense Information Purification (DIP) — improves
-        gradient flow to shallow layers, gives a multi-scale view.
-        Toggle: `use_multi_level_readout = True/False`.
-
-REMOVED relative to V11.1:
-    * TemporalMultiScaleStem  (multi-scale depthwise temporal conv)
-    * spatial_mix             (the 1x1 channel-mixing inside the stem)
-    The entry point reverts to V5's plain 1x1 channel projection
-    (LinearChannelProjection) directly before patchify.
-
-V5 backbone (untouched):
-    * parallel tri-axis with softmax fusion (separate logits for attn / mlp)
-    * per-axis RMSNorm x 6 per block
-    * shared cross-axis attention (3 modules, each invoked twice)
-    * per-channel LayerScale gamma on attn and mlp residual paths
-
-Note on channel coordinates:
-    The optional ChannelAdapter module (use_channel_adapter=True) uses
-    channel coordinates from `canonical_channel_coord_path` (a CSV you
-    supply) or `canonical_channel_coords`. If none provided AND the adapter
-    is enabled, the fallback is fibonacci_sphere (same as V5). When
-    use_channel_adapter=False, no coordinates are used anywhere.
-
-Ablation presets at the bottom of the file:
-    cfg_v5_baseline          — V5 (no input norm, no DSS, no multi-level)
-    cfg_v11_plus_inorm       — V5 + InstanceTimeNorm
-    cfg_v11_inorm_dss        — V5 + InstanceTimeNorm + DSS
-    cfg_v11_2_full           — V5 + InstanceTimeNorm + DSS + multi-level readout
+The pretraining integration also supports an optional coordinate-based
+channel adapter via use_channel_adapter and channel coordinate settings.
 """
 
 import csv
@@ -90,7 +49,7 @@ def _get_config(configs, name: str, default=None):
 
 
 # =============================================================================
-# Channel coordinate utilities  (unchanged from V4 / V5)
+# Channel coordinate utilities 
 # =============================================================================
 
 def load_channel_coordinate_csv(
@@ -301,7 +260,7 @@ class ChannelAdapter(nn.Module):
 
 
 # =============================================================================
-# NEW: Cross-subject normalisation at the input
+# Cross-subject normalisation at the input
 # =============================================================================
 
 class InstanceTimeNorm(nn.Module):
@@ -328,7 +287,7 @@ class InstanceTimeNorm(nn.Module):
 
 
 # =============================================================================
-# NEW: DropPath (per-sample stochastic depth) — needed for DSS
+# DropPath (per-sample stochastic depth) — needed for DSS
 # =============================================================================
 
 class DropPath(nn.Module):
@@ -348,7 +307,7 @@ class DropPath(nn.Module):
 
 
 # =============================================================================
-# Axis projections  (unchanged from V4 / V5)
+# Axis projections 
 # =============================================================================
 
 class LinearChannelProjection(nn.Module):
@@ -421,7 +380,7 @@ class ConvTProjection(nn.Module):
 
 
 # =============================================================================
-# Tri-axis attention pooling readout  (unchanged from V4 / V5)
+# Tri-axis attention pooling readout 
 # =============================================================================
 
 class AttentionPool1D(nn.Module):
@@ -542,7 +501,7 @@ class TriAxisAttentionPoolingHead(nn.Module):
 
 class MultiLevelTriAxisReadout(nn.Module):
     """
-    V11.1 multi-level tri-axis readout (DIP-inspired).
+    TriDim multi-level tri-axis readout (DIP-inspired).
 
     Given the per-layer outputs from the encoder
         [layer_0_out, layer_1_out, ..., layer_{N-1}_out]
@@ -558,12 +517,12 @@ class MultiLevelTriAxisReadout(nn.Module):
       * Improves gradient flow to shallow layers (extra supervision signal).
       * Gives the classifier a multi-scale view of the encoder hierarchy.
       * Cheap: each per-layer pool reuses the well-tested
-        TriAxisAttentionPoolingHead design from V5.
+        TriAxisAttentionPoolingHead design.
 
     Compared to EEG-Deformer's Dense Information Purification:
       * Lightweight: no dense skip connections through the backbone, just
         late-stage pooling.
-      * Fully decoupled from the backbone, which keeps the V5 tri-axis
+      * Fully decoupled from the backbone, which keeps the TriDim tri-axis
         core untouched.
     """
 
@@ -582,7 +541,7 @@ class MultiLevelTriAxisReadout(nn.Module):
         self.embed_dim = int(embed_dim)
         self.num_class = int(num_class)
 
-        # One pooling head per encoder layer, sharing the V5 TriAxis design
+        # One pooling head per encoder layer, sharing the TriAxis design
         # but in feature mode (no per-layer classifier).
         self.layer_pools = nn.ModuleList([
             TriAxisAttentionPoolingHead(
@@ -628,7 +587,7 @@ class MultiLevelTriAxisReadout(nn.Module):
 
 
 # =============================================================================
-# Building blocks for the encoder  (unchanged from V5)
+# Building blocks for the encoder 
 # =============================================================================
 
 class AxisRMSNorm(nn.Module):
@@ -761,12 +720,12 @@ class AxisAttention(nn.Module):
 
 
 # =============================================================================
-# V11 Tri-axis Mixer Block — V5 backbone + DSS DropPath per sub-branch
+# TriDim block — cross-axis attention with per-branch DropPath
 # =============================================================================
 
 class TriAxisMixerBlock(nn.Module):
     """
-    V11 PreNorm + dual-residual + shared cross-axis attention
+    TriDim pre-normalization + dual-residual + shared cross-axis attention
         + per-channel LayerScale + Dimension-Specific Stochastic Depth (DSS).
 
     Structure:
@@ -785,14 +744,14 @@ class TriAxisMixerBlock(nn.Module):
         mlp_branch = dp_mlp(w_mlp ·-fused (c_out, k_out, t_out))
         x = x + γ_mlp ⊙ mlp_branch
 
-    Differences from V5:
+    Stochastic-depth configuration:
         * Each attention sub-branch is gated by its own DropPath rate (DSS).
           Default: drop_path_c=0.25, drop_path_k=0.05, drop_path_t=0.15.
         * The MLP path is gated by a single DropPath rate (drop_path_mlp).
         * All four rates are configurable per block (used by the encoder
           to implement a linear DropPath schedule across layers).
 
-    Backwards-compatible: setting all drop_path_* to 0 reproduces V5 exactly.
+    Setting all drop_path_* to zero disables stochastic depth.
     """
 
     def __init__(
@@ -840,7 +799,7 @@ class TriAxisMixerBlock(nn.Module):
         self.gamma_attn = nn.Parameter(ls * torch.ones(1, self.channel_dim, 1, 1))
         self.gamma_mlp  = nn.Parameter(ls * torch.ones(1, self.channel_dim, 1, 1))
 
-        # ---- NEW: Dimension-Specific Stochastic Depth ----
+        # ---- Dimension-Specific Stochastic Depth ----
         # Attention path: one DropPath per sub-branch (C / K / T).
         self.dp_c_attn = DropPath(drop_path_c)
         self.dp_k_attn = DropPath(drop_path_k)
@@ -991,12 +950,12 @@ class TriAxisEncoder(nn.Module):
 
 
 # =============================================================================
-# Top-level model: BasisMixer (V11)
+# Top-level model: TriDim (BasisMixer implementation class)
 # =============================================================================
 
 class BasisMixer(nn.Module):
     """
-    V11.1 BasisMixer.
+    TriDim model (BasisMixer is the implementation class).
 
     Pipeline:
 
@@ -1009,10 +968,10 @@ class BasisMixer(nn.Module):
           -> channel_basis  (1x1 conv: C' -> D)         [B, D, K, T]
           -> k_basis        (Linear: K -> K')           [B, D, K', T]
           -> t_basis        (ConvT: T -> T')            [B, D, K', T']
-          -> TriAxisEncoder (V5 block × N)              [B, D, K', T']
+          -> TriAxisEncoder (N TriDim blocks)              [B, D, K', T']
           -> Readout:
                  TriAxisAttentionPoolingHead (default)
-                 OR MultiLevelTriAxisReadout (V11.1)    [B, num_class]
+                 OR MultiLevelTriAxisReadout    [B, num_class]
 
     Config fields:
         # Cross-subject frontend
@@ -1033,7 +992,7 @@ class BasisMixer(nn.Module):
             weights before the final classifier.
 
     Setting use_input_norm=False, use_multi_level_readout=False, and all
-    drop_path_*=0 reproduces V5.
+    drop_path_*=0 disables these optional normalization, readout and stochastic-depth features.
     """
 
     def __init__(self, configs):
@@ -1076,12 +1035,12 @@ class BasisMixer(nn.Module):
         )
 
         # -------------------------
-        # NEW: cross-subject frontend flags
+        # cross-subject frontend flags
         # -------------------------
         self.use_input_norm = bool(_get_config(configs, "use_input_norm", True))
 
         # -------------------------
-        # NEW: Dimension-Specific Stochastic Depth
+        # Dimension-Specific Stochastic Depth
         # -------------------------
         self.drop_path_c = float(_get_config(configs, "drop_path_c", 0.25))
         self.drop_path_k = float(_get_config(configs, "drop_path_k", 0.05))
@@ -1090,7 +1049,7 @@ class BasisMixer(nn.Module):
         self.drop_path_schedule = str(_get_config(configs, "drop_path_schedule", "linear"))
 
         # -------------------------
-        # V11.1: multi-level readout
+        # multi-level readout
         # -------------------------
         self.use_multi_level_readout = bool(
             _get_config(configs, "use_multi_level_readout", False)
@@ -1133,7 +1092,7 @@ class BasisMixer(nn.Module):
             active_channels = self.canonical_channels
 
         # -------------------------
-        # NEW: input normalisation
+        # input normalisation
         # -------------------------
         self.input_norm = (
             InstanceTimeNorm() if self.use_input_norm else nn.Identity()
@@ -1171,7 +1130,7 @@ class BasisMixer(nn.Module):
         )
 
         # -------------------------
-        # Tri-axis encoder (V11 block with DSS)
+        # Tri-axis encoder (TriDim block with DSS)
         # -------------------------
         self.encoder = TriAxisEncoder(
             self.channel_basis_dim,
@@ -1189,7 +1148,7 @@ class BasisMixer(nn.Module):
         )
 
         # -------------------------
-        # Readout: V5 single-layer head OR V11.1 multi-level head
+        # Readout: single-layer or multi-level tri-axis pooling
         # -------------------------
         self.readout = None
         if self.num_class > 0:
@@ -1285,7 +1244,7 @@ class BasisMixer(nn.Module):
             aug = self.augmentations[random.randint(0, len(self.augmentations) - 1)]
             x = aug(x)
 
-        # --- NEW: InstanceTimeNorm (raw EEG, removes subject baseline) ---
+        # --- InstanceTimeNorm (raw EEG, removes subject baseline) ---
         x = self.input_norm(x)
 
         # --- Optional channel adapter (montage harmonisation) ---
@@ -1302,9 +1261,9 @@ class BasisMixer(nn.Module):
         x = self.k_basis(x)         # [B, C', K', T ]
         x = self.t_basis(x)         # [B, C', K', T']
 
-        # --- Tri-axis encoder (V5 block with DSS) ---
-        # V11.1: if multi-level readout is enabled, ask encoder for per-layer
-        # outputs. Otherwise behave like V5/V11 and only return the final layer.
+        # --- Tri-axis encoder (TriDim block with DSS) ---
+        # if multi-level readout is enabled, ask encoder for per-layer
+        # outputs. Otherwise return only the final layer.
         if self.use_multi_level_readout and self.readout is not None:
             layer_outputs = self.encoder(x, return_all_layers=True)
             x = layer_outputs[-1]    # final layer for patch_embeddings / mode
@@ -1329,7 +1288,7 @@ class BasisMixer(nn.Module):
                 }
             return patch_embeddings
 
-        # V11.1: dispatch to the right readout signature.
+        # dispatch to the right readout signature.
         if isinstance(self.readout, MultiLevelTriAxisReadout):
             logits = self.readout(layer_outputs)
         else:
@@ -1357,7 +1316,7 @@ Model = BasisMixer
 # at a time, so the marginal effect of each is isolated.
 #
 # Suggested experiment order:
-#   1. V5 baseline                  — pure V5 backbone
+#   1. TriDim baseline                  — encoder without optional features
 #   2. + InstanceTimeNorm           — cross-subject baseline normalisation
 #   3. + Temporal stem              — frequency-band prior
 #   4. + DSS DropPath               — dimension-specific regularisation
@@ -1384,7 +1343,7 @@ class _BaseConfig:
 
 
 class cfg_v5_baseline(_BaseConfig):
-    """Pure V5 — no input norm, no DSS, no multi-level readout."""
+    """Pure TriDim — no input norm, no DSS, no multi-level readout."""
     use_input_norm = False
     use_multi_level_readout = False
     drop_path_c = 0.0
@@ -1394,7 +1353,7 @@ class cfg_v5_baseline(_BaseConfig):
 
 
 class cfg_v11_plus_inorm(_BaseConfig):
-    """V5 + InstanceTimeNorm at the input."""
+    """TriDim + InstanceTimeNorm at the input."""
     use_input_norm = True
     use_multi_level_readout = False
     drop_path_c = 0.0
@@ -1404,7 +1363,7 @@ class cfg_v11_plus_inorm(_BaseConfig):
 
 
 class cfg_v11_inorm_dss(_BaseConfig):
-    """V5 + InstanceTimeNorm + DSS DropPath (no multi-level readout)."""
+    """TriDim + InstanceTimeNorm + DSS DropPath (no multi-level readout)."""
     use_input_norm = True
     use_multi_level_readout = False
     drop_path_c = 0.25
@@ -1415,7 +1374,7 @@ class cfg_v11_inorm_dss(_BaseConfig):
 
 
 class cfg_v11_2_full(_BaseConfig):
-    """V11.2 full: V5 + InstanceTimeNorm + DSS + multi-level readout.
+    """Full TriDim: TriDim + InstanceTimeNorm + DSS + multi-level readout.
 
     This is the post-stem-removal model. Novelty is concentrated in the
     tri-axis backbone, the dimension-specific stochastic depth, and the
@@ -1431,7 +1390,7 @@ class cfg_v11_2_full(_BaseConfig):
 
 
 class cfg_v11_2_full_constant_dss(_BaseConfig):
-    """V11.2 full with constant DSS schedule + stronger C drop_path.
+    """Full TriDim with constant DSS schedule + stronger C drop_path.
 
     Recommended starting point: constant schedule keeps shallow layers
     regularised (linear schedule drives early-layer rates toward 0, which
@@ -1455,15 +1414,15 @@ if __name__ == "__main__":
     torch.set_num_threads(1)
 
     print("=" * 70)
-    print("V11.2 (no-stem) smoke test — ablation comparison")
+    print("TriDim smoke test — ablation comparison")
     print("=" * 70)
 
     test_configs = [
-        ("V5 baseline",                cfg_v5_baseline),
-        ("V5 + InstanceTimeNorm",      cfg_v11_plus_inorm),
-        ("V5 + InstanceNorm + DSS",    cfg_v11_inorm_dss),
-        ("V11.2 full (linear DSS)",    cfg_v11_2_full),
-        ("V11.2 full (constant DSS)",  cfg_v11_2_full_constant_dss),
+        ("TriDim baseline",                cfg_v5_baseline),
+        ("TriDim + InstanceTimeNorm",      cfg_v11_plus_inorm),
+        ("TriDim + InstanceNorm + DSS",    cfg_v11_inorm_dss),
+        ("Full TriDim (linear DSS)",    cfg_v11_2_full),
+        ("Full TriDim (constant DSS)",  cfg_v11_2_full_constant_dss),
     ]
 
     x = torch.randn(2, _BaseConfig.seq_len, _BaseConfig.enc_in)
@@ -1489,10 +1448,10 @@ if __name__ == "__main__":
         loss.backward()
         print(f"  backward OK; loss = {float(loss.detach()):.4f}")
 
-    # ----- Detailed inspection of V11.2 full -----
+    # ----- Detailed inspection of Full TriDim -----
     print()
     print("=" * 70)
-    print("V11.2 full (constant DSS) — detailed inspection")
+    print("Full TriDim (constant DSS) — detailed inspection")
     print("=" * 70)
     cfg = cfg_v11_2_full_constant_dss()
     model = Model(cfg)
