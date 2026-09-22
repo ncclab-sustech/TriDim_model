@@ -1,8 +1,10 @@
 {
   "overlays/cbramod/train_pretrain_v11_v5.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/train_pretrain_v11_v5.py",
-    "sha256": "e3ff5e5f9c178bc6d19f8c69108913d6382a9f6aae87aec41201be882ee87497",
-    "status": "retained integration source"
+    "sha256": "3bff946abe92ce46bee7ac9cee9afa48847f30a148b531880cc4738ae0e0846b",
+    "status": "retained integration source",
+    "source_sha256": "e3ff5e5f9c178bc6d19f8c69108913d6382a9f6aae87aec41201be882ee87497",
+    "publication_change": "English TriDim comments/docstrings and labels; executable model behavior unchanged"
   },
   "overlays/cbramod/basis_pretrain_wrapper_v10.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/basis_pretrain_wrapper_v10.py",
@@ -18,10 +20,10 @@
   },
   "overlays/cbramod/tridim.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/eeg_mixer_v11_1_spatial_multilevel.py",
-    "sha256": "d4074cf609539e351e98ffc5f4c806c09dba51d2ab5d876e802fada22c038d31",
+    "sha256": "361e9343fb9b3009dc98870b15c93e049321aa44f939c91a3c322d2a3cbcbaae",
     "status": "retained integration source",
     "source_sha256": "d4074cf609539e351e98ffc5f4c806c09dba51d2ab5d876e802fada22c038d31",
-    "publication_change": "module filename/import renamed to tridim; model mathematics unchanged"
+    "publication_change": "English TriDim comments/docstrings and labels; executable model behavior unchanged"
   },
   "overlays/cbramod/standard_1020_uppercase_ch_pos.csv": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/cbramod/standard_1020_uppercase_ch_pos.csv",
@@ -30,8 +32,10 @@
   },
   "overlays/csbrain/CSBrain_TriAxial.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/csbrain/CSBrain_TriAxial.py",
-    "sha256": "8d6cc80367a92140ddefc635da97c5450851f7176f088d7babe6af1a8dbdffe1",
-    "status": "retained integration source"
+    "sha256": "f03535b399b7902c85b53b1dfa88afb2a6b5e2591f6d3f9b193205de48dfede4",
+    "status": "retained integration source",
+    "source_sha256": "8d6cc80367a92140ddefc635da97c5450851f7176f088d7babe6af1a8dbdffe1",
+    "publication_change": "English TriDim comments and docstrings; executable code unchanged"
   },
   "overlays/csbrain/pretrain_csbrain_triaxial_h5.py": {
     "source": "artifacts/TriDim_GitHub_release/baselines/pretrained/overlays/csbrain/pretrain_csbrain_triaxial_h5.py",
