@@ -233,7 +233,7 @@ class Exp_Classification(Exp_Basic):
         model_optim = self._select_optimizer()
         criterion = self._select_criterion(train_data)
 
-        # V8 scheduler setup
+        # current scheduler setup
         scheduler = None
         if getattr(self.args, 'use_cosine_scheduler', False):
             T_max = self.args.train_epochs - getattr(self.args, 'warmup_epochs', 0)
@@ -245,7 +245,7 @@ class Exp_Classification(Exp_Basic):
         scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
         for epoch in range(self.args.train_epochs):
-            # V8 warmup + cosine scheduler
+            # current warmup + cosine scheduler
             if getattr(self.args, 'use_cosine_scheduler', False):
                 warmup_epochs = getattr(self.args, 'warmup_epochs', 0)
                 if epoch < warmup_epochs:
