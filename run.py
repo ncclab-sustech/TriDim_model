@@ -560,13 +560,13 @@ if __name__ == "__main__":
 
     Exp = Exp_Classification
     avg_metrics = []
-    # 种子列表生成逻辑：优先使用自定义种子列表，否则沿用原连续种子逻辑
+    # Prefer explicit seeds; otherwise generate consecutive seeds from seed_start.
     if args.seeds is not None:
         seed_list = args.seeds
-        # 同步更新itr，保证后续均值/标准差计算的循环次数正确
+        # Match itr to the seed count for subsequent mean and standard deviation calculations.
         args.itr = len(seed_list)
     else:
-        # 原连续种子逻辑，完全保留
+        # Generate the requested number of consecutive seeds.
         seed_list = [args.seed_start + ii for ii in range(args.itr)]
     # seed range: [seed_start, seed_start + itr - 1]
     for seed in seed_list:
