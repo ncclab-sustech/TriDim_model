@@ -10,7 +10,7 @@ from models.CSBrain import (
 
 
 # =============================================================================
-# Tri-axial core (minimal V11 block only)
+# Tri-axial core (minimal TriDim block only)
 # =============================================================================
 
 class InstanceTimeNorm(nn.Module):
@@ -18,7 +18,7 @@ class InstanceTimeNorm(nn.Module):
     Per-sample, per-channel normalization along the time axis.
 
     For CSBrain inputs [B, C, P, K], we flatten patches to [B, C, P*K],
-    normalize over the last axis, then reshape back. This mirrors the V11
+    normalize over the last axis, then reshape back. This mirrors the TriDim
     idea of doing input normalization before patchification / patch embedding.
     """
     def __init__(self, eps: float = 1e-5):
@@ -156,7 +156,7 @@ class AxisAttention(nn.Module):
 
 class TriAxisMixerBlock(nn.Module):
     """
-    Minimal V11 tri-axial block.
+    Minimal TriDim tri-axial block.
 
     We keep only the tri-axial mixer core:
       - per-axis RMSNorm
@@ -346,7 +346,7 @@ class CSBrainTriAxial(nn.Module):
       We intentionally do NOT bring over channel_adapter, fixed interpolation,
       multi-level readout, or the full BasisMixer frontend. This file only
       injects the tri-axial block into the existing CSBrain pretraining setup.
-      We do, however, add the V11-style input normalization right before PatchEmbedding.
+      We do, however, add the TriDim input normalization right before PatchEmbedding.
     """
     def __init__(
         self,
@@ -420,7 +420,7 @@ class CSBrainTriAxial(nn.Module):
         # Keep original CSBrain montage sorting
         x = x[:, self.sorted_indices, :, :]
 
-        # Add V11-style input normalization before patch embedding
+        # Add TriDim input normalization before patch embedding
         x = self.input_norm(x)
 
         # Original CSBrain patch embedding
